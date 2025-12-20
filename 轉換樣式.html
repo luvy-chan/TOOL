@@ -339,9 +339,38 @@ input[type="number"] {
 </div>
 
 <script>
+function safeGetStorage(key) {
+  try {
+    return localStorage.getItem(key);
+  } catch (e) {
+    return null;
+  }
+}
+
+function safeSetStorage(key, value) {
+  try {
+    localStorage.setItem(key, value);
+  } catch (e) {}
+}
+
+function safeRemoveStorage(key) {
+  try {
+    localStorage.removeItem(key);
+  } catch (e) {}
+}
+
 let originalContent = '';
 const defaultVars = { var1:'#FFF5F8', var2:'#FFFFFF', var3:'#F9CEDC', var4:'280' };
-let userVars = JSON.parse(localStorage.getItem('userVars')) || {...defaultVars};
+let userVars = (() => {
+  const raw = safeGetStorage('userVars');
+  if (!raw) return {...defaultVars};
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return {...defaultVars};
+  }
+})();
+
 let currentFile = null;
 
 // 渲染輸入框
@@ -372,10 +401,19 @@ function updateVars() {
   userVars.var2 = document.getElementById('var2').value.trim();
   userVars.var3 = document.getElementById('var3').value.trim();
   userVars.var4 = document.getElementById('var4').value.trim();
-  localStorage.setItem('userVars', JSON.stringify(userVars));
+  safeSetStorage('userVars', JSON.stringify(userVars));
   updatePreview();
 }
 
+// 延遲 150ms 後才更新
+function debounce(fn, delay = 150) {
+  let timer = null;
+  return function (...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
+  
 const updateVarsDebounced = debounce(updateVars);
   
 // color → text 同步
@@ -398,20 +436,13 @@ document.getElementById('var4_range').addEventListener('input', e => {
   document.getElementById(id).addEventListener('input', updateVarsDebounced);
 });
 
-// 延遲 150ms 後才更新
-function debounce(fn, delay = 150) {
-  let timer = null;
-  return function (...args) {
-    clearTimeout(timer);
-    timer = setTimeout(() => fn.apply(this, args), delay);
-  };
-}
+
 
 // 清空
 document.getElementById('clearBtn').addEventListener('click', () => {
   userVars = { var1:'', var2:'', var3:'', var4:'' };
   renderVars();
-  localStorage.removeItem('userVars');
+  safeRemoveStorage('userVars');
   updatePreview();
   syncControlsFromVars();
 });
@@ -420,7 +451,7 @@ document.getElementById('clearBtn').addEventListener('click', () => {
 document.getElementById('restoreBtn').addEventListener('click', () => {
   userVars = {...defaultVars};
   renderVars();
-  localStorage.setItem('userVars', JSON.stringify(userVars));
+  safeSetStorage('userVars', JSON.stringify(userVars));
   updatePreview();
   syncControlsFromVars();
 });
