@@ -1,0 +1,635 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>分段編輯器</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #e8eaf0; --panel: #fff; --accent: #5c7abf;
+  --accent-light: #edf1fb; --accent-dark: #3d5fa3;
+  --text: #333; --muted: #888; --border: #dde2ed;
+  --sidebar-w: 210px;
+}
+body { font-family: 'Noto Sans TC',-apple-system,sans-serif; background:var(--bg); color:var(--text); height:100vh; overflow:hidden; display:flex; flex-direction:column; }
+
+/* ── Topbar ── */
+#topbar { height:52px; background:var(--panel); border-bottom:1px solid var(--border); display:flex; align-items:center; padding:0 16px; gap:10px; flex-shrink:0; z-index:200; }
+#topbar h1 { font-size:15px; font-weight:600; color:#2d3a5e; }
+.topbar-sep { width:1px; height:24px; background:var(--border); margin:0 2px; }
+#file-btn { display:flex; align-items:center; gap:6px; padding:7px 14px; border-radius:8px; border:1.5px solid var(--border); background:#fafbfd; font-size:13px; color:#555; cursor:pointer; transition:border-color .15s,background .15s; white-space:nowrap; }
+#file-btn:hover { border-color:var(--accent); background:var(--accent-light); color:var(--accent); }
+#file-btn input { display:none; }
+#file-name { font-size:12px; color:var(--muted); max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.spacer { flex:1; }
+#style-btn { padding:7px 13px; border-radius:8px; border:1.5px solid var(--border); background:#fafbfd; font-size:13px; color:#555; cursor:pointer; white-space:nowrap; transition:border-color .15s,background .15s; }
+#style-btn:hover, #style-btn.active { border-color:var(--accent); background:var(--accent-light); color:var(--accent); }
+#section-count { font-size:12px; color:var(--muted); white-space:nowrap; }
+#export-btn { padding:8px 18px; border-radius:8px; border:none; background:var(--accent); color:#fff; font-size:13px; font-weight:500; cursor:pointer; white-space:nowrap; transition:background .15s; }
+#export-btn:hover { background:var(--accent-dark); }
+#export-btn:disabled { background:#b0bcd8; cursor:default; }
+
+/* ── Layout ── */
+#layout { display:flex; flex:1; overflow:hidden; }
+
+/* ── Left sidebar ── */
+#sidebar { width:var(--sidebar-w); background:var(--panel); border-right:1px solid var(--border); display:flex; flex-direction:column; flex-shrink:0; }
+#sidebar-head { padding:12px 14px 8px; font-size:11px; color:var(--muted); letter-spacing:.08em; border-bottom:1px solid var(--border); flex-shrink:0; }
+#sidebar-hint { padding:9px 14px; font-size:11px; color:#aaa; line-height:1.6; border-bottom:1px solid #f0f1f5; flex-shrink:0; }
+#section-list { overflow-y:auto; flex:1; padding:6px 0; }
+.section-item { display:flex; align-items:center; gap:5px; padding:8px 10px 8px 14px; font-size:13px; color:#555; cursor:pointer; border-left:3px solid transparent; }
+.section-item:hover { background:#f5f6fa; }
+.section-item.active { border-left-color:var(--accent); background:var(--accent-light); color:var(--accent-dark); }
+.section-item .num { font-size:10px; color:#bbb; width:16px; text-align:right; flex-shrink:0; }
+.section-item .title { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.section-item .del { opacity:0; font-size:13px; color:#ccc; cursor:pointer; padding:0 2px; flex-shrink:0; }
+.section-item:hover .del { opacity:1; }
+.section-item .del:hover { color:#d33; }
+.empty-hint { padding:20px 14px; font-size:12px; color:#bbb; line-height:1.8; text-align:center; }
+
+/* ── Center: iframe wrapper ── */
+#preview-wrap { flex:1; position:relative; overflow:hidden; background:var(--bg); }
+#drop-overlay { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; z-index:10; background:var(--bg); }
+#drop-overlay.hidden { display:none; }
+.drop-icon { font-size:52px; opacity:.35; }
+.drop-text { font-size:16px; color:#888; }
+.drop-sub { font-size:13px; color:#bbb; }
+
+/* The iframe fills the center area */
+#preview-frame { width:100%; height:100%; border:none; display:block; }
+
+/* Overlay canvas sits on top of iframe to draw insert zones */
+#overlay { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:5; }
+.insert-btn {
+  position:absolute; left:50%; transform:translateX(-50%);
+  pointer-events:all;
+  height:18px; display:flex; align-items:center;
+  cursor:pointer; opacity:0; transition:opacity .15s;
+}
+.insert-btn:hover { opacity:1 !important; }
+.insert-btn-inner {
+  background:var(--accent); color:#fff; border:none;
+  border-radius:20px; padding:2px 12px; font-size:11px;
+  white-space:nowrap; box-shadow:0 1px 8px rgba(92,122,191,.4);
+  cursor:pointer; font-family:inherit;
+}
+.insert-line {
+  position:absolute; left:0; right:0;
+  height:2px; background:var(--accent);
+  pointer-events:all; cursor:pointer;
+  opacity:0; transition:opacity .15s;
+  border-radius:2px;
+}
+.insert-line:hover, .insert-line:hover + .insert-btn,
+.insert-zone-group:hover .insert-line,
+.insert-zone-group:hover .insert-btn { opacity:1; }
+.insert-zone-group { position:absolute; left:0; right:0; }
+
+/* Section marker overlaid on iframe */
+.section-bar {
+  position:absolute; left:0; right:0;
+  display:flex; align-items:center; gap:8px;
+  pointer-events:all; z-index:6;
+  padding:0 20px;
+}
+.section-bar-line { flex:1; height:2px; background:linear-gradient(90deg,var(--accent),#a8bfe8); border-radius:2px; }
+.section-bar-label {
+  display:flex; align-items:center; gap:5px;
+  background:var(--accent); color:#fff;
+  font-size:11px; font-weight:500;
+  padding:3px 10px 3px 8px; border-radius:20px;
+  box-shadow:0 1px 6px rgba(92,122,191,.35);
+  white-space:nowrap;
+}
+.section-bar-label input {
+  background:transparent; border:none; outline:none;
+  color:#fff; font-size:11px; font-weight:500;
+  width:100px; font-family:inherit;
+}
+.section-bar-label input::placeholder { color:rgba(255,255,255,.55); }
+.section-bar-del { cursor:pointer; font-size:13px; color:rgba(255,255,255,.65); margin-left:2px; }
+.section-bar-del:hover { color:#fff; }
+
+/* ── Right style panel ── */
+#style-panel { width:0; overflow:hidden; background:var(--panel); border-left:1px solid var(--border); flex-shrink:0; transition:width .22s cubic-bezier(.4,0,.2,1); }
+#style-panel.open { width:234px; }
+#style-panel-inner { width:234px; overflow-y:auto; height:100%; padding:14px; }
+#style-panel-inner h3 { font-size:11px; color:var(--muted); letter-spacing:.07em; margin-bottom:12px; border-bottom:1px solid var(--border); padding-bottom:7px; margin-top:4px; }
+.sp-group { margin-bottom:14px; }
+.sp-label { font-size:12px; color:#666; margin-bottom:5px; display:block; }
+.sp-row { display:flex; gap:8px; align-items:center; }
+.sp-input { width:100%; padding:5px 9px; border:1.5px solid var(--border); border-radius:6px; font-size:13px; color:var(--text); background:#fafbfd; outline:none; transition:border-color .15s; }
+.sp-input:focus { border-color:var(--accent); }
+.sp-color { width:34px; height:28px; border:1.5px solid var(--border); border-radius:6px; cursor:pointer; padding:2px; background:#fafbfd; flex-shrink:0; }
+.sp-seg { display:flex; border:1.5px solid var(--border); border-radius:6px; overflow:hidden; }
+.sp-seg button { flex:1; padding:5px 0; border:none; background:none; font-size:12px; color:#888; cursor:pointer; transition:background .12s,color .12s; }
+.sp-seg button.on { background:var(--accent); color:#fff; }
+.sp-range { width:100%; accent-color:var(--accent); cursor:pointer; }
+.sp-val { font-size:12px; color:var(--muted); white-space:nowrap; min-width:32px; text-align:right; }
+.sp-divider { height:1px; background:var(--border); margin:12px 0; }
+
+/* ── Toast ── */
+#toast { position:fixed; bottom:22px; left:50%; transform:translateX(-50%); background:#2d3a5e; color:#fff; padding:9px 18px; border-radius:8px; font-size:13px; z-index:9999; opacity:0; transition:opacity .2s; pointer-events:none; white-space:nowrap; }
+#toast.show { opacity:1; }
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <h1>✦ 分段編輯器</h1>
+  <div class="topbar-sep"></div>
+  <label id="file-btn">
+    <input type="file" accept=".html,.htm" onchange="loadFile(this)">
+    📂 選擇 HTML 檔案
+  </label>
+  <span id="file-name">尚未載入</span>
+  <div class="spacer"></div>
+  <span id="section-count"></span>
+  <button id="style-btn" onclick="toggleStylePanel()">🎨 目錄外觀</button>
+  <div class="topbar-sep"></div>
+  <button id="export-btn" onclick="exportHTML()" disabled>⬇ 輸出分段版</button>
+</div>
+
+<div id="layout">
+
+  <!-- Left: section list -->
+  <div id="sidebar">
+    <div id="sidebar-head">章節目錄</div>
+    <div id="sidebar-hint">把游標移到訊息之間<br>點藍線插入分段
+  <span style="display: block; margin-top: 4px; font-weight: bold; color: #000;">※記得自行在最開頭添加分段記號</span>
+</div>
+    <div id="section-list">
+      <div class="empty-hint">載入檔案後<br>點訊息間的藍線<br>新增篇章分段</div>
+    </div>
+  </div>
+
+  <!-- Center: preview -->
+  <div id="preview-wrap">
+    <div id="drop-overlay">
+      <div class="drop-icon">📄</div>
+      <div class="drop-text">選擇 HTML 對話記錄</div>
+      <div class="drop-sub">點擊上方「選擇 HTML 檔案」</div>
+    </div>
+    <!-- iframe renders original file with full CSS -->
+    <iframe id="preview-frame"></iframe>
+    <!-- overlay for insert zones and section bars -->
+    <div id="overlay"></div>
+  </div>
+
+  <!-- Right: style panel -->
+  <div id="style-panel">
+    <div id="style-panel-inner">
+      <h3>目錄按鈕</h3>
+      <div class="sp-group">
+        <span class="sp-label">位置</span>
+        <div class="sp-seg" id="pos-seg">
+          <button class="on" onclick="setOpt('pos','top-right',this)">右上</button>
+          <button onclick="setOpt('pos','top-left',this)">左上</button>
+        </div>
+      </div>
+      <div class="sp-group">
+        <span class="sp-label">顏色</span>
+        <div class="sp-row">
+          <input type="color" class="sp-color" id="btn-color" value="#5c7abf" oninput="syncOpt('btn-color','btn-color-hex')">
+          <input class="sp-input" id="btn-color-hex" value="#5c7abf" oninput="syncHex('btn-color-hex','btn-color')">
+        </div>
+      </div>
+      <div class="sp-group">
+        <span class="sp-label">透明度</span>
+        <div class="sp-row">
+          <input type="range" class="sp-range" id="btn-opacity" min="5" max="100" value="20" oninput="updVal('btn-opacity','btn-opacity-val','%')">
+          <span class="sp-val" id="btn-opacity-val">20%</span>
+        </div>
+      </div>
+      <div class="sp-group">
+        <span class="sp-label">圖示</span>
+        <div class="sp-seg" id="icon-seg">
+          <button class="on" onclick="setOpt('icon','☰',this)">☰</button>
+          <button onclick="setOpt('icon','📖',this)">📖</button>
+          <button onclick="setOpt('icon','✦',this)">✦</button>
+          <button onclick="setOpt('icon','≡',this)">≡</button>
+        </div>
+      </div>
+      <div class="sp-divider"></div>
+      <h3>側邊目錄欄</h3>
+      <div class="sp-group">
+        <span class="sp-label">開啟方向</span>
+        <div class="sp-seg" id="dir-seg">
+          <button class="on" onclick="setOpt('dir','right',this)">從右滑入</button>
+          <button onclick="setOpt('dir','left',this)">從左滑入</button>
+        </div>
+      </div>
+      <div class="sp-group">
+        <span class="sp-label">背景遮罩</span>
+        <div class="sp-seg" id="backdrop-seg">
+          <button class="on" onclick="setOpt('backdrop',true,this)">開啟</button>
+          <button onclick="setOpt('backdrop',false,this)">關閉</button>
+        </div>
+      </div>
+      <div class="sp-group">
+        <span class="sp-label">欄位寬度</span>
+        <div class="sp-row">
+          <input type="range" class="sp-range" id="panel-width" min="160" max="340" value="240" oninput="updVal('panel-width','panel-width-val','px')">
+          <span class="sp-val" id="panel-width-val">240px</span>
+        </div>
+      </div>
+      <div class="sp-group">
+        <span class="sp-label">背景顏色</span>
+        <div class="sp-row">
+          <input type="color" class="sp-color" id="panel-bg" value="#ffffff" oninput="syncOpt('panel-bg','panel-bg-hex')">
+          <input class="sp-input" id="panel-bg-hex" value="#ffffff" oninput="syncHex('panel-bg-hex','panel-bg')">
+        </div>
+      </div>
+      <div class="sp-group">
+        <span class="sp-label">強調顏色</span>
+        <div class="sp-row">
+          <input type="color" class="sp-color" id="panel-accent" value="#5c7abf" oninput="syncOpt('panel-accent','panel-accent-hex')">
+          <input class="sp-input" id="panel-accent-hex" value="#5c7abf" oninput="syncHex('panel-accent-hex','panel-accent')">
+        </div>
+      </div>
+      <div class="sp-group">
+        <span class="sp-label">字體大小</span>
+        <div class="sp-row">
+          <input type="range" class="sp-range" id="entry-font" min="11" max="18" value="14" oninput="updVal('entry-font','entry-font-val','px')">
+          <span class="sp-val" id="entry-font-val">14px</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /layout -->
+
+<div id="toast"></div>
+
+<script>
+// ── State ──
+var origFileName = "匯出檔案";
+var rawHead = '', rawInner = '', rawMsgParts = [], rawPreamble = '', rawAllBlocks = [];
+var sections = [], sectionCounter = 0;
+var frameDoc = null;
+var msgRects = []; // bounding rects of each message in the iframe
+
+var cfg = {
+  pos: 'top-right', icon: '☰',
+  btnColor: '#5c7abf', btnOpacity: 20,
+  dir: 'right', backdrop: true,
+  panelWidth: 240, panelBg: '#ffffff',
+  panelAccent: '#5c7abf', entryFont: 14
+};
+
+// ── File load ──
+function loadFile(input) {
+  var file = input.files[0];
+  if (!file) return;
+  document.getElementById('file-name').textContent = file.name;
+  origFileName = file.name.replace(/\.[^/.]+$/, "");
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try { parseHTML(e.target.result); }
+    catch(err) { showToast('❌ 解析失敗：' + err.message); console.error(err); }
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+function parseHTML(html) {
+  // Extract head
+  var hm = html.match(/^([\s\S]*?<\/style>\s*<\/head>)/);
+  if (!hm) hm = html.match(/^([\s\S]*?<\/head>)/);
+  rawHead = hm ? hm[1] : '';
+
+  // Extract chat-container inner
+  var bm = html.match(/<body>([\s\S]*)<\/body>/);
+  var body = bm ? bm[1] : html;
+  var im = body.match(/<div class="chat-container">([\s\S]*)/);
+  if (!im) throw new Error('找不到 chat-container');
+  var raw = im[1].trimEnd();
+  rawInner = raw.endsWith('</div>') ? raw.slice(0,-6).trimEnd() : raw;
+
+  // Split into ALL blocks in order (preamble elements + messages)
+  // Each top-level element becomes one entry in rawAllBlocks
+  var tmp = document.createElement('div');
+  tmp.innerHTML = rawInner;
+  rawAllBlocks = [];
+  tmp.childNodes.forEach(function(node) {
+    if (node.nodeType === 1) { // element nodes only
+      rawAllBlocks.push(node.outerHTML);
+    }
+  });
+  // Also keep rawMsgParts for backwards compat (not used in export anymore)
+  rawMsgParts = rawAllBlocks.filter(function(h){ return /^<div class="(?:char|pc)">/.test(h.trim()); });
+
+  // Load full original HTML into iframe
+  loadIframe(html);
+}
+
+function loadIframe(html) {
+  var frame = document.getElementById('preview-frame');
+  // Write full original HTML so all CSS/fonts/images work
+  frame.onload = function() {
+    frameDoc = frame.contentDocument;
+    // After iframe loads, position the overlay buttons
+    setTimeout(buildOverlay, 300);
+    document.getElementById('drop-overlay').classList.add('hidden');
+    document.getElementById('export-btn').disabled = false;
+    showToast('✅ 載入完成，共 ' + rawMsgParts.length + ' 則訊息');
+  };
+  frame.srcdoc = html;
+}
+
+// ── Build overlay with insert zones ──
+// allBlocks = all elements in order: date-divider, environment, char/pc
+// index -1 = before everything, 0..N-1 = after block N
+function buildOverlay() {
+  if (!frameDoc) return;
+  var overlay = document.getElementById('overlay');
+  overlay.innerHTML = '';
+
+  var frame = document.getElementById('preview-frame');
+
+  // Collect ALL visible blocks in document order
+  var all = frameDoc.querySelectorAll('.date-divider, .environment, .char, .pc');
+  if (!all.length) { showToast('找不到任何內容元素'); return; }
+
+  var scrollY = frameDoc.documentElement.scrollTop || frameDoc.body.scrollTop;
+  msgRects = [];
+  all.forEach(function(el) {
+    var r = el.getBoundingClientRect();
+    msgRects.push({
+      top: r.top + scrollY,
+      bottom: r.bottom + scrollY
+    });
+  });
+
+  // Also rebuild rawMsgParts to include preamble blocks as separate indexable items
+  // so export stays in sync. We rebuild allBlocks in parseHTML instead.
+
+  // Sync overlay scroll with iframe scroll
+  frame.contentWindow.removeEventListener('scroll', rebuildOverlayPositions);
+  frame.contentWindow.addEventListener('scroll', rebuildOverlayPositions);
+  frame.contentWindow.removeEventListener('resize', onFrameResize);
+  frame.contentWindow.addEventListener('resize', onFrameResize);
+
+  rebuildOverlayPositions();
+}
+
+function onFrameResize() { setTimeout(buildOverlay, 100); }
+
+function rebuildOverlayPositions() {
+  if (!frameDoc || !msgRects.length) return;
+  var overlay = document.getElementById('overlay');
+  overlay.innerHTML = '';
+
+  var frame = document.getElementById('preview-frame');
+  var scrollY = frameDoc.documentElement.scrollTop || frameDoc.body.scrollTop;
+
+  // Zone BEFORE the very first block (index -1)
+  var firstTop = msgRects[0].top - scrollY - 10;
+  makeZone(overlay, firstTop, -1);
+
+  // Zone AFTER each block
+  msgRects.forEach(function(rect, i) {
+    var y = rect.bottom - scrollY + 4;
+    makeZone(overlay, y, i);
+  });
+
+  // Re-draw existing section bars
+  sections.forEach(function(sec) {
+    drawSectionBar(overlay, sec, scrollY);
+  });
+}
+
+function makeZone(overlay, y, afterIdx) {
+  // Skip if out of visible area
+  var frame = document.getElementById('preview-frame');
+  if (y < -20 || y > frame.clientHeight + 20) return;
+
+  // Check if a section already exists at this position
+  var hasSec = sections.some(function(s){ return s.afterMsgIndex === afterIdx; });
+  if (hasSec) return;
+
+  var group = document.createElement('div');
+  group.className = 'insert-zone-group';
+  group.style.cssText = 'position:absolute;left:0;right:0;top:' + (y-9) + 'px;height:18px;';
+
+  var line = document.createElement('div');
+  line.className = 'insert-line';
+  line.style.cssText = 'position:absolute;left:10%;right:10%;top:50%;transform:translateY(-50%);';
+
+  var btn = document.createElement('div');
+  btn.className = 'insert-btn';
+  btn.style.cssText = 'top:0;bottom:0;';
+  btn.innerHTML = '<button class="insert-btn-inner">＋ 在此插入分段</button>';
+
+  group.appendChild(line);
+  group.appendChild(btn);
+  overlay.appendChild(group);
+
+  // Hover group shows both line and btn
+  group.addEventListener('mouseenter', function(){
+    line.style.opacity='1'; btn.style.opacity='1';
+  });
+  group.addEventListener('mouseleave', function(){
+    line.style.opacity='0'; btn.style.opacity='0';
+  });
+  group.addEventListener('click', function(){ insertSection(afterIdx, y); });
+}
+
+function drawSectionBar(overlay, sec, scrollY) {
+  var frame = document.getElementById('preview-frame');
+  var y = sec.yPos - scrollY;
+  if (y < -30 || y > frame.clientHeight + 30) return;
+
+  var bar = document.createElement('div');
+  bar.className = 'section-bar';
+  bar.id = 'bar_' + sec.id;
+  bar.style.cssText = 'top:' + (y - 10) + 'px;';
+  bar.innerHTML =
+    '<div class="section-bar-line"></div>' +
+    '<div class="section-bar-label">✦ ' +
+      '<input type="text" value="' + escAttr(sec.title) + '" placeholder="篇章名稱" ' +
+        'oninput="onTitleChange(\'' + sec.id + '\',this.value)">' +
+      '<span class="section-bar-del" onclick="removeSection(\'' + sec.id + '\')">✕</span>' +
+    '</div>' +
+    '<div class="section-bar-line"></div>';
+  overlay.appendChild(bar);
+}
+
+// ── Section management ──
+function insertSection(afterIdx, yPos) {
+  if (sections.some(function(s){ return s.afterMsgIndex === afterIdx; })) {
+    showToast('此處已有分段標記'); return;
+  }
+  sectionCounter++;
+  var id = 'sec_' + sectionCounter;
+  var title = '篇章 ' + (sections.length + 1);
+  var scrollY = frameDoc.documentElement.scrollTop || frameDoc.body.scrollTop;
+  sections.push({ id:id, title:title, afterMsgIndex:afterIdx, yPos: yPos + scrollY });
+  sections.sort(function(a,b){ return a.afterMsgIndex - b.afterMsgIndex; });
+  rebuildOverlayPositions();
+  updateSidebar();
+  updateSectionCount();
+  // Focus the new bar's input
+  setTimeout(function(){
+    var bar = document.getElementById('bar_' + id);
+    if (bar) { var inp = bar.querySelector('input'); if(inp){ inp.focus(); inp.select(); } }
+  }, 50);
+}
+
+function onTitleChange(id, val) {
+  var s = sections.find(function(s){ return s.id===id; });
+  if (s) { s.title = val; updateSidebar(); }
+}
+
+function removeSection(id) {
+  sections = sections.filter(function(s){ return s.id!==id; });
+  rebuildOverlayPositions();
+  updateSidebar(); updateSectionCount();
+  showToast('已移除分段');
+}
+
+function updateSidebar() {
+  var list = document.getElementById('section-list');
+  if (!sections.length) {
+    list.innerHTML = '<div class="empty-hint">載入檔案後<br>點訊息間的藍線<br>新增篇章分段</div>';
+    return;
+  }
+  list.innerHTML = '';
+  sections.forEach(function(sec, i) {
+    var item = document.createElement('div');
+    item.className = 'section-item';
+    item.innerHTML =
+      '<span class="num">' + (i+1) + '</span>' +
+      '<span class="title">' + esc(sec.title||'（未命名）') + '</span>' +
+      '<span class="del" onclick="removeSection(\'' + sec.id + '\');event.stopPropagation()">✕</span>';
+    item.onclick = function() {
+      // Scroll iframe to section position
+      if (frameDoc) frameDoc.documentElement.scrollTop = Math.max(0, sec.yPos - 80);
+      document.querySelectorAll('.section-item').forEach(function(s){ s.classList.remove('active'); });
+      item.classList.add('active');
+    };
+    list.appendChild(item);
+  });
+}
+
+function updateSectionCount() {
+  document.getElementById('section-count').textContent = sections.length ? sections.length + ' 個段落' : '';
+}
+
+// ── Style panel ──
+function toggleStylePanel() {
+  var p = document.getElementById('style-panel');
+  var b = document.getElementById('style-btn');
+  var open = p.classList.toggle('open');
+  b.classList.toggle('active', open);
+}
+function setOpt(key, val, el) {
+  cfg[key] = val;
+  var segId = {pos:'pos-seg',dir:'dir-seg',icon:'icon-seg',backdrop:'backdrop-seg'}[key];
+  if (segId) {
+    document.querySelectorAll('#'+segId+' button').forEach(function(b){ b.classList.remove('on'); });
+    el.classList.add('on');
+  }
+}
+function syncOpt(colorId, hexId) {
+  document.getElementById(hexId).value = document.getElementById(colorId).value;
+}
+function syncHex(hexId, colorId) {
+  var hex = document.getElementById(hexId).value;
+  if (/^#[0-9a-fA-F]{6}$/.test(hex)) document.getElementById(colorId).value = hex;
+}
+function updVal(rangeId, valId, unit) {
+  document.getElementById(valId).textContent = document.getElementById(rangeId).value + unit;
+}
+
+// ── Export ──
+function exportHTML() {
+  if (!rawInner) { showToast('請先載入檔案'); return; }
+  if (!sections.length) { showToast('請先新增至少一個分段'); return; }
+
+  // Read current cfg values from inputs
+  cfg.btnColor    = document.getElementById('btn-color').value;
+  cfg.btnOpacity  = parseInt(document.getElementById('btn-opacity').value);
+  cfg.panelWidth  = parseInt(document.getElementById('panel-width').value);
+  cfg.panelBg     = document.getElementById('panel-bg').value;
+  cfg.panelAccent = document.getElementById('panel-accent').value;
+  cfg.entryFont   = parseInt(document.getElementById('entry-font').value);
+
+  var sorted = sections.slice().sort(function(a,b){ return a.afterMsgIndex - b.afterMsgIndex; });
+  var result = [];
+  sorted.forEach(function(sec, i) {
+    var start = sec.afterMsgIndex + 1;  // afterMsgIndex -1 means "before block 0", so start=0
+    var end = (i+1 < sorted.length) ? sorted[i+1].afterMsgIndex + 1 : rawAllBlocks.length;
+    var html = '';
+    for (var m = start; m < end; m++) { if (rawAllBlocks[m]) html += rawAllBlocks[m] + '\n'; }
+    result.push({ title: sec.title||('段落'+(i+1)), html: html.trim() });
+  });
+
+  var c = cfg.btnColor, r=parseInt(c.slice(1,3),16), g=parseInt(c.slice(3,5),16), b=parseInt(c.slice(5,7),16);
+  var a1 = cfg.btnOpacity/100, a2 = Math.min(1, a1*1.9);
+  var btnPos = cfg.pos==='top-right' ? 'top:14px;right:14px;' : 'top:14px;left:14px;';
+  var ac = cfg.panelAccent, ar=parseInt(ac.slice(1,3),16), ag=parseInt(ac.slice(3,5),16), ab=parseInt(ac.slice(5,7),16);
+  var sideFrom = cfg.dir==='right' ? 'right:0;transform:translateX(100%);box-shadow:-4px 0 24px rgba(0,0,0,0.12);'
+                                   : 'left:0;transform:translateX(-100%);box-shadow:4px 0 24px rgba(0,0,0,0.12);';
+
+  var navCss = '<style>\n'+
+'#toc-btn{position:fixed;'+btnPos+'z-index:300;width:36px;height:36px;border-radius:8px;background:rgba('+r+','+g+','+b+','+a1+');color:'+c+';border:none;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;backdrop-filter:blur(4px);}\n'+
+'#toc-btn:hover,#toc-btn.open{background:rgba('+r+','+g+','+b+','+a2+');}\n'+
+'#toc-sidebar{position:fixed;top:0;'+sideFrom+'width:'+cfg.panelWidth+'px;height:100vh;z-index:299;background:'+cfg.panelBg+';backdrop-filter:blur(12px);transition:transform .25s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow:hidden;}\n'+
+'#toc-sidebar.open{transform:translateX(0);}\n'+
+'#toc-sidebar-header{padding:18px 16px 12px;font-size:12px;color:#aaa;letter-spacing:.08em;border-bottom:1px solid #eee;flex-shrink:0;display:flex;justify-content:space-between;align-items:center;}\n'+
+'#toc-close-btn{background:none;border:none;color:#bbb;font-size:18px;cursor:pointer;line-height:1;}\n'+
+'#toc-close-btn:hover{color:#888;}\n'+
+'#toc-entries{overflow-y:auto;flex:1;padding:8px 0;}\n'+
+'.toc-entry{display:block;padding:11px 18px;font-size:'+cfg.entryFont+'px;color:#555;cursor:pointer;border-left:3px solid transparent;transition:background .12s;line-height:1.4;}\n'+
+'.toc-entry:hover{background:rgba('+ar+','+ag+','+ab+',.07);color:'+ac+';}\n'+
+'.toc-entry.active{border-left-color:'+ac+';background:rgba('+ar+','+ag+','+ab+',.1);color:'+ac+';font-weight:500;}\n'+
+'#toc-nav-footer{border-top:1px solid #eee;padding:12px 16px;display:flex;gap:8px;flex-shrink:0;}\n'+
+'.nav-btn{flex:1;padding:8px 0;border-radius:8px;border:1px solid rgba('+ar+','+ag+','+ab+',.3);background:#fff;color:'+ac+';font-size:13px;cursor:pointer;transition:background .15s;}\n'+
+'.nav-btn:hover{background:rgba('+ar+','+ag+','+ab+',.08);}\n'+
+'.nav-btn:disabled{opacity:.3;cursor:default;background:#fff;}\n'+
+'#toc-backdrop{display:none;position:fixed;inset:0;z-index:298;background:'+(cfg.backdrop?'rgba(0,0,0,0.08)':'transparent')+';pointer-events:'+(cfg.backdrop?'auto':'none')+';}\n'+
+'#toc-backdrop.open{display:block;}\n'+
+'</style>';
+
+  var navHtml =
+'<button id="toc-btn" onclick="toggleTOC()">'+cfg.icon+'</button>\n'+
+'<div id="toc-backdrop" onclick="closeTOC()"></div>\n'+
+'<div id="toc-sidebar">\n'+
+'  <div id="toc-sidebar-header"><span>章節目錄</span><button id="toc-close-btn" onclick="closeTOC()">✕</button></div>\n'+
+'  <div id="toc-entries"></div>\n'+
+'  <div id="toc-nav-footer">\n'+
+'    <button class="nav-btn" id="btn-prev" onclick="navigate(-1);closeTOC()">← 上一段</button>\n'+
+'    <button class="nav-btn" id="btn-next" onclick="navigate(1);closeTOC()">下一段 →</button>\n'+
+'  </div>\n'+
+'</div>';
+
+  var sj = JSON.stringify(result).replace(/<\//g, "<\\/");
+  var navJs = '<script>\n'+
+'var S='+sj+',cur=0;\n'+
+'function render(i){cur=i;document.getElementById("chat-area").innerHTML=S[i].html;window.scrollTo(0,0);document.getElementById("btn-prev").disabled=(i===0);document.getElementById("btn-next").disabled=(i===S.length-1);document.querySelectorAll(".toc-entry").forEach(function(e,j){e.classList.toggle("active",j===i);});}\n'+
+'function navigate(d){var n=cur+d;if(n>=0&&n<S.length)render(n);}\n'+
+'function toggleTOC(){var s=document.getElementById("toc-sidebar"),b=document.getElementById("toc-backdrop"),btn=document.getElementById("toc-btn"),o=s.classList.contains("open");[s,b,btn].forEach(function(e){e.classList.toggle("open",!o);});}\n'+
+'function closeTOC(){["toc-sidebar","toc-backdrop","toc-btn"].forEach(function(id){document.getElementById(id).classList.remove("open");});}\n'+
+'var en=document.getElementById("toc-entries");S.forEach(function(s,i){var e=document.createElement("div");e.className="toc-entry";e.textContent=s.title;e.onclick=function(){render(i);closeTOC();};en.appendChild(e);});\n'+
+'render(0);\n'+
+'</' + 'script>';
+
+  var newHead = rawHead.replace('</head>', navCss+'\n</head>');
+  var out = newHead+'\n<body>\n<div class="chat-container" id="chat-area"></div>\n'+navHtml+'\n'+navJs+'\n</body></html>';
+
+  var blob = new Blob([out], {type:'text/html;charset=utf-8'});
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = origFileName + '_目錄.html'; a.click();
+  URL.revokeObjectURL(a.href);
+  showToast('✅ 已下載，共 ' + result.length + ' 個段落');
+}
+
+// ── Helpers ──
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s){ return String(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+var _tt;
+function showToast(m){ var t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(_tt); _tt=setTimeout(function(){t.classList.remove('show');},2800); }
+</script>
+</body>
+</html>
