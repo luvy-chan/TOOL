@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -500,15 +501,41 @@ function updateSidebar() {
     var item = document.createElement('div');
     item.className = 'section-item';
     item.innerHTML =
-      '<span class="num">' + (i+1) + '</span>' +
-      '<span class="title">' + esc(sec.title||'（未命名）') + '</span>' +
-      '<span class="del" onclick="removeSection(\'' + sec.id + '\');event.stopPropagation()">✕</span>';
+        '<span class="num">' + (i+1) + '</span>' +
+        '<span class="title" title="雙擊重新命名">' + esc(sec.title||'（未命名）') + '</span>' +
+        '<span class="del" onclick="removeSection(\'' + sec.id + '\');event.stopPropagation()">✕</span>';
     item.onclick = function() {
       // Scroll iframe to section position
       if (frameDoc) frameDoc.documentElement.scrollTop = Math.max(0, sec.yPos - 80);
       document.querySelectorAll('.section-item').forEach(function(s){ s.classList.remove('active'); });
       item.classList.add('active');
     };
+    // 雙擊標題進行重新命名
+var titleEl = item.querySelector('.title');
+titleEl.ondblclick = function(e) {
+  e.stopPropagation();
+  var input = document.createElement('input');
+  input.type = 'text';
+  input.value = sec.title || '';
+  input.style.cssText = 'width:100%;border:none;outline:none;background:transparent;font-size:13px;color:inherit;font-family:inherit;';
+  titleEl.replaceWith(input);
+  input.focus();
+  input.select();
+
+  function commit() {
+    var newTitle = input.value.trim() || '（未命名）';
+    sec.title = newTitle;
+    // 同步更新 iframe 上的 section-bar input
+    var bar = frameDoc && frameDoc.querySelector('[data-sid="' + sec.id + '"] input');
+    if (bar) bar.value = newTitle;
+    updateSidebar(); // 重繪
+  }
+  input.onblur = commit;
+  input.onkeydown = function(e) {
+    if (e.key === 'Enter') input.blur();
+    if (e.key === 'Escape') { input.value = sec.title || ''; input.blur(); }
+  };
+};
     list.appendChild(item);
   });
 }
