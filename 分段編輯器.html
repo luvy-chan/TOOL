@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -158,7 +157,7 @@ body { font-family: 'Noto Sans TC',-apple-system,sans-serif; background:var(--bg
   <!-- Left: section list -->
   <div id="sidebar">
     <div id="sidebar-head">章節目錄</div>
-    <div id="sidebar-hint">把游標移到訊息之間<br>點藍線插入分段<br>↓雙擊編輯名稱
+    <div id="sidebar-hint">把游標移到訊息之間<br>點藍線插入分段<br>↓雙擊編輯名稱<br>可用輸出來暫時存檔
   <span style="display: block; margin-top: 4px; font-weight: bold; color: #000;">※記得自行在最開頭添加分段記號</span>
 </div>
     <div id="section-list">
@@ -322,6 +321,17 @@ function parseHTML(html) {
   rawMsgParts = rawAllBlocks.filter(function(h){ return /^<div class="(?:char|pc)">/.test(h.trim()); });
 
   // Load full original HTML into iframe
+  // 偵測是否有存檔資料
+var saveEl = tmp.querySelector && document.createElement('div');
+var saveMatch = html.match(/<script type="application\/json" id="editor-save">([\s\S]*?)<\/script>/);
+if (saveMatch) {
+  try {
+    var saved = JSON.parse(saveMatch[1]);
+    sections = saved.sections || [];
+    sectionCounter = sections.length;
+    showToast('✅ 偵測到存檔，已還原 ' + sections.length + ' 個分段');
+  } catch(e) { sections = []; }
+}
   loadIframe(html);
 }
 
@@ -644,7 +654,10 @@ function exportHTML() {
 '</' + 'script>';
 
   var newHead = rawHead.replace('</head>', navCss+'\n</head>');
-  var out = newHead+'\n<body>\n<div class="chat-container" id="chat-area"></div>\n'+navHtml+'\n'+navJs+'\n</body></html>';
+
+  var originalBlocks = rawAllBlocks.join('\n');
+  var saveTag = '<script type="application/json" id="editor-save">' + JSON.stringify({ sections: sections }) + '<\/script>';
+  var out = newHead+'\n<body>\n'+saveTag+'\n<div class="chat-container">' + originalBlocks + '</div>\n'+navHtml+'\n'+navJs+'\n</body></html>';
 
   var blob = new Blob([out], {type:'text/html;charset=utf-8'});
   var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = origFileName + '_目錄.html'; a.click();
