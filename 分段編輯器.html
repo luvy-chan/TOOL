@@ -271,13 +271,15 @@ var sections = [], sectionCounter = 0;
 var frameDoc = null;
 var msgRects = []; // bounding rects of each message in the iframe
 
-var cfg = {
+var _savedCfg = {};
+try { _savedCfg = JSON.parse(localStorage.getItem('toc-cfg') || '{}'); } catch(e) {}
+var cfg = Object.assign({
   pos: 'top-right', icon: '☰',
   btnColor: '#5c7abf', btnOpacity: 20,
   dir: 'right', backdrop: true,
   panelWidth: 240, panelBg: '#ffffff',
   panelAccent: '#5c7abf', entryFont: 14
-};
+}, _savedCfg);
 
 // ── File load ──
 function loadFile(input) {
@@ -329,6 +331,12 @@ if (saveMatch) {
     var saved = JSON.parse(saveMatch[1]);
     sections = saved.sections || [];
     sectionCounter = sections.length;
+        if (saved.cfg) {
+      if (confirm('是否套用檔案原有的目錄樣式設定？')) {
+        Object.assign(cfg, saved.cfg);
+        applyCfgToUI();
+      }
+    }
     showToast('✅ 偵測到存檔，已還原 ' + sections.length + ' 個分段');
   } catch(e) { sections = []; }
 }
@@ -568,16 +576,49 @@ function setOpt(key, val, el) {
     document.querySelectorAll('#'+segId+' button').forEach(function(b){ b.classList.remove('on'); });
     el.classList.add('on');
   }
+  saveCfg();
 }
 function syncOpt(colorId, hexId) {
   document.getElementById(hexId).value = document.getElementById(colorId).value;
+  saveCfg();
 }
 function syncHex(hexId, colorId) {
   var hex = document.getElementById(hexId).value;
   if (/^#[0-9a-fA-F]{6}$/.test(hex)) document.getElementById(colorId).value = hex;
+  saveCfg();
 }
 function updVal(rangeId, valId, unit) {
   document.getElementById(valId).textContent = document.getElementById(rangeId).value + unit;
+  saveCfg();
+}
+
+function saveCfg() {
+  try { localStorage.setItem('toc-cfg', JSON.stringify(cfg)); } catch(e) {}
+}
+function applyCfgToUI() {
+  document.getElementById('btn-color').value = cfg.btnColor;
+  document.getElementById('btn-color-hex').value = cfg.btnColor;
+  document.getElementById('btn-opacity').value = cfg.btnOpacity;
+  document.getElementById('btn-opacity-val').textContent = cfg.btnOpacity + '%';
+  document.getElementById('panel-width').value = cfg.panelWidth;
+  document.getElementById('panel-width-val').textContent = cfg.panelWidth + 'px';
+  document.getElementById('panel-bg').value = cfg.panelBg;
+  document.getElementById('panel-bg-hex').value = cfg.panelBg;
+  document.getElementById('panel-accent').value = cfg.panelAccent;
+  document.getElementById('panel-accent-hex').value = cfg.panelAccent;
+  document.getElementById('entry-font').value = cfg.entryFont;
+  document.getElementById('entry-font-val').textContent = cfg.entryFont + 'px';
+  var map = {pos:{val:cfg.pos,seg:'pos-seg',map:{'top-right':'右上','top-left':'左上'}},
+             dir:{val:cfg.dir,seg:'dir-seg',map:{'right':'從右滑入','left':'從左滑入'}},
+             icon:{val:cfg.icon,seg:'icon-seg',map:null},
+             backdrop:{val:cfg.backdrop,seg:'backdrop-seg',map:{true:'開啟',false:'關閉'}}};
+  Object.keys(map).forEach(function(key) {
+    var m = map[key];
+    document.querySelectorAll('#'+m.seg+' button').forEach(function(b) {
+      var match = m.map ? b.textContent === m.map[String(m.val)] : b.textContent === String(m.val);
+      b.classList.toggle('on', match);
+    });
+  });
 }
 
 // ── Export ──
@@ -592,6 +633,7 @@ function exportHTML() {
   cfg.panelBg     = document.getElementById('panel-bg').value;
   cfg.panelAccent = document.getElementById('panel-accent').value;
   cfg.entryFont   = parseInt(document.getElementById('entry-font').value);
+  saveCfg();
 
   var sorted = sections.slice().sort(function(a,b){ return a.afterMsgIndex - b.afterMsgIndex; });
   var result = [];
@@ -656,7 +698,7 @@ function exportHTML() {
   var newHead = rawHead.replace('</head>', navCss+'\n</head>');
 
   var originalBlocks = rawAllBlocks.join('\n');
-  var saveTag = '<script type="application/json" id="editor-save">' + JSON.stringify({ sections: sections }) + '<\/script>';
+  var saveTag = '<script type="application/json" id="editor-save">' + JSON.stringify({ sections: sections, cfg: cfg }) + '<\/script>';
   var out = newHead+'\n<body>\n'+saveTag+'\n<div id="chat-area" class="chat-container"></div>\n'+navHtml+'\n'+navJs+'\n</body></html>';
 
   var blob = new Blob([out], {type:'text/html;charset=utf-8'});
@@ -670,6 +712,7 @@ function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
 function escAttr(s){ return String(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 var _tt;
 function showToast(m){ var t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(_tt); _tt=setTimeout(function(){t.classList.remove('show');},2800); }
+applyCfgToUI();
 </script>
 </body>
 </html>
