@@ -330,13 +330,13 @@ if (saveMatch) {
   try {
     var saved = JSON.parse(saveMatch[1]);
     sections = saved.sections || [];
-    sectionCounter = sections.length;
-        if (saved.cfg) {
-      if (confirm('是否套用檔案原有的目錄樣式設定？')) {
+    if (saved.cfg) {
+      if (confirm('是否套用檔案既有目錄樣式？')) {
         Object.assign(cfg, saved.cfg);
         applyCfgToUI();
       }
     }
+    sectionCounter = sections.length;
     showToast('✅ 偵測到存檔，已還原 ' + sections.length + ' 個分段');
   } catch(e) { sections = []; }
 }
@@ -687,7 +687,7 @@ function exportHTML() {
   var sj = JSON.stringify(result).replace(/<\//g, "<\\/");
   var navJs = '<script>\n'+
 'var S='+sj+',cur=0;\n'+
-'function render(i){cur=i;document.getElementById("chat-area").innerHTML=S[i].html;window.scrollTo(0,0);document.getElementById("btn-prev").disabled=(i===0);document.getElementById("btn-next").disabled=(i===S.length-1);document.querySelectorAll(".toc-entry").forEach(function(e,j){e.classList.toggle("active",j===i);});}\n'+
+'function render(i){cur=i;document.querySelector(".chat-container").innerHTML=S[i].html;window.scrollTo(0,0);document.getElementById("btn-prev").disabled=(i===0);document.getElementById("btn-next").disabled=(i===S.length-1);document.querySelectorAll(".toc-entry").forEach(function(e,j){e.classList.toggle("active",j===i);});}\n'+
 'function navigate(d){var n=cur+d;if(n>=0&&n<S.length)render(n);}\n'+
 'function toggleTOC(){var s=document.getElementById("toc-sidebar"),b=document.getElementById("toc-backdrop"),btn=document.getElementById("toc-btn"),o=s.classList.contains("open");[s,b,btn].forEach(function(e){e.classList.toggle("open",!o);});}\n'+
 'function closeTOC(){["toc-sidebar","toc-backdrop","toc-btn"].forEach(function(id){document.getElementById(id).classList.remove("open");});}\n'+
@@ -699,7 +699,7 @@ function exportHTML() {
 
   var originalBlocks = rawAllBlocks.join('\n');
   var saveTag = '<script type="application/json" id="editor-save">' + JSON.stringify({ sections: sections, cfg: cfg }) + '<\/script>';
-  var out = newHead+'\n<body>\n'+saveTag+'\n<div id="chat-area" class="chat-container"></div>\n'+navHtml+'\n'+navJs+'\n</body></html>';
+  var out = newHead+'\n<body>\n'+saveTag+'\n<div class="chat-container">' + originalBlocks + '</div>\n'+navHtml+'\n'+navJs+'\n</body></html>';
 
   var blob = new Blob([out], {type:'text/html;charset=utf-8'});
   var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = origFileName + '_目錄.html'; a.click();
