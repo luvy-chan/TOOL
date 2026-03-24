@@ -326,33 +326,33 @@ function parseHTML(html) {
   // 偵測是否有存檔資料
 var saveEl = tmp.querySelector && document.createElement('div');
 var saveMatch = html.match(/<script type="application\/json" id="editor-save">([\s\S]*?)<\/script>/);
+var pendingCfg = null;
 if (saveMatch) {
   try {
     var saved = JSON.parse(saveMatch[1]);
     sections = saved.sections || [];
-    if (saved.cfg) {
-      if (confirm('是否套用檔案既有目錄樣式？')) {
-        Object.assign(cfg, saved.cfg);
-        applyCfgToUI();
-      }
-    }
     sectionCounter = sections.length;
+    if (saved.cfg) pendingCfg = saved.cfg;
     showToast('✅ 偵測到存檔，已還原 ' + sections.length + ' 個分段');
   } catch(e) { sections = []; }
 }
-  loadIframe(html);
+  loadIframe(html, pendingCfg);
 }
 
-function loadIframe(html) {
+function loadIframe(html, pendingCfg) {
   var frame = document.getElementById('preview-frame');
-  // Write full original HTML so all CSS/fonts/images work
   frame.onload = function() {
     frameDoc = frame.contentDocument;
-    // After iframe loads, position the overlay buttons
     setTimeout(buildOverlay, 300);
     document.getElementById('drop-overlay').classList.add('hidden');
     document.getElementById('export-btn').disabled = false;
     showToast('✅ 載入完成，共 ' + rawMsgParts.length + ' 則訊息');
+    if (pendingCfg) {
+      if (confirm('是否套用檔案既有目錄樣式？')) {
+        Object.assign(cfg, pendingCfg);
+        applyCfgToUI();
+      }
+    }
   };
   frame.srcdoc = html;
 }
