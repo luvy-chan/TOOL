@@ -348,10 +348,12 @@ function loadIframe(html, pendingCfg) {
     document.getElementById('export-btn').disabled = false;
     showToast('✅ 載入完成，共 ' + rawMsgParts.length + ' 則訊息');
     if (pendingCfg) {
-      if (confirm('是否套用檔案既有目錄樣式？')) {
-        Object.assign(cfg, pendingCfg);
-        applyCfgToUI();
-      }
+      setTimeout(function() {
+        if (confirm('是否套用檔案既有目錄樣式？')) {
+          Object.assign(cfg, pendingCfg);
+          applyCfgToUI();
+        }
+      }, 100);
     }
   };
   frame.srcdoc = html;
