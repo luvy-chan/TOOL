@@ -181,7 +181,7 @@ body { font-family: 'Noto Sans TC',-apple-system,sans-serif; background:var(--bg
   <!-- Right: style panel -->
   <div id="style-panel">
     <div id="style-panel-inner">
-      <h3>目錄按鈕</h3>
+      <h3>目錄按鈕<button id="apply-cfg-btn" onclick="applySavedCfg()" style="float:right;padding:3px 8px;border-radius:6px;border:1.5px solid var(--border);background:#fafbfd;font-size:11px;color:#555;cursor:pointer;">套用檔案樣式</button></h3>
       <div class="sp-group">
         <span class="sp-label">位置</span>
         <div class="sp-seg" id="pos-seg">
@@ -270,6 +270,7 @@ var rawHead = '', rawInner = '', rawMsgParts = [], rawPreamble = '', rawAllBlock
 var sections = [], sectionCounter = 0;
 var frameDoc = null;
 var msgRects = []; // bounding rects of each message in the iframe
+var pendingCfg = null;
 
 var _savedCfg = {};
 try { _savedCfg = JSON.parse(localStorage.getItem('toc-cfg') || '{}'); } catch(e) {}
@@ -326,20 +327,19 @@ function parseHTML(html) {
   // 偵測是否有存檔資料
 var saveEl = tmp.querySelector && document.createElement('div');
 var saveMatch = html.match(/<script type="application\/json" id="editor-save">([\s\S]*?)<\/script>/);
-var pendingCfg = null;
 if (saveMatch) {
   try {
     var saved = JSON.parse(saveMatch[1]);
     sections = saved.sections || [];
-    sectionCounter = sections.length;
     if (saved.cfg) pendingCfg = saved.cfg;
+    sectionCounter = sections.length;
     showToast('✅ 偵測到存檔，已還原 ' + sections.length + ' 個分段');
   } catch(e) { sections = []; }
 }
-  loadIframe(html, pendingCfg);
+  loadIframe(html);
 }
 
-function loadIframe(html, pendingCfg) {
+function loadIframe(html) {
   var frame = document.getElementById('preview-frame');
   frame.onload = function() {
     frameDoc = frame.contentDocument;
@@ -347,14 +347,6 @@ function loadIframe(html, pendingCfg) {
     document.getElementById('drop-overlay').classList.add('hidden');
     document.getElementById('export-btn').disabled = false;
     showToast('✅ 載入完成，共 ' + rawMsgParts.length + ' 則訊息');
-    if (pendingCfg) {
-      setTimeout(function() {
-        if (confirm('是否套用檔案既有目錄樣式？')) {
-          Object.assign(cfg, pendingCfg);
-          applyCfgToUI();
-        }
-      }, 100);
-    }
   };
   frame.srcdoc = html;
 }
@@ -594,6 +586,13 @@ function updVal(rangeId, valId, unit) {
   saveCfg();
 }
 
+function applySavedCfg() {
+  if (!pendingCfg) { showToast('非既有目錄檔案'); return; }
+  Object.assign(cfg, pendingCfg);
+  applyCfgToUI();
+  saveCfg();
+  showToast('✅ 已套用檔案樣式');
+}
 function saveCfg() {
   try { localStorage.setItem('toc-cfg', JSON.stringify(cfg)); } catch(e) {}
 }
