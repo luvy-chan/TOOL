@@ -58,8 +58,8 @@
                 };
 
                 result = result.replace(/[,? !:;()\[\]{}<\/\\|@#$%^&_+\-=~`“”‘’]/g, (m) => punctMap[m] || m);
-
-                result = result.replace(/(\S)>/g, '$1》');
+                
+                //result = result.replace(/(\S)>/g, '$1》');
                 result = result.replace(/"/g, '”');
                 result = result.replace(/'/g, '’');
 
