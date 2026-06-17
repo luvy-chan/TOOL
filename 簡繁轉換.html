@@ -13,7 +13,7 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     
     <!-- 3. 載入 Babel (讓瀏覽器能看懂 JSX) -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
 
     <!-- 4. 載入 OpenCC (繁簡轉換庫) -->
     <script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.js"></script>
@@ -29,7 +29,7 @@
     <div id="root"></div>
 
     <!-- 這裡是 React 程式碼 -->
-    <script type="text/babel" data-type="module">
+    <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
         // --- 圖示組件 (內嵌 SVG 以避免依賴外部庫) ---
