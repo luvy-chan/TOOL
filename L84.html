@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>084MEMO</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f6fa;
+            color: #2f3640;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .series-container {
+            display: flex; 
+            align-items: center;
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .series-title {
+            margin: 0;
+            padding-right: 20px;
+            margin-right: 20px;
+            border-right: 2px solid #e1e2e6;
+            font-size: 1.1rem;
+            color: #353b48;
+            
+           
+            width: 100px;         
+            flex-shrink: 0;       
+            word-break: break-all;
+            text-align: center;
+        }
+
+
+        .char-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 70px); 
+            justify-content: space-between;
+            flex-grow: 1;
+        }
+
+        .char-item {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            object-fit: cover;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            
+            filter: brightness(0.3) grayscale(0.5);
+            border: 3px solid transparent;
+        }
+
+        .char-item.obtained {
+            filter: brightness(1) grayscale(0);
+            border: 3px solid #fbc531;
+            box-shadow: 0 0 10px rgba(251, 197, 49, 0.5);
+        }
+
+
+        .action-btn {
+            background-color: #fbc531;
+            border: none;
+            border-radius: 5px;
+            color: #2f3640;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        .action-btn:hover { background-color: #e1b12c; }
+
+        .toggle-btn {
+            display: block;
+            margin: 0 auto 20px auto;
+            padding: 10px 20px;
+            font-size: 1.1rem;
+        }
+
+        .select-all-btn {
+            margin-top: 10px;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            width: 100%;
+        }
+
+        .group-details {
+            background: #e1e2e6;
+            border-radius: 10px;
+            padding: 10px 20px;
+            margin-bottom: 20px;
+        }
+        .group-details summary {
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 10px 0;
+            color: #2f3640;
+            list-style: none;
+        }
+        .group-details summary::-webkit-details-marker { display: none; }
+
+
+
+        @media (max-width: 1050px) {
+            .series-container {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .series-title {
+                border-right: none;
+                border-bottom: 2px solid #e1e2e6;
+                padding-right: 0;
+                margin-right: 0;
+                padding-bottom: 10px;
+                margin-bottom: 15px;
+                width: 100%;
+                text-align: left;
+            }
+            .char-grid {
+                grid-template-columns: repeat(6, 70px);
+                justify-content: start;
+                gap: 15px;
+            }
+        }
+
+ 
+        @media (max-width: 600px) {
+            .char-grid {
+                grid-template-columns: repeat(4, 70px);
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <button id="toggle-view-btn" class="action-btn toggle-btn">分組</button>
+    <div id="app"></div>
+
+    <script>
+
+        const LCB01 = "https://raw.githubusercontent.com/394ast/limbus.sharetool/main/Identities.After/1001.3.jpg";
+        const LCB02 = "https://raw.githubusercontent.com/394ast/limbus.sharetool/main/Identities.After/2001.3.jpg";
+        const LCB03 = "https://raw.githubusercontent.com/394ast/limbus.sharetool/main/Identities.After/3001.3.jpg";
+        const LCB04 = "https://raw.githubusercontent.com/394ast/limbus.sharetool/main/Identities.After/4001.3.jpg";
+        const LCB05 = "https://raw.githubusercontent.com/394ast/limbus.sharetool/main/Identities.After/5001.3.jpg";
+        const LCB06 = "https://raw.githubusercontent.com/394ast/limbus.sharetool/main/Identities.After/6001.3.jpg";
+        const LCB07 = "https://raw.githubusercontent.com/394ast/limbus.sharetool/main/Identities.After/7001.3.jpg";
+        const LCB08 = "https://raw.githubusercontent.com/394ast/limbus.sharetool/main/Identities.After/8001.3.jpg";
+        const LCB09 = "https://raw.githubusercontent.com/394ast/limbus.sharetool/main/Identities.After/9001.3.jpg";
+        const LCB10 = "https://raw.githubusercontent.com/394ast/limbus.sharetool/main/Identities.After/1001.3.jpg";
+        const LCB11 = "https://raw.githubusercontent.com/394ast/limbus.sharetool/main/Identities.After/11001.3.jpg";
+        const LCB12 = "https://raw.githubusercontent.com/394ast/limbus.sharetool/main/Identities.After/12001.3.jpg";
+
+
+        const groupConfig = {
+
+            "邊獄公司": ["LCA/目燈", "LCCB", "LCD現場推理小隊", "LCEE.G.O"],
+
+            "公司": ["G公司", "綻放E.G.O/玫瑰板手/腦叶E.G.O/K公司", "N公司EGO", "R公司", "S公司", "T公司", "W公司"],
+
+            "協會": ["Zwei協會西部", "Zwei協會南部", "し協會東部", "し協會南部", "Cinq協會東部", "Cinq協會西部｜拉·曼卻領王子", "Cinq協會南部", "六協會", "Seven協會南部", "Девять協會", "Dieci協會", "Öufi協會"],
+
+            "事務所": ["臼齒事務所", "臼齒修船廠", "多裂紋事務所", "句點事務所", "獵牙事務所", "吊鉤/黎明事務所", "定事務所/夜錐組"],
+
+            "主線": ["豆豆幫｜流浪樂隊", "槌/執柄者", "裴廓德號", "呼嘯山莊", "拉·曼卻領", "Cinq協會西部｜拉·曼卻領王子", "黑獸", "鴻園的流浪武者", "蜘蛛巢"],
+
+            "支線": ["聖愚", "劍契/黑雲", "黑雲會若眾"],
+
+            "手指": ["拇指東部", "中指", "環指點彩派", "環指野獸派"]
+
+            /* " ": ["", ""], */
+            /* 腦叶E.G.O、良·派、炎拳事務所、倖存者｜苦行者 */
+
+        };
+
+
+        const trackerData = [
+            {
+                seriesName: "Seven協會南部",
+                images: [
+                    LCB01, LCB02, LCB04, LCB07, LCB11
+                ]
+            },
+            {
+                seriesName: "臼齒事務所",
+                images: [
+                    LCB01, LCB11
+                ]
+            },
+            {
+                seriesName: "裴廓德號",
+                images: [
+                    LCB01, LCB07, LCB08, LCB12
+                ]
+            },
+            {
+                seriesName: "Dieci協會",
+                images: [
+                    LCB01, LCB05, LCB06, LCB09
+                ]
+            },
+            {
+                seriesName: "LCE E.G.O",
+                images: [
+                    LCB01, LCB02, LCB12
+                ]
+            },
+            {
+                seriesName: "劍契/黑雲",
+                images: [
+                    LCB01, LCB02, LCB03, LCB04, LCB05, LCB06, LCB09, LCB10, LCB11, LCB12
+                ]
+            },
+            {
+                seriesName: "綻放E.G.O/玫瑰板手/腦叶E.G.O/K公司",
+                images: [
+                    LCB01, LCB05, LCB06, LCB07, LCB08, LCB09, LCB10, LCB12
+                ]
+            },
+            {
+                seriesName: "W公司",
+                images: [
+                    LCB01, LCB02, LCB03, LCB04, LCB05, LCB06, LCB07, LCB11
+                ]
+            },
+            {
+                seriesName: "環指點彩派",
+                images: [
+                    LCB01, LCB11
+                ]
+            },
+            {
+                seriesName: "腦叶E.G.O",
+                images: [
+                    LCB01, LCB02, LCB03, LCB03, LCB04, LCB04, LCB05, LCB09, LCB11
+                ]
+            },
+            {
+                seriesName: "六協會",
+                images: [
+                    LCB01, LCB04, LCB05, LCB06, LCB08, LCB09, LCB12
+                ]
+            },
+            {
+                seriesName: "N公司EGO",
+                images: [
+                    LCB01, LCB04
+                ]
+            },
+            {
+                seriesName: "黑獸",
+                images: [
+                    LCB01, LCB02, LCB03, LCB04, LCB06, LCB07, LCB08, LCB09, LCB10, LCB11, LCB12
+                ]
+            },
+            {
+                seriesName: "蜘蛛巢",
+                images: [
+                    LCB01, LCB02, LCB03, LCB04, LCB06, LCB08, LCB10, LCB11
+                ]
+            },
+            {
+                seriesName: "多裂紋事務所",
+                images: [
+                    LCB02, LCB07
+                ]
+            },
+            {
+                seriesName: "呼嘯山莊",
+                images: [
+                    LCB02, LCB04, LCB05, LCB07, LCB08, LCB11, LCB12
+                ]
+            },
+            {
+                seriesName: "槌/執柄者",
+                images: [
+                    LCB02, LCB03, LCB05, LCB07, LCB09, LCB10
+                ]
+            },
+            {
+                seriesName: "Zwei協會南部",
+                images: [
+                    LCB02, LCB09, LCB10, LCB12
+                ]
+            },
+            {
+                seriesName: "Cinq協會南部",
+                images: [
+                    LCB03, LCB10, LCB11
+                ]
+            },
+            {
+                seriesName: "中指",
+                images: [
+                    LCB03, LCB05, LCB07, LCB10
+                ]
+            },
+            {
+                seriesName: "T公司",
+                images: [
+                    LCB03, LCB09, LCB11
+                ]
+            },
+            {
+                seriesName: "拉·曼卻領",
+                images: [
+                    LCB03, LCB09, LCB11, LCB12
+                ]
+            },
+
+            {
+                seriesName: "し協會南部",
+                images: [
+                    LCB03, LCB07, LCB08
+                ]
+            },
+            {
+                seriesName: "LCCB",
+                images: [
+                    LCB04, LCB08, LCB09
+                ]
+            },
+            {
+                seriesName: "聖愚",
+                images: [
+                    LCB04, LCB06
+                ]
+            },
+            {
+                seriesName: "良·派",
+                images: [
+                    LCB04, LCB12
+                ]
+            },
+            {
+                seriesName: "環指野獸派",
+                images: [
+                    LCB05, LCB09
+                ]
+            },
+            {
+                seriesName: "拇指東部",
+                images: [
+                    LCB05, LCB10
+                ]
+            },
+            {
+                seriesName: "R公司",
+                images: [
+                    LCB05, LCB06,LCB07, LCB08, LCB09
+                ]
+            },
+            {
+                seriesName: "吊鉤/黎明事務所",
+                images: [
+                    LCB06, LCB10
+                ]
+            },
+            {
+                seriesName: "豆豆幫｜流浪樂隊",
+                images: [
+                    LCB06, LCB10
+                ]
+            },
+            {
+                seriesName: "句點事務所",
+                images: [
+                    LCB06, LCB07
+                ]
+            },
+            {
+                seriesName: "黑雲會若眾",
+                images: [
+                    LCB07, LCB08
+                ]
+            },
+            {
+                seriesName: "定事務所/夜錐組",
+                images: [
+                    LCB08, LCB12
+                ]
+            },
+            {
+                seriesName: "臼齒修船廠",
+                images: [
+                    LCB08, LCB10
+                ]
+            },
+            {
+                seriesName: "Zwei協會西部",
+                images: [
+                    LCB08, LCB10
+                ]
+            },
+            {
+                seriesName: "Девять協會",
+                images: [
+                    LCB09, LCB10
+                ]
+            },
+            {
+                seriesName: "G公司",
+                images: [
+                    LCB11, LCB12
+                ]
+            },
+            {
+                seriesName: "LCA/目燈",
+                images: [
+                    LCB11, LCB12
+                ]
+            },
+            {
+                seriesName: "炎拳事務所",
+                images: [
+                    LCB12
+                ]
+            },
+            {
+            {
+                seriesName: "倖存者｜苦行者｜し協會東部",
+                images: [
+                    LCB02, LCB02, LCB02
+                ]
+            },
+            {
+                seriesName: "Cinq協會東部",
+                images: [
+                    LCB03
+                ]
+            },
+            {
+                seriesName: "鴻園的流浪武者",
+                images: [
+                    LCB04
+                ]
+            },
+            {
+                seriesName: "Cinq協會西部｜拉·曼卻領王子",
+                images: [
+                    LCB05, LCB05
+                ]
+            },
+            {
+                seriesName: "獵牙事務所",
+                images: [
+                    LCB06
+                ]
+            },
+            {
+                seriesName: "S公司",
+                images: [
+                    LCB06
+                ]
+            },
+            {
+                seriesName: "Öufi協會",
+                images: [
+                    LCB07
+                ]
+            },
+            {
+                seriesName: "LCD現場推理小隊",
+                images: [
+                    LCB08
+                ]
+            }
+        ];
+
+
+        const app = document.getElementById('app');
+        const toggleBtn = document.getElementById('toggle-view-btn');
+        let savedState = JSON.parse(localStorage.getItem('gachaTrackerSave')) || {};
+        
+        let isGroupedView = false; 
+
+        toggleBtn.addEventListener('click', () => {
+            isGroupedView = !isGroupedView;
+            toggleBtn.textContent = isGroupedView ? "展開" : "分組";
+            renderView(); 
+        });
+
+        function createSeriesElement(series) {
+            const container = document.createElement('div');
+            container.className = 'series-container';
+
+            const titleWrapper = document.createElement('div');
+            titleWrapper.className = 'series-title';
+            
+            const title = document.createElement('h2');
+            title.textContent = series.seriesName;
+            title.style.margin = "0";
+            title.style.fontSize = "1.1rem";
+            titleWrapper.appendChild(title);
+
+            const selectAllBtn = document.createElement('button');
+            selectAllBtn.className = 'action-btn select-all-btn';
+            selectAllBtn.textContent = "全選";
+            selectAllBtn.addEventListener('click', () => {
+                let allSelected = true;
+                for (let i = 0; i < series.images.length; i++) {
+                    if (!savedState[`${series.seriesName}-char-${i}`]) allSelected = false;
+                }
+                
+                const newState = !allSelected;
+                for (let i = 0; i < series.images.length; i++) {
+                    savedState[`${series.seriesName}-char-${i}`] = newState;
+
+                    const imgElement = document.getElementById(`img-${series.seriesName}-${i}`);
+                    if (imgElement) {
+                        if (newState) {
+                            imgElement.classList.add('obtained');
+                        } else {
+                            imgElement.classList.remove('obtained');
+                        }
+                    }
+                }
+                localStorage.setItem('gachaTrackerSave', JSON.stringify(savedState));
+            });
+            titleWrapper.appendChild(selectAllBtn);
+            container.appendChild(titleWrapper);
+
+            const grid = document.createElement('div');
+            grid.className = 'char-grid';
+
+            series.images.forEach((imgUrl, index) => {
+                const charId = `${series.seriesName}-char-${index}`;
+                const img = document.createElement('img');
+                img.id = `img-${series.seriesName}-${index}`;
+                img.className = 'char-item';
+                img.src = imgUrl;
+
+                if (savedState[charId]) {
+                    img.classList.add('obtained');
+                }
+
+                img.addEventListener('click', () => {
+                    img.classList.toggle('obtained');
+                    savedState[charId] = img.classList.contains('obtained');
+                    localStorage.setItem('gachaTrackerSave', JSON.stringify(savedState));
+                });
+
+                grid.appendChild(img);
+            });
+
+            container.appendChild(grid);
+            return container;
+        }
+
+
+        function renderView() {
+            app.innerHTML = ''; 
+
+            if (isGroupedView) {
+
+                let classifiedSeriesNames = []; 
+
+
+                for (const [groupName, seriesNames] of Object.entries(groupConfig)) {
+                    const details = document.createElement('details');
+                    details.open = true;
+                    details.className = 'group-details';
+                    
+                    const summary = document.createElement('summary');
+                    summary.textContent = `▼ ${groupName}`;
+                    details.appendChild(summary);
+                    
+
+                    seriesNames.forEach(name => {
+                        const series = trackerData.find(d => d.seriesName === name);
+                        if (series) {
+                            details.appendChild(createSeriesElement(series));
+                            classifiedSeriesNames.push(name);
+                        }
+                    });
+                    
+
+                    if (details.children.length > 1) {
+                        app.appendChild(details);
+                    }
+                }
+
+
+                const unclassifiedSeries = trackerData.filter(d => !classifiedSeriesNames.includes(d.seriesName));
+                
+                if (unclassifiedSeries.length > 0) {
+                    const details = document.createElement('details');
+                    details.open = true;
+                    details.className = 'group-details';
+                    
+                    const summary = document.createElement('summary');
+                    summary.textContent = `▼ 其他`;
+                    details.appendChild(summary);
+                    
+                    unclassifiedSeries.forEach(series => {
+                        details.appendChild(createSeriesElement(series));
+                    });
+                    
+                    app.appendChild(details);
+                }
+
+            } else {
+
+                trackerData.forEach(series => {
+                    app.appendChild(createSeriesElement(series));
+                });
+            }
+        }
+
+        renderView();
+    </script>
+</body>
+</html>
