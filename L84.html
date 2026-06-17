@@ -150,9 +150,9 @@
 </head>
 <body>
 
-    <div style="display: flex; flex-direction: column; gap: 15px; align-items: flex-end; margin-bottom: 20px;">
-        <button id="toggle-view-btn" class="action-btn toggle-btn" style="margin: 0;">分組</button>
-        <button id="global-select-btn" class="action-btn toggle-btn" style="margin: 0;">全選</button>
+    <div style="position: fixed; top: 20px; right: 20px; z-index: 999; display: flex; flex-direction: column; gap: 1px; align-items: flex-end;">
+        <button id="toggle-view-btn" class="action-btn toggle-btn" style="margin: 0; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">分組</button>
+        <button id="global-select-btn" class="action-btn toggle-btn" style="margin: 0; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">全選</button>
     </div>
     <div id="app"></div>
 
@@ -573,13 +573,22 @@
             if (isGroupedView) {
                 let classifiedSeriesNames = []; 
 
+
                 for (const [groupName, seriesNames] of Object.entries(groupConfig)) {
                     const details = document.createElement('details');
-                    details.open = true;
                     details.className = 'group-details';
                     
-                    const summary = document.createElement('summary');
 
+                    const stateKey = `groupState-${groupName}`;
+                    details.open = savedState[stateKey] !== undefined ? savedState[stateKey] : true;
+
+
+                    details.addEventListener('toggle', () => {
+                        savedState[stateKey] = details.open;
+                        localStorage.setItem('gachaTrackerSave', JSON.stringify(savedState));
+                    });
+                    
+                    const summary = document.createElement('summary');
                     summary.textContent = groupName;
                     details.appendChild(summary);
                     
@@ -596,15 +605,23 @@
                     }
                 }
 
+
                 const unclassifiedSeries = trackerData.filter(d => !classifiedSeriesNames.includes(d.seriesName));
                 
                 if (unclassifiedSeries.length > 0) {
                     const details = document.createElement('details');
-                    details.open = true;
                     details.className = 'group-details';
                     
-                    const summary = document.createElement('summary');
 
+                    const stateKey = `groupState-其他`;
+                    details.open = savedState[stateKey] !== undefined ? savedState[stateKey] : true;
+
+                    details.addEventListener('toggle', () => {
+                        savedState[stateKey] = details.open;
+                        localStorage.setItem('gachaTrackerSave', JSON.stringify(savedState));
+                    });
+                    
+                    const summary = document.createElement('summary');
                     summary.textContent = "其他";
                     details.appendChild(summary);
                     
@@ -622,7 +639,6 @@
                 });
             }
         }
-
         renderView();
     </script>
 </body>
