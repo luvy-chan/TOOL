@@ -107,6 +107,14 @@
         }
         .group-details summary::-webkit-details-marker { display: none; }
 
+        .group-details summary::before {
+            content: "▸ ";
+            display: inline-block;
+            margin-right: 5px;
+        }
+        .group-details[open] summary::before {
+            content: "▾ ";
+        }
 
 
         @media (max-width: 1050px) {
@@ -142,7 +150,10 @@
 </head>
 <body>
 
-    <button id="toggle-view-btn" class="action-btn toggle-btn">分組</button>
+    <div style="display: flex; flex-direction: column; gap: 15px; align-items: flex-end; margin-bottom: 20px;">
+        <button id="toggle-view-btn" class="action-btn toggle-btn" style="margin: 0;">分組</button>
+        <button id="global-select-btn" class="action-btn toggle-btn" style="margin: 0;">全選</button>
+    </div>
     <div id="app"></div>
 
     <script>
@@ -478,9 +489,33 @@
 
         const app = document.getElementById('app');
         const toggleBtn = document.getElementById('toggle-view-btn');
+        const globalSelectBtn = document.getElementById('global-select-btn'); 
         let savedState = JSON.parse(localStorage.getItem('gachaTrackerSave')) || {};
         
         let isGroupedView = false; 
+
+
+        globalSelectBtn.addEventListener('click', () => {
+            let allSelected = true;
+
+            trackerData.forEach(series => {
+                series.images.forEach((imgUrl, index) => {
+                    if (!savedState[`${series.seriesName}-char-${index}`]) allSelected = false;
+                });
+            });
+
+
+            const newState = !allSelected;
+            trackerData.forEach(series => {
+                series.images.forEach((imgUrl, index) => {
+                    savedState[`${series.seriesName}-char-${index}`] = newState;
+                });
+            });
+            
+            localStorage.setItem('gachaTrackerSave', JSON.stringify(savedState));
+            renderView(); 
+        });
+
 
         toggleBtn.addEventListener('click', () => {
             isGroupedView = !isGroupedView;
@@ -501,31 +536,7 @@
             title.style.fontSize = "1.1rem";
             titleWrapper.appendChild(title);
 
-            const selectAllBtn = document.createElement('button');
-            selectAllBtn.className = 'action-btn select-all-btn';
-            selectAllBtn.textContent = "全選";
-            selectAllBtn.addEventListener('click', () => {
-                let allSelected = true;
-                for (let i = 0; i < series.images.length; i++) {
-                    if (!savedState[`${series.seriesName}-char-${i}`]) allSelected = false;
-                }
-                
-                const newState = !allSelected;
-                for (let i = 0; i < series.images.length; i++) {
-                    savedState[`${series.seriesName}-char-${i}`] = newState;
 
-                    const imgElement = document.getElementById(`img-${series.seriesName}-${i}`);
-                    if (imgElement) {
-                        if (newState) {
-                            imgElement.classList.add('obtained');
-                        } else {
-                            imgElement.classList.remove('obtained');
-                        }
-                    }
-                }
-                localStorage.setItem('gachaTrackerSave', JSON.stringify(savedState));
-            });
-            titleWrapper.appendChild(selectAllBtn);
             container.appendChild(titleWrapper);
 
             const grid = document.createElement('div');
@@ -560,9 +571,7 @@
             app.innerHTML = ''; 
 
             if (isGroupedView) {
-
                 let classifiedSeriesNames = []; 
-
 
                 for (const [groupName, seriesNames] of Object.entries(groupConfig)) {
                     const details = document.createElement('details');
@@ -570,10 +579,10 @@
                     details.className = 'group-details';
                     
                     const summary = document.createElement('summary');
-                    summary.textContent = `▼ ${groupName}`;
+
+                    summary.textContent = groupName;
                     details.appendChild(summary);
                     
-
                     seriesNames.forEach(name => {
                         const series = trackerData.find(d => d.seriesName === name);
                         if (series) {
@@ -582,12 +591,10 @@
                         }
                     });
                     
-
                     if (details.children.length > 1) {
                         app.appendChild(details);
                     }
                 }
-
 
                 const unclassifiedSeries = trackerData.filter(d => !classifiedSeriesNames.includes(d.seriesName));
                 
@@ -597,7 +604,8 @@
                     details.className = 'group-details';
                     
                     const summary = document.createElement('summary');
-                    summary.textContent = `▼ 其他`;
+
+                    summary.textContent = "其他";
                     details.appendChild(summary);
                     
                     unclassifiedSeries.forEach(series => {
