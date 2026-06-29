@@ -1,1 +1,2686 @@
-400: Invalid request
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>【角色電子寵物】</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DotGothic16&family=M+PLUS+Rounded+1c:wght@400;700&display=swap');
+:root{
+  --cream:#fdf6e3;--brown:#4a3728;--brown2:#2a1f18;
+  --yellow:#ffd54f;--red:#ef5350;--green:#7bc67e;
+  --sc:1; /* scale factor — changed by JS */
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+
+/* ══ LAUNCHER ══ */
+#launcher{
+  display:none;flex-direction:column;align-items:center;
+  min-height:100vh;
+  font-family:'M PLUS Rounded 1c',sans-serif;
+  color:var(--brown);background:var(--cream);
+  overflow-x:hidden;
+}
+
+/* hero */
+#hero{
+  width:100%;background:var(--brown);
+  display:flex;flex-direction:column;align-items:center;
+  padding:60px 24px 48px;text-align:center;gap:16px;
+}
+#hero .logo{font-size:64px;line-height:1;}
+#hero h1{
+  font-family:'DotGothic16',monospace;font-size:36px;
+  color:var(--cream);letter-spacing:2px;
+}
+#hero .tagline{
+  font-size:15px;color:rgba(253,246,227,.7);
+  line-height:1.8;max-width:400px;
+}
+#launch-btn{
+  background:var(--yellow);color:var(--brown);border:none;
+  border-radius:14px;padding:15px 40px;
+  font-family:'DotGothic16',monospace;font-size:17px;
+  cursor:pointer;box-shadow:4px 4px 0 rgba(0,0,0,.25);
+  transition:all .1s;letter-spacing:1px;margin-top:8px;
+}
+#launch-btn:hover{background:#ffe082;}
+#launch-btn:active{transform:translate(4px,4px);box-shadow:none;}
+#hint{font-size:11px;color:rgba(253,246,227,.5);font-family:'DotGothic16',monospace;}
+
+/* sections */
+.section{
+  width:100%;max-width:640px;
+  padding:48px 28px;
+  display:flex;flex-direction:column;align-items:center;gap:24px;
+}
+.section-title{
+  font-family:'DotGothic16',monospace;font-size:18px;
+  color:var(--brown);text-align:center;
+  border-bottom:2.5px solid var(--brown);
+  padding-bottom:8px;width:100%;
+}
+
+/* features grid */
+.features{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:14px;width:100%;
+}
+.feature-card{
+  background:#fff;border:2px solid var(--brown);border-radius:14px;
+  padding:20px 14px;text-align:center;
+  box-shadow:3px 3px 0 var(--brown);
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+}
+.feature-card .ficon{font-size:30px;}
+.feature-card .fname{
+  font-family:'DotGothic16',monospace;font-size:12px;color:var(--brown);font-weight:bold;
+}
+.feature-card .fdesc{font-size:12px;color:#7a6555;line-height:1.6;}
+
+/* screenshots */
+.screenshots{
+  display:grid;grid-template-columns:repeat(2,1fr);
+  gap:12px;width:100%;
+}
+.screenshot-slot{
+  background:#e8dcc8;border:2px solid var(--brown);border-radius:12px;
+  aspect-ratio:3/4;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DotGothic16',monospace;font-size:10px;color:#a09080;
+  text-align:center;padding:12px;overflow:hidden;
+}
+.screenshot-slot img{
+  width:100%;height:100%;object-fit:cover;border-radius:9px;
+}
+
+/* how to use */
+.steps{display:flex;flex-direction:column;gap:12px;width:100%;}
+.step{
+  display:flex;align-items:flex-start;gap:14px;
+  background:#fff;border:2px solid var(--brown);border-radius:12px;
+  padding:14px 16px;box-shadow:2px 2px 0 var(--brown);
+}
+.step-num{
+  background:var(--brown);color:var(--cream);
+  font-family:'DotGothic16',monospace;font-size:13px;
+  width:28px;height:28px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.step-text{font-size:13px;color:var(--brown);line-height:1.7;}
+.step-text strong{font-family:'DotGothic16',monospace;font-size:12px;}
+
+/* api guide */
+.api-box{
+  background:#fff;border:2px solid var(--brown);border-radius:14px;
+  padding:22px;width:100%;box-shadow:3px 3px 0 var(--brown);
+  display:flex;flex-direction:column;gap:12px;
+}
+.api-step{
+  display:flex;align-items:center;gap:10px;
+  font-size:13px;color:var(--brown);line-height:1.6;
+}
+.api-step .astep{
+  background:var(--yellow);color:var(--brown);
+  font-family:'DotGothic16',monospace;font-size:10px;
+  padding:2px 7px;border-radius:4px;flex-shrink:0;border:1.5px solid var(--brown);
+}
+.api-link{
+  color:var(--brown);font-weight:bold;
+  text-decoration:underline;text-underline-offset:3px;
+}
+.api-note{
+  font-size:11px;color:#a09080;font-family:'DotGothic16',monospace;
+  background:#fff9f0;border-radius:8px;padding:10px 12px;line-height:1.7;
+  border:1.5px dashed #d4c9b0;
+}
+
+/* reset section */
+.reset-box{
+  background:#fff;border:2px solid var(--brown);border-radius:14px;
+  padding:22px;width:100%;box-shadow:3px 3px 0 var(--brown);
+  display:flex;flex-direction:column;gap:10px;align-items:flex-start;
+}
+.reset-box p{font-size:13px;color:#7a6555;line-height:1.7;}
+#reset-btn{
+  background:var(--red);color:#fff;border:none;border-radius:8px;
+  padding:9px 20px;font-family:'DotGothic16',monospace;font-size:12px;
+  cursor:pointer;box-shadow:2px 2px 0 #b71c1c;transition:all .1s;
+}
+#reset-btn:hover{background:#e53935;}
+#reset-btn:active{transform:translate(2px,2px);box-shadow:none;}
+
+/* divider */
+.ldivider{width:100%;border:none;border-top:2px dashed #d4c9b0;margin:4px 0;}
+
+/* footer */
+#footer{
+  width:100%;background:var(--brown);
+  padding:24px;text-align:center;
+  font-family:'DotGothic16',monospace;font-size:11px;
+  color:rgba(253,246,227,.55);line-height:2;
+}
+#footer a{color:rgba(253,246,227,.8);text-decoration:none;}
+#footer a:hover{color:var(--cream);}
+
+/* ══ MAIN APP ══ */
+#main-app{
+  display:none;width:calc(300px * var(--sc));
+  font-family:'M PLUS Rounded 1c',sans-serif;color:var(--brown);
+  background:var(--cream);border:3px solid var(--brown);
+  border-radius:calc(18px * var(--sc));box-shadow:4px 4px 0 var(--brown2);
+  overflow:hidden;user-select:none;
+}
+
+/* titlebar */
+#titlebar{
+  background:var(--brown);color:var(--cream);
+  font-family:'DotGothic16',monospace;font-size:calc(11px * var(--sc));
+  padding:calc(6px * var(--sc)) calc(10px * var(--sc));
+  display:flex;align-items:center;gap:calc(5px * var(--sc));
+  border-radius:calc(14px * var(--sc)) calc(14px * var(--sc)) 0 0;
+}
+#title-name{flex:1;font-size:calc(12px * var(--sc));letter-spacing:.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tb-btn{
+  background:rgba(255,255,255,.18);border:none;border-radius:calc(4px * var(--sc));
+  color:var(--cream);font-family:'DotGothic16',monospace;font-size:calc(9px * var(--sc));
+  padding:calc(3px * var(--sc)) calc(6px * var(--sc));cursor:pointer;white-space:nowrap;transition:background .1s;flex-shrink:0;
+}
+.tb-btn:hover{background:rgba(255,255,255,.35);}
+#close-btn{
+  background:var(--red);border:none;
+  width:calc(15px * var(--sc));height:calc(15px * var(--sc));border-radius:50%;
+  cursor:pointer;font-size:calc(9px * var(--sc));color:#fff;font-weight:bold;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .1s;
+}
+#close-btn:hover{transform:scale(1.2);}
+
+/* stage */
+#stage{
+  position:relative;width:100%;height:calc(190px * var(--sc));
+  overflow:hidden;transition:background 8s ease;
+}
+#sky{position:absolute;inset:0;transition:background 8s ease;z-index:0;}
+#ground{
+  position:absolute;bottom:0;left:0;width:100%;height:calc(52px * var(--sc));
+  transition:background 4s ease;z-index:1;
+}
+#celestial{
+  position:absolute;top:calc(10px * var(--sc));right:calc(18px * var(--sc));
+  font-size:calc(20px * var(--sc));z-index:2;pointer-events:none;transition:opacity 2s;
+}
+.star{position:absolute;background:white;border-radius:50%;pointer-events:none;z-index:2;animation:twinkle 2s infinite alternate;}
+@keyframes twinkle{0%{opacity:.3}100%{opacity:1}}
+.season-particle{position:absolute;pointer-events:none;z-index:3;animation:fallDown linear forwards;}
+@keyframes fallDown{0%{transform:translateY(-10px) rotate(0deg);opacity:1;}100%{transform:translateY(200px) rotate(360deg);opacity:0;}}
+.cloud{position:absolute;border-radius:20px;opacity:.85;z-index:3;}
+
+/* char units */
+.char-unit{
+  position:absolute;bottom:calc(16px * var(--sc));
+  width:calc(78px * var(--sc));height:calc(78px * var(--sc));
+  cursor:pointer;transition:left .5s cubic-bezier(.34,1.56,.64,1);z-index:4;
+}
+#char0{left:calc(38px * var(--sc));}
+#char1{left:calc(184px * var(--sc));}
+.char-img{width:100%;height:100%;object-fit:contain;image-rendering:pixelated;transform-origin:bottom center;display:block;}
+.char-placeholder{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.82);border:2px dashed var(--brown);border-radius:calc(10px * var(--sc));
+  cursor:pointer;font-family:'DotGothic16',monospace;font-size:calc(8px * var(--sc));
+  color:var(--brown);gap:2px;text-align:center;line-height:1.5;
+}
+.char-placeholder:hover{background:rgba(255,249,240,.95);}
+.char-placeholder .uico{font-size:calc(16px * var(--sc));}
+.ph-input{display:none;}
+
+/* add char btn */
+#add-char-btn{
+  position:absolute;right:calc(10px * var(--sc));bottom:calc(12px * var(--sc));
+  background:rgba(255,255,255,.85);border:2px dashed var(--brown);border-radius:calc(10px * var(--sc));
+  width:calc(68px * var(--sc));height:calc(68px * var(--sc));
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:2px;cursor:pointer;font-family:'DotGothic16',monospace;font-size:calc(8px * var(--sc));
+  color:var(--brown);transition:background .1s;
+}
+#add-char-btn:hover{background:rgba(255,249,240,.98);}
+#add-char-btn .plus{font-size:calc(20px * var(--sc));line-height:1;}
+
+/* bubbles — position updated by JS to follow characters */
+.bubble{
+  position:absolute;background:#fff;border:2px solid var(--brown);border-radius:calc(10px * var(--sc));
+  padding:calc(4px * var(--sc)) calc(8px * var(--sc));font-size:calc(9px * var(--sc));
+  opacity:0;transition:opacity .3s;pointer-events:none;z-index:8;
+  font-family:'DotGothic16',monospace;
+  max-width:calc(110px * var(--sc));white-space:normal;text-align:center;line-height:1.4;
+  top:calc(6px * var(--sc));
+}
+#bub0{ left:calc(6px * var(--sc)); }
+#bub1{ right:calc(6px * var(--sc)); }
+.bubble.show{opacity:1;}
+.bubble.thinking{animation:thinkPulse 1s infinite;}
+.bubble::after{
+  content:'';position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);
+  border:6px solid transparent;border-top-color:var(--brown);
+}
+@keyframes thinkPulse{0%,100%{opacity:.45}50%{opacity:1}}
+
+/* interact */
+.interact-pop{
+  position:absolute;top:48%;left:50%;transform:translate(-50%,-50%);
+  font-size:calc(20px * var(--sc));pointer-events:none;z-index:12;
+  animation:iPop 1.4s ease-out forwards;
+}
+@keyframes iPop{0%{opacity:1;transform:translate(-50%,-50%) scale(.4)}30%{transform:translate(-50%,-50%) scale(1.3)}100%{opacity:0;transform:translate(-50%,-65%) scale(1)}}
+.heart{position:absolute;font-size:calc(14px * var(--sc));pointer-events:none;animation:fHeart 1.2s ease-out forwards;}
+@keyframes fHeart{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-38px) scale(.5)}}
+.zzz{position:absolute;font-family:'DotGothic16',monospace;font-size:calc(12px * var(--sc));color:#9fa8da;pointer-events:none;animation:fZzz 2s ease-out forwards;}
+@keyframes fZzz{0%{opacity:1;transform:translate(0,0)}100%{opacity:0;transform:translate(9px,-26px) scale(1.3)}}
+
+/* panel tabs */
+#panel-tabs{
+  display:flex;border-top:2px solid var(--brown);border-bottom:2px solid var(--brown);
+  background:#fff9f0;
+}
+.ptab{
+  flex:1;padding:calc(5px * var(--sc)) 0;
+  font-family:'DotGothic16',monospace;font-size:calc(10px * var(--sc));
+  text-align:center;cursor:pointer;color:var(--brown);opacity:.4;
+  border:none;background:none;border-bottom:3px solid transparent;
+  margin-bottom:-2px;transition:opacity .15s;
+}
+.ptab.active{opacity:1;border-bottom-color:var(--brown);}
+
+/* slide */
+#slide-wrap{overflow:hidden;}
+#slide-track{display:flex;transition:transform .32s cubic-bezier(.4,0,.2,1);}
+.char-panel{flex-shrink:0;width:calc(300px * var(--sc));}
+
+/* stats */
+.stats{padding:calc(5px * var(--sc)) calc(12px * var(--sc)) calc(2px * var(--sc));background:#fff9f0;}
+.stat-row{display:flex;align-items:center;gap:calc(5px * var(--sc));margin-bottom:calc(4px * var(--sc));}
+.stat-label{
+  font-family:'DotGothic16',monospace;font-size:calc(9px * var(--sc));
+  width:calc(40px * var(--sc));flex-shrink:0;white-space:nowrap;overflow:hidden;
+}
+.stat-bar{flex:1;height:calc(7px * var(--sc));background:#e8dcc8;border-radius:4px;border:1.5px solid var(--brown);overflow:hidden;}
+.stat-fill{height:100%;border-radius:3px;transition:width .5s ease;}
+.fill-hunger{background:linear-gradient(90deg,#ff8a65,#ff5722);}
+.fill-happy{background:linear-gradient(90deg,#ffca28,#ffd54f);}
+.fill-sleep{background:linear-gradient(90deg,#7986cb,#9fa8da);}
+.fill-clean{background:linear-gradient(90deg,#4dd0e1,#00bcd4);}
+.fill-health{background:linear-gradient(90deg,#66bb6a,#81c784);}
+.stat-num{font-family:'DotGothic16',monospace;font-size:calc(9px * var(--sc));width:calc(18px * var(--sc));text-align:right;flex-shrink:0;}
+@keyframes flash{0%,100%{opacity:1}50%{opacity:.2}}
+.warning{animation:flash .8s infinite;color:var(--red)!important;}
+
+/* actions */
+.actions{
+  padding:calc(5px * var(--sc)) calc(10px * var(--sc)) calc(6px * var(--sc));
+  border-top:2px solid var(--brown);background:var(--cream);
+  display:grid;grid-template-columns:repeat(3,1fr);gap:calc(4px * var(--sc));
+}
+.act-btn{
+  background:#fff;border:2px solid var(--brown);border-radius:calc(7px * var(--sc));
+  padding:calc(6px * var(--sc)) calc(3px * var(--sc));
+  font-family:'DotGothic16',monospace;font-size:calc(9px * var(--sc));
+  cursor:pointer;color:var(--brown);text-align:center;line-height:1.4;
+  transition:all .1s;box-shadow:2px 2px 0 var(--brown);
+}
+.act-btn:hover{background:var(--yellow);}
+.act-btn:active{transform:translate(2px,2px);box-shadow:none;}
+
+/* info bar */
+/* special event actions */
+#special-actions{
+  display:none;
+  grid-template-columns:repeat(3,1fr);
+  gap:calc(4px * var(--sc));
+  padding:calc(4px * var(--sc)) calc(10px * var(--sc)) calc(5px * var(--sc));
+  border-top:2px dashed var(--brown);
+  background:var(--cream);
+}
+.sact-btn{
+  background:linear-gradient(135deg,#fff9f0,#fff0f5);
+  border:2px solid var(--brown);
+  border-radius:calc(7px * var(--sc));
+  padding:calc(6px * var(--sc)) calc(3px * var(--sc));
+  font-family:'DotGothic16',monospace;font-size:calc(9px * var(--sc));
+  cursor:pointer;color:var(--brown);text-align:center;line-height:1.4;
+  transition:all .1s;box-shadow:2px 2px 0 var(--brown);
+}
+.sact-btn:hover:not(.locked):not(.cooldown){background:linear-gradient(135deg,#ffe0f0,#fff0b0);}
+.sact-btn:active:not(.locked):not(.cooldown){transform:translate(2px,2px);box-shadow:none;}
+.sact-btn.locked{opacity:.4;cursor:not-allowed;filter:grayscale(.4);}
+.sact-btn.cooldown{opacity:.6;cursor:not-allowed;}
+.sact-cd{
+  display:block;font-size:calc(7px * var(--sc));
+  opacity:.7;margin-top:2px;
+}
+
+#info-bar{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:calc(4px * var(--sc)) calc(12px * var(--sc));
+  border-top:2px solid var(--brown);background:#fff9f0;
+  font-family:'DotGothic16',monospace;font-size:calc(10px * var(--sc));
+  min-height:calc(26px * var(--sc));
+}
+#info-mood{font-size:calc(14px * var(--sc));}
+#info-affinity{font-size:calc(10px * var(--sc));opacity:.85;}
+
+/* ══ SETTINGS PAGE ══ */
+#settings-page{
+  display:none;flex-direction:column;
+  font-family:'M PLUS Rounded 1c',sans-serif;color:var(--brown);
+  background:var(--cream);min-height:100vh;
+}
+#set-titlebar{
+  background:var(--brown);color:var(--cream);
+  font-family:'DotGothic16',monospace;font-size:14px;
+  padding:10px 16px;display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:10;
+}
+#set-close{
+  background:var(--red);border:none;border-radius:50%;
+  width:22px;height:22px;color:#fff;font-size:12px;font-weight:bold;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+}
+#set-tabs{
+  display:flex;background:#fff9f0;border-bottom:2px solid var(--brown);
+  position:sticky;top:42px;z-index:9;overflow-x:auto;
+}
+.set-tab{
+  flex-shrink:0;padding:11px 16px;font-family:'DotGothic16',monospace;font-size:12px;
+  text-align:center;cursor:pointer;border:none;background:none;
+  color:var(--brown);opacity:.4;
+  border-bottom:3px solid transparent;margin-bottom:-2px;transition:opacity .15s;
+  white-space:nowrap;
+}
+.set-tab.active{opacity:1;border-bottom-color:var(--brown);}
+.set-body{padding:18px;display:flex;flex-direction:column;gap:0;}
+.tab-panel{display:none;flex-direction:column;gap:16px;padding-top:4px;}
+.tab-panel.active{display:flex;}
+.set-section{display:flex;flex-direction:column;gap:7px;}
+.set-label{font-family:'DotGothic16',monospace;font-size:12px;color:var(--brown);}
+.set-label small{opacity:.55;font-size:10px;}
+.set-input{
+  width:100%;font-family:'DotGothic16',monospace;font-size:12px;
+  border:2px solid var(--brown);border-radius:8px;
+  padding:9px 11px;background:#fff;color:var(--brown);outline:none;resize:none;
+}
+.set-input:focus{border-color:var(--green);}
+.size-btns,.preset-btns{display:flex;gap:7px;}
+.sz-btn,.ps-btn{
+  flex:1;background:#fff;border:2px solid var(--brown);border-radius:7px;
+  font-family:'DotGothic16',monospace;font-size:11px;padding:8px 0;
+  cursor:pointer;color:var(--brown);text-align:center;
+  transition:all .1s;box-shadow:2px 2px 0 var(--brown);line-height:1.5;
+}
+.sz-btn:hover,.ps-btn:hover{background:var(--yellow);}
+.sz-btn.active,.ps-btn.active{background:var(--brown);color:var(--cream);box-shadow:none;}
+.sz-btn:active,.ps-btn:active{transform:translate(2px,2px);box-shadow:none;}
+.img-upload-box{
+  border:2px dashed var(--brown);border-radius:10px;padding:16px;text-align:center;
+  cursor:pointer;background:#fff;transition:background .1s;
+  font-family:'DotGothic16',monospace;font-size:12px;color:var(--brown);
+  display:flex;flex-direction:column;align-items:center;gap:7px;
+}
+.img-upload-box:hover{background:#fff9f0;}
+.img-preview{width:72px;height:72px;object-fit:contain;image-rendering:pixelated;border-radius:6px;}
+.img-upload-input{display:none;}
+.set-save{
+  background:var(--brown);color:var(--cream);border:none;border-radius:9px;
+  padding:12px;font-family:'DotGothic16',monospace;font-size:13px;
+  cursor:pointer;box-shadow:2px 2px 0 var(--brown2);transition:all .1s;width:100%;
+}
+.set-save:hover{background:#5d4437;}
+.set-save:active{transform:translate(2px,2px);box-shadow:none;}
+.set-save.ok{background:var(--green)!important;}
+.divider{border:none;border-top:1.5px dashed #d4c9b0;margin:2px 0;}
+
+/* diary */
+.diary-item{background:#fff;border:1.5px solid #e0d5c0;border-radius:9px;padding:11px 13px;display:flex;flex-direction:column;gap:4px;margin-bottom:8px;}
+.diary-date{font-family:'DotGothic16',monospace;font-size:10px;opacity:.55;}
+.diary-body{font-family:'DotGothic16',monospace;font-size:11px;color:var(--brown);line-height:1.7;}
+
+/* achievements */
+#achv-list{display:flex;flex-direction:column;gap:6px;}
+.achv-item{display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #e0d5c0;border-radius:9px;padding:9px 12px;}
+.achv-item.locked{opacity:.38;filter:grayscale(1);}
+.achv-emoji{font-size:20px;flex-shrink:0;}
+.achv-info{display:flex;flex-direction:column;gap:1px;}
+.achv-name{font-family:'DotGothic16',monospace;font-size:11px;color:var(--brown);}
+.achv-desc{font-family:'DotGothic16',monospace;font-size:9px;opacity:.55;}
+
+/* heart gauge bar */
+#heart-gauge{
+  position:absolute;bottom:4px;left:50%;transform:translateX(-50%);
+  display:none;align-items:center;gap:3px;
+  font-size:12px;z-index:9;pointer-events:none;
+  filter:drop-shadow(0 1px 1px rgba(0,0,0,.15));
+}
+#heart-gauge.show{display:flex;}
+.hg-heart{transition:transform .25s, filter .25s;}
+.hg-heart.filled{filter:none;}
+.hg-heart.empty{filter:grayscale(1);opacity:.35;}
+#growth-banner{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  background:var(--brown);color:var(--cream);
+  font-family:'DotGothic16',monospace;font-size:12px;
+  padding:10px 18px;border-radius:12px;
+  white-space:nowrap;z-index:16;pointer-events:none;
+  opacity:0;transition:opacity .3s;text-align:center;line-height:1.6;
+}
+#growth-banner.show{opacity:1;}
+
+/* confetti particle */
+.confetti{
+  position:absolute;width:7px;height:7px;border-radius:2px;
+  pointer-events:none;z-index:15;
+  animation:confettiFall linear forwards;
+}
+@keyframes confettiFall{
+  0%{opacity:1;transform:translateY(0) rotate(0deg);}
+  100%{opacity:0;transform:translateY(160px) rotate(720deg);}
+}
+
+/* log tab */
+#log-filter{display:flex;gap:7px;margin-bottom:10px;}
+.log-filter-btn{
+  background:#fff;border:1.5px solid var(--brown);border-radius:6px;
+  font-family:'DotGothic16',monospace;font-size:11px;padding:5px 11px;
+  cursor:pointer;color:var(--brown);transition:all .1s;
+}
+.log-filter-btn.active{background:var(--brown);color:var(--cream);}
+#log-list{display:flex;flex-direction:column;gap:8px;max-height:440px;overflow-y:auto;}
+.log-item{
+  background:#fff;border:1.5px solid #e0d5c0;border-radius:9px;
+  padding:10px 12px;display:flex;flex-direction:column;gap:3px;
+}
+.log-meta{display:flex;justify-content:space-between;align-items:center;}
+.log-who{font-family:'DotGothic16',monospace;font-size:11px;color:var(--brown);font-weight:bold;}
+.log-time{font-family:'DotGothic16',monospace;font-size:10px;opacity:.5;}
+.log-trigger{font-family:'DotGothic16',monospace;font-size:10px;opacity:.6;margin-bottom:1px;}
+.log-line{font-family:'DotGothic16',monospace;font-size:12px;color:var(--brown);}
+.log-fail{color:#aaa;}
+.log-empty{font-family:'DotGothic16',monospace;font-size:12px;opacity:.5;text-align:center;padding:24px;}
+</style>
+</head>
+<body>
+
+<!-- ══ LAUNCHER ══ -->
+<div id="launcher">
+
+  <!-- 히어로 -->
+  <div id="hero">
+    <div class="logo">🐾</div>
+    <h1>桌面寵物</h1>
+    <p class="tagline">培育專屬自己角色的網頁版電子雞。<br>開啟彈出式視窗，一邊工作一邊陪伴吧！</p>
+    <button id="launch-btn">🐾 開始吧</button>
+    <div id="hint">如果出現阻擋彈出視窗，請在網址列點選允許</div>
+  </div>
+
+  <!-- 기능 소개 -->
+  <div class="section">
+    <div class="section-title">✨ 主要功能</div>
+    <div class="features">
+      <div class="feature-card">
+        <div class="ficon">🌱</div>
+        <div class="fname">成長系統</div>
+        <div class="fdesc">悉心照顧的話，就會從嬰兒成長為大人喔</div>
+      </div>
+      <div class="feature-card">
+        <div class="ficon">🤖</div>
+        <div class="fname">AI 台詞生成</div>
+        <div class="fdesc">Gemini AI 會親自創作出符合角色性格的台詞</div>
+      </div>
+      <div class="feature-card">
+        <div class="ficon">💕</div>
+        <div class="fname">好感度系統</div>
+        <div class="fdesc">一起培育 2 隻角色，彼此之間就會產生關係</div>
+      </div>
+      <div class="feature-card">
+        <div class="ficon">📔</div>
+        <div class="fname">AI 日記</div>
+        <div class="fdesc">每天 AI 都會以角色的視角撰寫一日日記</div>
+      </div>
+      <div class="feature-card">
+        <div class="ficon">🏆</div>
+        <div class="fname">20 個成就</div>
+        <div class="fdesc">達成各種條件並收集成就吧</div>
+      </div>
+      <div class="feature-card">
+        <div class="ficon">🌸</div>
+        <div class="fname">季節 & 時間</div>
+        <div class="fdesc">背景會根據實際的時間和季節進行變化</div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="ldivider"/>
+
+  <!-- 사용 방법 -->
+  <div class="section">
+    <div class="section-title">📖 使用方法</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text">點擊<strong>開始</strong>按鈕來開啟彈出視窗。<br>如果出現封鎖快顯視窗，請在網址列中選擇允許。</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text">點擊舞台的<strong>🐾 上傳圖片</strong>來放入角色圖片。<br>推薦使用 PNG 透明背景圖片！</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text">在<strong>⚙ 設定</strong>中輸入名字、個性與 Gemini API 金鑰。<br>擁有 API 金鑰的話，AI 就會直接產生對話喔。</div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-text">透過餵食、遊玩、撫摸來<strong>照顧角色吧！</strong><br>如果放任不管的話數值會下降，記得要經常來看看牠們喔 🐾</div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="ldivider"/>
+
+  <!-- Gemini API 안내 -->
+  <div class="section">
+    <div class="section-title">🔑 Gemini API 金鑰獲取方法</div>
+    <div class="api-box">
+      <div class="api-step">
+        <span class="astep">1</span>
+        <span>前往 <a class="api-link" href="https://aistudio.google.com" target="_blank">aistudio.google.com</a></span>
+      </div>
+      <div class="api-step">
+        <span class="astep">2</span>
+        <span>使用 Google 帳戶登入</span>
+      </div>
+      <div class="api-step">
+        <span class="astep">3</span>
+        <span>點擊左側選單的 <strong>Get API Key</strong> → <strong>Create API Key</strong></span>
+      </div>
+      <div class="api-step">
+        <span class="astep">4</span>
+        <span>複製生成的金鑰，並貼到 <strong>設定 → 共通 → API 金鑰</strong>！</span>
+      </div>
+      <div class="api-note">
+        💡 Gemini API 可以免費使用。<br>
+        桌面寵物採用預先收集台詞的方式，因此 API 呼叫次數非常少。<br>
+        即使沒有 API 金鑰，也能使用基本台詞來遊玩喔！
+      </div>
+    </div>
+  </div>
+
+  <hr class="ldivider"/>
+
+  <!-- 초기화 -->
+  <div class="section">
+    <div class="section-title">🔄 資料初始化</div>
+    <div class="reset-box">
+      <p>如果想從頭開始培育，可以進行初始化。<br>⚠️ 能力值、成就、日記、台詞庫都將被刪除。圖片會保留。</p>
+      <button id="reset-btn">🗑️ 資料初始化</button>
+    </div>
+  </div>
+
+  <!-- 頁尾 -->
+  <div id="footer">
+    🐾 桌寵<br>
+    Made by <a href="https://twitter.com/Wildowlll" target="_blank">Yabu (@Wildowlll)</a><br>
+    <span style="font-size:10px">Powered by Gemini API</span>
+  </div>
+
+</div>
+
+<!-- ══ MAIN POPUP ══ -->
+<div id="main-app">
+  <div id="titlebar">
+    <span id="title-name">🐾 桌面寵物</span>
+    <button class="tb-btn" id="btn-screenshot" title="下載">📷</button>
+    <button class="tb-btn" id="btn-copy" title="複製到剪貼簿">📋</button>
+    <button class="tb-btn" id="open-settings-btn">⚙ 設定</button>
+    <button id="close-btn">✕</button>
+  </div>
+
+  <div id="stage">
+    <div id="sky"></div>
+    <div id="ground"></div>
+    <div id="celestial"></div>
+    <div class="bubble" id="bub0"></div>
+    <div class="bubble" id="bub1"></div>
+    <div id="growth-banner"></div>
+    <div id="heart-gauge">
+      <span class="hg-heart" id="hg0">❤️</span>
+      <span class="hg-heart" id="hg1">❤️</span>
+      <span class="hg-heart" id="hg2">❤️</span>
+      <span class="hg-heart" id="hg3">❤️</span>
+      <span class="hg-heart" id="hg4">❤️</span>
+    </div>
+
+    <div class="char-unit" id="char0">
+      <img class="char-img" id="img0" src="" style="display:none"/>
+      <div class="char-placeholder" id="ph0">
+        <span class="uico">🐾</span>上傳圖片
+        <input type="file" class="ph-input" id="file0" accept="image/*"/>
+      </div>
+    </div>
+
+    <div class="char-unit" id="char1" style="display:none">
+      <img class="char-img" id="img1" src="" style="display:none"/>
+      <div class="char-placeholder" id="ph1">
+        <span class="uico">🐾</span>上傳圖片
+        <input type="file" class="ph-input" id="file1" accept="image/*"/>
+      </div>
+    </div>
+
+    <div id="add-char-btn">
+      <span class="plus">＋</span>
+      <span>新增角色</span>
+    </div>
+  </div>
+
+  <div id="panel-tabs" style="display:none">
+    <button class="ptab active" id="tab0">← <span id="tabname0">角色1</span></button>
+    <button class="ptab"        id="tab1"><span id="tabname1">角色2</span> →</button>
+  </div>
+
+  <div id="slide-wrap">
+    <div id="slide-track">
+
+      <div class="char-panel">
+        <div class="stats">
+          <div class="stat-row"><span class="stat-label">🍎 飽食度</span><div class="stat-bar"><div class="stat-fill fill-hunger" id="b0-hunger" style="width:80%"></div></div><span class="stat-num" id="n0-hunger">80</span></div>
+          <div class="stat-row"><span class="stat-label">😊 心情</span><div class="stat-bar"><div class="stat-fill fill-happy"  id="b0-happy"  style="width:80%"></div></div><span class="stat-num" id="n0-happy">80</span></div>
+          <div class="stat-row"><span class="stat-label">💤 睏意</span><div class="stat-bar"><div class="stat-fill fill-sleep"  id="b0-sleep"  style="width:20%"></div></div><span class="stat-num" id="n0-sleep">20</span></div>
+          <div class="stat-row"><span class="stat-label">🛁 整潔</span><div class="stat-bar"><div class="stat-fill fill-clean"  id="b0-clean"  style="width:80%"></div></div><span class="stat-num" id="n0-clean">80</span></div>
+          <div class="stat-row"><span class="stat-label">❤️ 健康</span><div class="stat-bar"><div class="stat-fill fill-health" id="b0-health" style="width:100%"></div></div><span class="stat-num" id="n0-health">100</span></div>
+        </div>
+        <div class="actions">
+          <button class="act-btn" data-ci="0" data-act="feed">🍎<br>餵食</button>
+          <button class="act-btn" data-ci="0" data-act="play">🎾<br>陪玩</button>
+          <button class="act-btn" data-ci="0" data-act="sleep">💤<br>哄睡</button>
+          <button class="act-btn" data-ci="0" data-act="clean">🛁<br>洗澡</button>
+          <button class="act-btn" data-ci="0" data-act="medicine">💊<br>餵藥</button>
+          <button class="act-btn" data-ci="0" data-act="pet">✨<br>撫摸</button>
+        </div>
+      </div>
+
+      <div class="char-panel" id="panel1" style="display:none">
+        <div class="stats">
+          <div class="stat-row"><span class="stat-label">🍎 飽食度</span><div class="stat-bar"><div class="stat-fill fill-hunger" id="b1-hunger" style="width:80%"></div></div><span class="stat-num" id="n1-hunger">80</span></div>
+          <div class="stat-row"><span class="stat-label">😊 心情</span><div class="stat-bar"><div class="stat-fill fill-happy"  id="b1-happy"  style="width:80%"></div></div><span class="stat-num" id="n1-happy">80</span></div>
+          <div class="stat-row"><span class="stat-label">💤 睏意</span><div class="stat-bar"><div class="stat-fill fill-sleep"  id="b1-sleep"  style="width:20%"></div></div><span class="stat-num" id="n1-sleep">20</span></div>
+          <div class="stat-row"><span class="stat-label">🛁 整潔</span><div class="stat-bar"><div class="stat-fill fill-clean"  id="b1-clean"  style="width:80%"></div></div><span class="stat-num" id="n1-clean">80</span></div>
+          <div class="stat-row"><span class="stat-label">❤️ 健康</span><div class="stat-bar"><div class="stat-fill fill-health" id="b1-health" style="width:100%"></div></div><span class="stat-num" id="n1-health">100</span></div>
+        </div>
+        <div class="actions">
+          <button class="act-btn" data-ci="1" data-act="feed">🍎<br>餵食</button>
+          <button class="act-btn" data-ci="1" data-act="play">🎾<br>陪玩</button>
+          <button class="act-btn" data-ci="1" data-act="sleep">💤<br>哄睡</button>
+          <button class="act-btn" data-ci="1" data-act="clean">🛁<br>洗澡</button>
+          <button class="act-btn" data-ci="1" data-act="medicine">💊<br>餵藥</button>
+          <button class="act-btn" data-ci="1" data-act="pet">✨<br>撫摸</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="special-actions" style="display:none">
+    <button class="sact-btn locked" id="btn-gift">🎁<br>贈送禮物</button>
+    <button class="sact-btn locked" id="btn-kiss">💋<br>親親</button>
+    <button class="sact-btn locked" id="btn-date">🌸<br>約會</button>
+  </div>
+
+  <div id="info-bar">
+    <span id="info-age">年齡: 0天</span>
+    <span id="info-mood">😊</span>
+    <span id="info-affinity"></span>
+  </div>
+</div>
+
+<!-- ══ SETTINGS PAGE ══ -->
+<div id="settings-page">
+  <div id="set-titlebar">
+    <span>⚙ 設定 — 桌寵</span>
+    <button id="set-close">✕</button>
+  </div>
+  <div id="set-tabs">
+    <button class="set-tab active" data-tab="common">一般</button>
+    <button class="set-tab" data-tab="c0">角色1</button>
+    <button class="set-tab" data-tab="c1">角色2</button>
+    <button class="set-tab" data-tab="log">📜 日誌</button>
+    <button class="set-tab" data-tab="diary">📔 日記</button>
+    <button class="set-tab" data-tab="achv">🏆 成就</button>
+  </div>
+  <div class="set-body">
+
+    <!-- 공통 -->
+    <div class="tab-panel active" id="panel-common">
+      <div class="set-section">
+        <span class="set-label">📏 畫面大小</span>
+        <div class="size-btns">
+          <button class="sz-btn" data-sc="1">小</button>
+          <button class="sz-btn" data-sc="1.25">中</button>
+          <button class="sz-btn active" data-sc="1.5">大</button>
+        </div>
+      </div>
+      <hr class="divider"/>
+      <div class="set-section">
+        <span class="set-label">⏱ 需求減少速度</span>
+        <div class="preset-btns">
+          <button class="ps-btn" data-ps="vslow">🐢<br>非常悠閒</button>
+          <button class="ps-btn" data-ps="slow">🌱<br>悠閒</button>
+          <button class="ps-btn active" data-ps="normal">🌿<br>普通</button>
+          <button class="ps-btn" data-ps="fast">🔥<br>緊湊</button>
+        </div>
+      </div>
+      <hr class="divider"/>
+      <div class="set-section">
+        <span class="set-label">📅 日期速度 <small>(以實際時間為準的一天)</small></span>
+        <div class="preset-btns" id="dayspeed-btns">
+          <button class="ps-btn" data-ds="slow">🐌<br>24小時</button>
+          <button class="ps-btn" data-ds="normal">🌿<br>4小時</button>
+          <button class="ps-btn" data-ds="fast">⚡<br>1小時</button>
+        </div>
+      </div>
+      <hr class="divider"/>
+      <div class="set-section">
+        <span class="set-label">🔑 Gemini API 金鑰 <small>(免費 · aistudio.google.com)</small></span>
+        <input class="set-input" id="set-apikey" type="password" placeholder="AIza..."/>
+      </div>
+      <div class="set-section" id="relation-wrap" style="display:none">
+        <span class="set-label">💞 兩個角色之間的關係 <small>(若無則依據好感度自動設定)</small></span>
+        <textarea class="set-input" id="set-relation" rows="2" placeholder="例）青梅竹馬。雖然常常吵架，但其實很喜歡對方。"></textarea>
+      </div>
+      <hr class="divider"/>
+      <div class="set-section">
+        <span class="set-label">🔔 通知設定</span>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+          <label style="font-family:'DotGothic16',monospace;font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer;">
+            <input type="checkbox" id="set-notify-on" style="width:15px;height:15px;cursor:pointer;accent-color:var(--brown);"/>
+            開啟通知 (需要要求權限)
+          </label>
+        </div>
+        <div id="notify-detail" style="display:flex;flex-direction:column;gap:8px;">
+          <div>
+            <span class="set-label" style="font-size:10px;">通知基準數值: <span id="threshold-val">20</span></span>
+            <input type="range" id="set-notify-threshold" min="10" max="40" step="1" value="20"
+              style="width:100%;margin-top:4px;accent-color:var(--brown);"/>
+          </div>
+          <div>
+            <span class="set-label" style="font-size:10px;">通知最小間隔: <span id="interval-val">10</span>分鐘</span>
+            <input type="range" id="set-notify-interval" min="1" max="60" step="1" value="10"
+              style="width:100%;margin-top:4px;accent-color:var(--brown);"/>
+          </div>
+          <div>
+            <span class="set-label" style="font-size:10px;margin-bottom:4px;display:block;">接收通知的狀態屬性</span>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <label style="font-family:'DotGothic16',monospace;font-size:11px;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="nstat-hunger" style="accent-color:var(--brown);"/> 🍎 飽食度</label>
+              <label style="font-family:'DotGothic16',monospace;font-size:11px;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="nstat-happy"  style="accent-color:var(--brown);"/> 😊 心情</label>
+              <label style="font-family:'DotGothic16',monospace;font-size:11px;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="nstat-clean"  style="accent-color:var(--brown);"/> 🛁 清潔</label>
+              <label style="font-family:'DotGothic16',monospace;font-size:11px;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="nstat-health" style="accent-color:var(--brown);"/> ❤️ 健康</label>
+            </div>
+          </div>
+          <div id="notify-perm-warn" style="display:none;font-family:'DotGothic16',monospace;font-size:10px;color:var(--red);">
+            ⚠️ 權限遭拒絕。請在瀏覽器設定中允許通知。
+          </div>
+        </div>
+      </div>
+      <button class="set-save" id="btn-save-common">💾 儲存</button>
+    </div>
+
+    <!-- 캐릭터1 -->
+    <div class="tab-panel" id="panel-c0">
+      <div class="set-section">
+        <span class="set-label">🏷️ 名字</span>
+        <input class="set-input" id="set-name0" type="text" maxlength="8" placeholder="角色1 名字..."/>
+      </div>
+      <div class="set-section">
+        <span class="set-label">✨ 個性 <small>(會反映在 AI 對話中)</small></span>
+        <textarea class="set-input" id="set-persona0" rows="3" placeholder="例：活潑且喜歡吃東西。很愛睡覺。"></textarea>
+      </div>
+      <div class="set-section">
+        <span class="set-label">🖼️ 圖片</span>
+        <div class="img-upload-box" id="imgbox0">
+          <img class="img-preview" id="setprev0" style="display:none"/>
+          <span id="imglbl0">🐾 點擊上傳</span>
+          <input type="file" class="img-upload-input" id="setfile0" accept="image/*"/>
+        </div>
+      </div>
+      <button class="set-save" id="btn-save0">💾 儲存</button>
+    </div>
+
+    <!-- 캐릭터2 -->
+    <div class="tab-panel" id="panel-c1">
+      <div class="set-section">
+        <span class="set-label">🏷️ 名字</span>
+        <input class="set-input" id="set-name1" type="text" maxlength="8" placeholder="角色2 名字..."/>
+      </div>
+      <div class="set-section">
+        <span class="set-label">✨ 個性 <small>(會反映在 AI 對話中)</small></span>
+        <textarea class="set-input" id="set-persona1" rows="3" placeholder="例）安靜沉穩。喜歡閱讀。"></textarea>
+      </div>
+      <div class="set-section">
+        <span class="set-label">🖼️ 圖片</span>
+        <div class="img-upload-box" id="imgbox1">
+          <img class="img-preview" id="setprev1" style="display:none"/>
+          <span id="imglbl1">🐾 點擊上傳</span>
+          <input type="file" class="img-upload-input" id="setfile1" accept="image/*"/>
+        </div>
+      </div>
+      <button class="set-save" id="btn-save1">💾 儲存</button>
+    </div>
+
+    <!-- 로그 -->
+    <div class="tab-panel" id="panel-log">
+      <div id="log-filter">
+        <button class="log-filter-btn active" data-lf="all">全部</button>
+        <button class="log-filter-btn" data-lf="0">角色1</button>
+        <button class="log-filter-btn" data-lf="1">角色2</button>
+        <button class="log-filter-btn" data-lf="fail">失敗</button>
+      </div>
+      <div id="log-list"><div class="log-empty">目前還沒有對話</div></div>
+    </div>
+
+    <!-- 日記 -->
+    <div class="tab-panel" id="panel-diary">
+      <div id="diary-list"><div class="log-empty">目前還沒有日記 📔</div></div>
+    </div>
+
+    <!-- 업적 -->
+    <div class="tab-panel" id="panel-achv">
+      <div id="achv-list"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════
+//  CONSTANTS & STORAGE
+// ══════════════════════════════════════════════════
+const SAVE_KEY  = 'deskpet_v1';
+const IMG_KEYS  = ['deskpet_img0','deskpet_img1'];
+const LOG_KEY   = 'deskpet_log';
+const TS_KEY    = 'deskpet_ts';
+const POOL_KEY  = 'deskpet_pool';
+const POOL_MAX  = 50; // max lines per trigger per character
+
+function loadPool(){ try{ return JSON.parse(localStorage.getItem(POOL_KEY)||'{}'); }catch(e){ return {}; } }
+function savePool(p){ try{ localStorage.setItem(POOL_KEY,JSON.stringify(p)); }catch(e){} }
+
+function poolPush(ci, trigger, line){
+  const p = loadPool();
+  if(!p[ci]) p[ci]={};
+  if(!p[ci][trigger]) p[ci][trigger]=[];
+  // avoid exact duplicates
+  if(!p[ci][trigger].includes(line)){
+    p[ci][trigger].push(line);
+    if(p[ci][trigger].length > POOL_MAX) p[ci][trigger].shift();
+  }
+  savePool(p);
+}
+
+function poolPick(ci, trigger){
+  const p = loadPool();
+  const arr = p[ci]?.[trigger];
+  if(!arr||arr.length===0) return null;
+  return arr[Math.floor(Math.random()*arr.length)];
+}
+
+function poolClear(ci){
+  const p = loadPool();
+  delete p[ci];
+  savePool(p);
+}
+
+// popup sizes per scale [w, h]
+const POPUP_SIZES = { 1:[308,576], 1.25:[385,720], 1.5:[462,864] };
+
+// decay presets
+const PRESETS = {
+  vslow:  { interval:80000, hunger:0.5, happy:0.4, clean:0.3 },
+  slow:   { interval:20000, hunger:1,   happy:0.8, clean:0.5 },
+  normal: { interval:13000, hunger:2,   happy:1.5, clean:1   },
+  fast:   { interval:9000,  hunger:3,   happy:2,   clean:1.5 },
+};
+
+// day speed: real ms per in-game day
+const DAY_SPEEDS = {
+  slow:   86400000, // 24h
+  normal:  14400000, // 4h
+  fast:    3600000, // 1h
+};
+
+// growth stages: { id, label, emoji, minAge(days), minCare, scale }
+const GROWTH_STAGES = [
+  { id:'baby',  label:'嬰兒',   emoji:'🥚', minAge:0,  minCare:0,   scale:0.60 },
+  { id:'child', label:'兒童',   emoji:'🌱', minAge:7,  minCare:50,  scale:0.75 },
+  { id:'teen',  label:'青少年', emoji:'🌿', minAge:20, minCare:150, scale:0.90 },
+  { id:'adult', label:'成人',   emoji:'🌳', minAge:40, minCare:300, scale:1.00 },
+];
+
+function getStage(age, care) {
+  let stage = GROWTH_STAGES[0];
+  for (const s of GROWTH_STAGES) {
+    if (age >= s.minAge && care >= s.minCare) stage = s;
+  }
+  return stage;
+}
+
+// affinity labels
+const AFFINITY_LABELS = [
+  [0,   '😒 尷尬生疏',   '彼此尷尬且無話可說'],
+  [200, '🙂 點頭之交',  '偶爾會搭話，但還是有些生疏'],
+  [400, '😊 朋友',       '相處起來很輕鬆的關係'],
+  [600, '😄 好朋友',     '會互相關心且經常聊天'],
+  [800, '💕 摯友',       '做什麼事都想在一起的死黨'],
+];
+function getAffinityLabel(v) {
+  let r = AFFINITY_LABELS[0];
+  for (const row of AFFINITY_LABELS) { if (v >= row[0]) r = row; }
+  return r;
+}
+
+// achievements definition
+const ACHIEVEMENTS = [
+  { id:'first_name',    emoji:'🌱', name:'初次邂逅',      desc:'第一次設定了角色名字' },
+  { id:'first_image',   emoji:'🖼️', name:'這是我的模樣',  desc:'上傳了角色圖片' },
+  { id:'first_feed',    emoji:'🍎', name:'第一餐',         desc:'第一次餵了飯' },
+  { id:'feed_50',       emoji:'🍽️', name:'家常飯之王',     desc:'餵飯達 50 次' },
+  { id:'first_play',    emoji:'🎾', name:'來玩吧！',         desc:'第一次一起玩耍' },
+  { id:'play_30',       emoji:'🎮', name:'玩耍之王',        desc:'達成陪玩 30 次' },
+  { id:'first_clean',   emoji:'🛁', name:'第一次洗澡',       desc:'第一次幫牠洗了澡' },
+  { id:'clean_100',     emoji:'✨', name:'清潔之王',        desc:'潔淨度達成了 100' },
+  { id:'medicine_10',   emoji:'💊', name:'健康第一',      desc:'餵了 10 次藥' },
+  { id:'health_7days',  emoji:'❤️', name:'無敵',          desc:'健康度 100 維持了 7 天' },
+  { id:'day_7',         emoji:'🎂', name:'7天',           desc:'在一起滿 7 天了' },
+  { id:'day_30',        emoji:'🎂', name:'30天',          desc:'在一起滿 30 天了' },
+  { id:'day_100',       emoji:'🎂', name:'100天',         desc:'在一起滿 100 天了' },
+  { id:'grow_child',    emoji:'🌱', name:'第一次成長',       desc:'成長為兒童了' },
+  { id:'grow_teen',     emoji:'🌿', name:'快快長大',          desc:'成長為青少年了' },
+  { id:'grow_adult',    emoji:'🌳', name:'長大成人了',      desc:'變成大人了' },
+  { id:'two_chars',     emoji:'👫', name:'第一個朋友',       desc:'角色增加到了 2 隻' },
+  { id:'affinity_80',   emoji:'💕', name:'摯友',          desc:'好感度達成了 800' },
+  { id:'affinity_100',  emoji:'💯', name:'死黨',          desc:'好感度達成了 1000' },
+  { id:'night_owl',     emoji:'🌙', name:'夜貓子',        desc:'在午夜～凌晨 4 點之間登入' },
+];
+
+const DIARY_KEY = 'deskpet_diary';
+function loadDiary(){ try{ return JSON.parse(localStorage.getItem(DIARY_KEY)||'[]'); }catch(e){ return []; } }
+function saveDiary(d){ try{ localStorage.setItem(DIARY_KEY, JSON.stringify(d.slice(-30))); }catch(e){} }
+
+function loadD()  { try { return JSON.parse(localStorage.getItem(SAVE_KEY)||'{}'); } catch(e){ return {}; } }
+function saveD(d) { try { localStorage.setItem(SAVE_KEY, JSON.stringify(d)); } catch(e){} }
+function loadLog(){ try { return JSON.parse(localStorage.getItem(LOG_KEY)||'[]'); } catch(e){ return []; } }
+function saveLog(l){ try { localStorage.setItem(LOG_KEY, JSON.stringify(l.slice(-50))); } catch(e){} }
+
+function defChar(i){ return {
+  name:i===0?'角色1':'角色2', persona:'',
+  hunger:80, happy:80, sleep:20, clean:80, health:100,
+  asleep:false, playedMs:0, age:0,
+  care:0,          // care score for growth
+  stageId:'baby',  // current growth stage
+  actionCounts: { feed:0, play:0, clean:0, medicine:0, pet:0 },
+  healthStreak:0,  // days health=100
+}; }
+
+function defCommon(){ return {
+  apiKey:'', relation:'', scale:1.5, preset:'normal', hasChar1:false, affinity:0,
+  notifyOn:false, notifyThreshold:20,
+  notifyStats:{ hunger:true, happy:false, clean:false, health:true },
+  notifyIntervalMin:10,
+  daySpeed:'normal',        // key into DAY_SPEEDS
+  achievements:[],          // array of unlocked achievement ids
+  lastDiaryDay:[-1,-1],     // [char0 lastDay, char1 lastDay]
+}; }
+
+// ══════════════════════════════════════════════════
+//  MODE DETECT
+// ══════════════════════════════════════════════════
+const MODE = window.name;
+if (MODE === 'deskpet_main') {
+  document.getElementById('main-app').style.display = 'block';
+  /* document.body.style.cssText = 'background:transparent;overflow:hidden;'; 新視窗改分頁後設定致中 下同*/
+  document.body.style.cssText = 'background:#fdf6e3; overflow:hidden; display:flex; justify-content:center; align-items:flex-start; height:100vh; margin:0;';  
+  runMain();
+} else if (MODE === 'deskpet_settings') {
+  document.getElementById('settings-page').style.display = 'flex';
+  /* document.body.style.cssText = 'background:#fdf6e3;overflow-y:auto;min-height:100vh;width:480px;'; */
+  document.body.style.cssText = 'background:#fdf6e3; overflow-y:auto; min-height:100vh; display:flex; justify-content:center; align-items:center; margin:0;';  
+  runSettings();
+} else {
+  document.getElementById('launcher').style.display = 'flex';
+  document.body.style.cssText = 'background:#fdf6e3;overflow:auto;min-height:100vh;width:100vw;border:none;border-radius:0;box-shadow:none;';
+  document.getElementById('launch-btn').onclick = () => {
+    const D = loadD();
+    const sc = D.common?.scale || 1.5;
+    const [w,h] = POPUP_SIZES[sc] || POPUP_SIZES[1];
+    const p = window.open(location.href,'deskpet_main',
+      `width=${w},height=${h},left=${screen.width-w-20},top=${screen.height-h-60},resizable=no,scrollbars=no,toolbar=no,menubar=no,location=no,status=no`);
+    if (!p) { const el=document.getElementById('hint'); el.textContent='⚠️ 彈出視窗被封鎖！請在網址列允許彈出。'; el.style.color='#ef5350'; }
+  };
+
+  document.getElementById('reset-btn').onclick = () => {
+    if (!confirm('⚠️ 確定要重設嗎？\n能力值、成就、日記、台詞解鎖進度都將會被刪除。\n圖片將會保留。')) return;
+    const img0 = localStorage.getItem(IMG_KEYS[0]);
+    const img1 = localStorage.getItem(IMG_KEYS[1]);
+    localStorage.clear();
+    if (img0) localStorage.setItem(IMG_KEYS[0], img0);
+    if (img1) localStorage.setItem(IMG_KEYS[1], img1);
+    alert('✅ 已完成重設！現在請點擊開始 🐾');
+  };
+}
+
+// ══════════════════════════════════════════════════
+//  GEMINI
+// ══════════════════════════════════════════════════
+// ══════════════════════════════════════════════════
+//  GEMINI — batch only
+// ══════════════════════════════════════════════════
+const TRIGGER_LABELS = {
+  greeting:'初次打招呼', feed:'吃飯', play:'一起玩耍', pet:'撫摸',
+  clean:'洗澡', medicine:'吃藥', wakeup:'從睡夢中醒來', idle:'自言自語',
+  hungry:'喊餓', sleepy:'睏倦', sick:'不舒服', click:'點擊反應', interact:'跟朋友搭話',
+  gift:'互相送禮', kiss:'親親', date:'約會中',
+};
+
+async function geminiAllTriggers({ apiKey, me, other, relation }) {
+  const mood = me.asleep?'睡覺中':me.hunger<25?'非常餓':me.happy<25?'悲傷且孤單':me.health<30?'身體不舒服':me.sleep>80?'非常睏':me.happy>80?'非常幸福':me.clean<25?'髒亂且不舒服':'平靜';
+
+  // interact 트리거에만 상대방 정보 포함 — 나머지엔 제외해서 이름이 섞이지 않게
+  const interactCtx = other
+    ? `\n\n僅限 "interact" 觸發條件：在與身邊的朋友 "${other.name}" 搭話的情況。${relation?` 兩人的關係：${relation}`:''}`
+    : '';
+
+  const triggerList = Object.entries(TRIGGER_LABELS)
+    .map(([k,v]) => `"${k}": ${v}`)
+    .join('\n');
+
+  const prompt =
+`你是名字叫作 "${me.name}" 的可愛虛擬角色。
+個性：${me.persona||'可愛且活潑'}
+目前狀態：${mood} (年齡 ${me.age}天)${interactCtx}
+
+請針對以下各個狀況，分別創作出 3 個不同感覺的簡短繁體中文(台灣)台詞。
+條件：每句台詞須包含 1~2 個表情符號、在 20 字以內，並符合角色個性。
+注意：除了 interact 以外，其餘觸發條件的台詞絕對不能放入其他角色的名字。請營造出獨言獨語的感覺。
+
+請務必僅以格式如下的 JSON 格式輸出。每個觸發條件為 3 個字串的陣列。不要包含其他文字，只要 JSON:
+{"greeting":["...","...","..."], "feed":["...","...","..."], "play":["...","...","..."], "pet":["...","...","..."], "clean":["...","...","..."], "medicine":["...","...","..."], "wakeup":["...","...","..."], "idle":["...","...","..."], "hungry":["...","...","..."], "sleepy":["...","...","..."], "sick":["...","...","..."], "click":["...","...","..."], "interact":["...","...","..."], "gift":["...","...","..."], "kiss":["...","...","..."], "date":["...","...","..."]}`;
+
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+    { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({contents:[{parts:[{text:prompt}]}]}) });
+
+  if (!res.ok) {
+    const errText = await res.text().catch(()=>'');
+    throw new Error(`HTTP ${res.status}: ${errText.slice(0,120)}`);
+  }
+
+  const data = await res.json();
+  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+  if (!text) throw new Error('回應解析失敗');
+
+  const clean = text.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/```\s*$/,'').trim();
+
+  try {
+    const obj = JSON.parse(clean);
+    if (typeof obj !== 'object' || Array.isArray(obj)) throw new Error('JSON 格式錯誤');
+    return obj;
+  } catch(e) {
+    throw new Error(`JSON 解析失敗: ${clean.slice(0,100)}`);
+  }
+}
+
+// 일기 전용 API 호출
+async function geminiDiary({ apiKey, me, other, day, summary, mood }) {
+  const otherTxt = other?`同行的朋友: "${other.name}". `:'';
+  const prompt =
+`你是名字叫作 "${me.name}" 的可愛虛擬角色。
+個性：${me.persona||'可愛且活潑'}
+${otherTxt}
+今天（第 ${day} 天）發生的事：${summary}。整體而言是個感覺 ${mood} 的一天。
+
+請以角色的視角將今天的一天寫成一篇簡短的日記。
+3~4句話、繁體中文(台灣)、包含表情符號、可愛且自然。不需日期或標題，只需正文。`;
+
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+    { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({contents:[{parts:[{text:prompt}]}]}) });
+
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json();
+  return data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
+}
+
+// ══════════════════════════════════════════════════
+//  MAIN APP
+// ══════════════════════════════════════════════════
+function runMain() {
+  let D = loadD();
+  if (!D.chars)  D.chars  = [defChar(0)];
+  if (!D.common) D.common = defCommon();
+  D.chars.forEach((c,i)=>{ const d=defChar(i); Object.keys(d).forEach(k=>{ if(c[k]===undefined) c[k]=d[k]; }); });
+  // migrate old saves: convert born → playedMs
+  D.chars.forEach(c=>{
+    if (c.born && !c.playedMs) {
+      c.playedMs = Date.now() - c.born; // treat elapsed as played
+      delete c.born;
+    }
+    if (c.playedMs === undefined) c.playedMs = 0;
+  });
+  if (D.common.affinity===undefined) D.common.affinity=50;
+
+  let charCount = 1;
+  let activePanel = 0;
+  let decayTimer = null;
+
+  // ── scale / resize ──
+  function applyScale(sc_val) {
+    D.common.scale = sc_val;
+    const [w,h] = POPUP_SIZES[sc_val]||POPUP_SIZES[1];
+    document.documentElement.style.setProperty('--sc', sc_val);
+    document.getElementById('main-app').style.zoom = '';
+    try { window.resizeTo(w, h); } catch(e){}
+    const track = document.getElementById('slide-track');
+    if (charCount >= 2) track.style.width=`${600*sc_val}px`;
+    track.style.transform=`translateX(${-300*sc_val*activePanel}px)`;
+    saveD(D);
+  }
+  applyScale(D.common.scale||1.5);
+
+  // ── decay timer ──
+  function resetDecayTimer() {
+    clearInterval(decayTimer);
+    const preset = PRESETS[D.common.preset||'normal'];
+    decayTimer = setInterval(statTick, preset.interval);
+  }
+  resetDecayTimer();
+
+  // ── day speed (age calculation) ──
+  // migrate old scale values
+  if (!D.common.scale || D.common.scale < 1) D.common.scale = 1.5;
+
+  // scale helper for JS pixel calculations
+  const sc = () => D.common.scale || 1.5;
+  const sessionStart = Date.now();
+
+  function calcAge(ci) {
+    const C = D.chars[ci];
+    if (!C) return 0;
+    if (C.playedMs === undefined) C.playedMs = 0;
+    const totalMs = C.playedMs + (Date.now() - sessionStart);
+    const dayMs = DAY_SPEEDS[D.common.daySpeed||'normal'];
+    // ageOffset: 날짜 속도 변경 전까지 쌓인 나이 보존
+    return (C.ageOffset||0) + Math.floor(totalMs / dayMs);
+  }
+
+  // save accumulated playtime on page unload
+  window.addEventListener('beforeunload', ()=>{
+    const elapsed = Date.now() - sessionStart;
+    D.chars.forEach(C=>{ if(C) C.playedMs = (C.playedMs||0) + elapsed; });
+    saveD(D);
+  });
+
+  // ── achievement unlock ──
+  // use a session Set so banners never re-fire after reload
+  const sessionUnlocked = new Set(D.common.achievements||[]);
+
+  function unlock(id) {
+    if (sessionUnlocked.has(id)) return; // already done this session or ever
+    sessionUnlocked.add(id);
+    if (!D.common.achievements) D.common.achievements = [];
+    if (!D.common.achievements.includes(id)) {
+      D.common.achievements.push(id);
+      const achv = ACHIEVEMENTS.find(a=>a.id===id);
+      if (achv) {
+        showAchievementBanner(achv);
+        if (D.common.notifyOn && Notification.permission==='granted') {
+          new Notification('🏆 達成成就！', { body:`${achv.emoji} ${achv.name} — ${achv.desc}` });
+        }
+      }
+      saveD(D);
+    }
+  }
+
+  function showAchievementBanner(achv) {
+    const b = document.getElementById('growth-banner');
+    b.innerHTML = `🏆 達成成就！<br>${achv.emoji} ${achv.name}`;
+    b.classList.add('show');
+    spawnConfetti();
+    setTimeout(()=>b.classList.remove('show'), 3000);
+  }
+
+  // ── growth check ──
+  function checkGrowth(ci) {
+    const C = D.chars[ci];
+    if (!C) return;
+    // ensure stageId is initialized
+    if (!C.stageId) C.stageId = 'baby';
+    const newStage = getStage(C.age||0, C.care||0);
+    if (newStage.id === C.stageId) return; // no change
+    C.stageId = newStage.id;
+    applyCharScale(ci, newStage.scale);
+    const b = document.getElementById('growth-banner');
+    b.innerHTML = `${newStage.emoji} ${C.name}已成長為 ${newStage.label}！`;
+    b.classList.add('show');
+    spawnConfetti();
+    setTimeout(()=>b.classList.remove('show'), 3500);
+    aiSpeak(ci, 'idle');
+    const achvMap = { child:'grow_child', teen:'grow_teen', adult:'grow_adult' };
+    if (achvMap[newStage.id]) unlock(achvMap[newStage.id]);
+    saveD(D); // fix: was calling undefined save()
+  }
+
+  function applyCharScale(ci, scale) {
+    const base = 78 * sc();
+    const sz = Math.round(base * scale);
+    const wrap = document.getElementById('char'+ci);
+    wrap.style.transition = 'width .8s, height .8s';
+    wrap.style.width  = sz+'px';
+    wrap.style.height = sz+'px';
+  }
+
+  // restore char sizes on load — use saved stageId, not recalculated
+  D.chars.forEach((c,i)=>{
+    if (!c.stageId) c.stageId = 'baby'; // ensure initialized
+    const st = GROWTH_STAGES.find(s=>s.id===c.stageId) || GROWTH_STAGES[0];
+    applyCharScale(i, st.scale);
+  });
+
+  // ── confetti ──
+  function spawnConfetti() {
+    const s=sc(), stageEl = document.getElementById('stage');
+    const colors = ['#ffd54f','#ff8a65','#7bc67e','#9fa8da','#ff8fb1','#4dd0e1'];
+    for (let i=0;i<28;i++) {
+      setTimeout(()=>{
+        const c = document.createElement('div');
+        c.className = 'confetti';
+        c.style.cssText = `left:${Math.random()*280*s}px;top:${Math.random()*40*s}px;background:${colors[Math.floor(Math.random()*colors.length)]};animation-duration:${0.8+Math.random()*1}s;`;
+        stageEl.appendChild(c);
+        setTimeout(()=>c.remove(), 2000);
+      }, i*40);
+    }
+  }
+
+  // ── diary generation — independent API call ──
+  const diaryRetryAt  = [-1, -1];
+  const diaryWriting  = [false, false]; // prevent duplicate writes
+
+  async function tryGenerateDiary(ci) {
+    const C = D.chars[ci];
+    const today = C.age||0;
+    if (today <= 0) return; // 0일차엔 일기 안 씀
+    if (!D.common.lastDiaryDay) D.common.lastDiaryDay = [-1,-1];
+    if (D.common.lastDiaryDay[ci] === today) return; // already wrote today
+    if (diaryWriting[ci]) return; // already in progress
+    if (diaryRetryAt[ci] > 0 && Date.now() < diaryRetryAt[ci]) return; // 503 cooldown
+
+    diaryWriting[ci] = true;
+
+    const ac = C.actionCounts||{};
+    const summary = `餵食 ${ac.feed||0} 次，玩耍 ${ac.play||0} 次，洗澡 ${ac.clean||0} 次，撫摸 ${ac.pet||0} 次`;
+    const moodStr = C.happy>70?'幸福的':C.hunger<30?'肚子餓的':C.health<50?'身體不太舒服的':'平靜的';
+
+    let diaryText = '';
+    if (D.common.apiKey) {
+      try {
+        const other = charCount===2 ? D.chars[1-ci] : null;
+        diaryText = await geminiDiary({
+          apiKey: D.common.apiKey,
+          me: C, other,
+          day: today, summary, mood: moodStr,
+        }) || '';
+        pushLog({ ci, trigger:'[日記]', time:Date.now(), line:diaryText||'(生成失敗)', fail:diaryText?null:'無回應' });
+        diaryRetryAt[ci] = -1; // 成功時重試次數歸零
+      } catch(e) {
+        const msg = e.message||'';
+        pushLog({ ci, trigger:'[日記]', time:Date.now(), line:null, fail:msg });
+        if (msg.includes('503') || msg.includes('429')) {
+          diaryRetryAt[ci] = Date.now() + 3 * 60 * 1000;
+          diaryWriting[ci] = false;
+          return;
+        }
+      }
+    }
+
+    // fallback (API 키 없거나 503/429 외 오류일 때만)
+    if (!diaryText) {
+      diaryText = `今天真是個 ${moodStr} 一天。${ac.feed>0?`吃了 ${ac.feed} 次飯 🍎 `:''}${ac.play>0?`還一起玩了 ${ac.play} 次呢 🎾 `:''}希望明天也是個美好的一天 😊`;
+    }
+
+    D.common.lastDiaryDay[ci] = today;
+    const diary = loadDiary();
+    diary.push({ ci, day:today, date:new Date().toLocaleDateString('zh-TW'), text:diaryText });
+    saveDiary(diary);
+    C.actionCounts = {feed:0,play:0,clean:0,medicine:0,pet:0};
+    saveD(D);
+    diaryWriting[ci] = false;
+  }
+
+  // check diary every minute
+  setInterval(()=>{
+    for(let ci=0;ci<charCount;ci++) tryGenerateDiary(ci);
+  }, 60000);
+
+  // ── char1 enable ──
+  function enableChar1(silent=false) {
+    if (charCount>=2) return;
+    charCount=2; D.common.hasChar1=true;
+    if (!D.chars[1]) {
+      D.chars.push(defChar(1));
+      D.chars[1].stageId = 'baby'; // 새 캐릭터만 아기로 시작
+    }
+    // 저장된 stageId 기준으로 크기 복원 (기존 캐릭터는 유지)
+    const existingStage = GROWTH_STAGES.find(s=>s.id===D.chars[1].stageId) || GROWTH_STAGES[0];
+    applyCharScale(1, existingStage.scale);
+    const c1    = document.getElementById('char1');
+    const addBtn= document.getElementById('add-char-btn');
+    const tabs  = document.getElementById('panel-tabs');
+    const p1    = document.getElementById('panel1');
+    const track = document.getElementById('slide-track');
+    c1.style.display='block';
+    document.getElementById('char0').style.left=`${38*sc()}px`;
+    document.getElementById('char1').style.left=`${184*sc()}px`;
+    addBtn.style.display='none';
+    tabs.style.display='flex';
+    p1.style.display='';
+    track.style.width=`${600*sc()}px`;
+    refreshUI();
+    unlock('two_chars');
+    document.getElementById('special-actions').style.display = 'grid';
+    applyAffinityPositions(false);
+    updateHeartGauge();
+    if(!silent){
+      saveD(D); notifySettings();
+      // new char added — force fill pool immediately
+      setTimeout(()=>refillPool(1, true), 1000);
+    }
+  }
+
+  // ── restore char1 if saved ──
+  if (D.common.hasChar1) {
+    // defer one tick so DOM is fully painted first
+    setTimeout(()=>enableChar1(true), 0);
+  }
+  document.getElementById('add-char-btn').addEventListener('click',()=>enableChar1(false));
+  let lastTs = 0;
+  let lastImgTs = 0;
+  setInterval(()=>{
+    // check image upload from settings popup
+    const imgRaw = localStorage.getItem('deskpet_img_uploaded');
+    if (imgRaw) {
+      const imgTs = parseInt(imgRaw);
+      if (imgTs > lastImgTs) {
+        lastImgTs = imgTs;
+        unlock('first_image');
+        refreshImages();
+      }
+    }
+    const raw = localStorage.getItem(TS_KEY);
+    if (!raw) return;
+    const ts = parseInt(raw);
+    if (ts <= lastTs) return;
+    lastTs = ts;
+    const nd = loadD();
+    if (!nd.common) return;
+    const oldSc = D.common.scale, oldPreset = D.common.preset, oldDaySpeed = D.common.daySpeed;
+    Object.assign(D.common, nd.common);
+    nd.chars?.forEach((nc,i)=>{
+      if(D.chars[i]) Object.assign(D.chars[i],{name:nc.name,persona:nc.persona});
+      else D.chars[i]=nc;
+    });
+    // chars 전체 데이터 동기화 (ageOffset, playedMs 포함)
+    if (nd.common.daySpeed !== oldDaySpeed) {
+      nd.chars?.forEach((nc,i)=>{ if(D.chars[i] && nc) { D.chars[i].ageOffset=nc.ageOffset||0; D.chars[i].playedMs=nc.playedMs||0; }});
+    }
+    if (nd.common.scale !== oldSc) {
+      applyScale(nd.common.scale);
+      // 캐릭터 크기/위치는 sc() 갱신 후 다음 프레임에 재적용
+      setTimeout(()=>{
+        D.chars.forEach((c,i)=>{
+          if (!c) return;
+          const st = GROWTH_STAGES.find(s=>s.id===(c.stageId||'baby')) || GROWTH_STAGES[0];
+          applyCharScale(i, st.scale);
+        });
+        applyAffinityPositions(false);
+      }, 50);
+    }
+    if (nd.common.preset !== oldPreset) resetDecayTimer();
+    if (nd.common.hasChar1 && charCount<2) enableChar1(true);
+    refreshImages(); refreshUI();
+  }, 700);
+
+
+  // ── slide ──
+  function goPanel(idx) {
+    activePanel = Math.max(0,Math.min(charCount-1,idx));
+    document.getElementById('slide-track').style.transform=`translateX(${-300*sc()*activePanel}px)`;
+    document.querySelectorAll('.ptab').forEach((t,i)=>t.classList.toggle('active',i===activePanel));
+    refreshInfoBar();
+  }
+  document.getElementById('tab0').addEventListener('click',()=>goPanel(0));
+  document.getElementById('tab1').addEventListener('click',()=>goPanel(1));
+
+  // swipe
+  let sx=null;
+  document.getElementById('slide-wrap').addEventListener('touchstart',e=>{sx=e.touches[0].clientX;},{passive:true});
+  document.getElementById('slide-wrap').addEventListener('touchend',e=>{ if(sx!==null){const dx=e.changedTouches[0].clientX-sx; if(Math.abs(dx)>40)goPanel(activePanel+(dx<0?1:-1)); sx=null;} });
+
+  // ── images ──
+  function refreshImages() {
+    [0,1].forEach(i=>{
+      const img=document.getElementById('img'+i);
+      const ph =document.getElementById('ph'+i);
+      if(!img) return;
+      try {
+        const src=localStorage.getItem(IMG_KEYS[i]);
+        if(src&&src.length>100){ img.src=src; img.style.display='block'; ph.style.display='none'; }
+        else { img.style.display='none'; ph.style.display='flex'; }
+      }catch(e){}
+    });
+  }
+  refreshImages();
+
+  // inline placeholder upload
+  [0,1].forEach(i=>{
+    const ph=document.getElementById('ph'+i);
+    const inp=document.getElementById('file'+i);
+    if(!ph||!inp) return;
+    ph.addEventListener('click',()=>inp.click());
+    inp.addEventListener('change',e=>{
+      const f=e.target.files[0]; if(!f) return;
+      const r=new FileReader();
+      r.onload=ev=>{ try{localStorage.setItem(IMG_KEYS[i],ev.target.result);}catch(x){} refreshImages(); showBubble(i,'你好！請多指教 🎉'); unlock('first_image'); };
+      r.readAsDataURL(f);
+    });
+  });
+
+  // ── char click → tab switch ──
+  [0,1].forEach(ci=>{
+    document.getElementById('char'+ci).addEventListener('click',()=>{
+      if(charCount>1) goPanel(ci);
+      const img=document.getElementById('img'+ci);
+      if(!img.src||img.style.display==='none') return;
+      bounce(ci);
+      if(!D.chars[ci]?.asleep){ spawnHeart(ci); aiSpeak(ci,'click','你好！ 😊'); }
+    });
+  });
+
+  // ── UI refresh ──
+  function refreshUI() {
+    const n0=D.chars[0]?.name||'角色1', n1=D.chars[1]?.name||'角色2';
+    document.getElementById('title-name').textContent = charCount===2?`🐾 ${n0} · ${n1}`:`🐾 ${n0}`;
+    document.getElementById('tabname0').textContent=n0;
+    document.getElementById('tabname1').textContent=n1;
+    refreshInfoBar();
+  }
+  function refreshInfoBar() {
+    const C=D.chars[activePanel];
+    document.getElementById('info-age').textContent=`年齡: ${C?.age||0}天`;
+    document.getElementById('info-mood').textContent=getMoodEmoji(activePanel);
+    if(charCount===2){
+      const [, lbl] = getAffinityLabel(D.common.affinity);
+      document.getElementById('info-affinity').textContent=`${lbl} ${Math.round(D.common.affinity)}`;
+      updateSpecialBtns();
+    } else {
+      document.getElementById('info-affinity').textContent=D.chars[0]?.name||'';
+    }
+  }
+  refreshUI();
+
+  // ── screenshot ──
+  async function captureApp() {
+    const stage = document.getElementById('stage');
+    const dpr = window.devicePixelRatio || 1;
+    const canvas = await html2canvas(stage, {
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: null,
+      scale: dpr,
+    });
+    // 세로 5px 보정
+    const out = document.createElement('canvas');
+    out.width  = canvas.width;
+    out.height = canvas.height + Math.round(5 * dpr);
+    out.getContext('2d').drawImage(canvas, 0, 0, canvas.width, out.height);
+    return out;
+  }
+
+  document.getElementById('btn-screenshot').addEventListener('click', async ()=>{
+    const btn = document.getElementById('btn-screenshot');
+    btn.textContent = '⏳';
+    try {
+      const canvas = await captureApp();
+      const a = document.createElement('a');
+      const name = (D.chars[0]?.name||'deskpet').replace(/[^a-zA-Z0-9\u4E00-\u9FA5]/g,'_');
+      a.download = `deskpet_${name}_${new Date().toLocaleDateString('zh-TW').replace(/\//g,'')}.png`;
+      a.href = canvas.toDataURL('image/png');
+      a.click();
+    } catch(e) { alert('螢幕截圖失敗：'+e.message); }
+    finally { btn.textContent = '📷'; }
+  });
+
+  document.getElementById('btn-copy').addEventListener('click', async ()=>{
+    const btn = document.getElementById('btn-copy');
+    btn.textContent = '⏳';
+    try {
+      const canvas = await captureApp();
+      canvas.toBlob(async blob=>{
+        await navigator.clipboard.write([
+          new ClipboardItem({ 'image/png': blob })
+        ]);
+        btn.textContent = '✅';
+        setTimeout(()=>btn.textContent='📋', 1500);
+      }, 'image/png');
+    } catch(e) {
+      alert('剪貼簿複製失敗：'+e.message);
+      btn.textContent = '📋';
+    }
+  });
+
+  // ── 특별 이벤트 버튼 잠금/해제 ──
+  const SPECIAL_NEEDS = { gift:400, kiss:600, date:800 };
+  // 쿨타임 localStorage에서 복원
+  const _cd = JSON.parse(localStorage.getItem('deskpet_special_cd')||'{}');
+  const specialCdUntil = {
+    gift: _cd.gift||0,
+    kiss: _cd.kiss||0,
+    date: _cd.date||0,
+  };
+  function saveSpecialCd() {
+    localStorage.setItem('deskpet_special_cd', JSON.stringify(specialCdUntil));
+  }
+
+  function updateSpecialBtns() {
+    if (charCount < 2) return;
+    const aff = D.common.affinity;
+    const now = Date.now();
+    Object.entries(SPECIAL_NEEDS).forEach(([key, need])=>{
+      const btn = document.getElementById('btn-'+key);
+      if (!btn) return;
+      // 쿨다운 숫자 제거
+      const old = btn.querySelector('.sact-cd');
+      if (old) old.remove();
+
+      if (aff < need) {
+        btn.classList.add('locked');
+        btn.classList.remove('cooldown');
+        btn.title = `好感度需要 ${need} 以上`;
+      } else if (now < specialCdUntil[key]) {
+        btn.classList.remove('locked');
+        btn.classList.add('cooldown');
+        const remain = Math.ceil((specialCdUntil[key]-now)/60000);
+        const cd = document.createElement('span');
+        cd.className = 'sact-cd';
+        cd.textContent = `${remain}分鐘後`;
+        btn.appendChild(cd);
+      } else {
+        btn.classList.remove('locked','cooldown');
+        btn.title = '';
+      }
+    });
+  }
+
+  // 쿨다운 표시 갱신 (30초마다)
+  setInterval(updateSpecialBtns, 30000);
+
+  // ── 특별 이벤트 버튼 ──
+  ['gift','kiss','date'].forEach(key=>{
+    document.getElementById('btn-'+key).addEventListener('click',()=>{
+      const btn = document.getElementById('btn-'+key);
+      if (btn.classList.contains('locked') || btn.classList.contains('cooldown')) return;
+      if (key==='gift') doGift();
+      if (key==='kiss') doKiss();
+      if (key==='date') doDate();
+    });
+  });
+
+  // 선물하기
+  function doGift() {
+    specialCdUntil.gift = Date.now() + 30*60*1000;
+    saveSpecialCd();
+    D.common.affinity = Math.min(1000, D.common.affinity+30);
+    D.chars[0].happy  = Math.min(100, D.chars[0].happy+15);
+    D.chars[1].happy  = Math.min(100, D.chars[1].happy+15);
+    // 연출 — 살짝 가까이
+    const s = sc();
+    const c0 = document.getElementById('char0');
+    const c1 = document.getElementById('char1');
+    c0.style.transition = 'left .6s cubic-bezier(.34,1.56,.64,1)';
+    c1.style.transition = 'left .6s cubic-bezier(.34,1.56,.64,1)';
+    const [l0,l1] = getAffinityPositions(D.common.affinity);
+    c0.style.left = (l0 - 10*s) + 'px';
+    c1.style.left = (l1 + 10*s) + 'px';
+    spawnInteract('🎁');
+    spawnHeart(0); spawnHeart(1); spawnHeart(0);
+    setTimeout(()=>applyAffinityPositions(true), 2500);
+    aiSpeak(0,'gift','這是禮物！請收下 🎁');
+    setTimeout(()=>aiSpeak(1,'gift','謝謝你！好開心 🎁'), 2000);
+    updateHeartGauge(); updateBars(0); updateBars(1);
+    saveD(D); refreshInfoBar();
+  }
+
+  // 뽀뽀
+  function doKiss() {
+    specialCdUntil.kiss = Date.now() + 10*60*1000;
+    saveSpecialCd();
+    D.common.affinity = Math.min(1000, D.common.affinity+50);
+    D.chars[0].happy  = Math.min(100, D.chars[0].happy+20);
+    D.chars[1].happy  = Math.min(100, D.chars[1].happy+20);
+    // 연출 — 중앙으로 바짝
+    const s = sc();
+    const c0 = document.getElementById('char0');
+    const c1 = document.getElementById('char1');
+    c0.style.transition = 'left .6s cubic-bezier(.34,1.56,.64,1)';
+    c1.style.transition = 'left .6s cubic-bezier(.34,1.56,.64,1)';
+    c0.style.left = (111*s) + 'px';
+    c1.style.left = (133*s) + 'px';
+    setTimeout(()=>{
+      spawnInteract('💋');
+      spawnHeart(0); spawnHeart(0); spawnHeart(1); spawnHeart(1); spawnHeart(0);
+      spawnConfetti();
+    }, 650);
+    setTimeout(()=>applyAffinityPositions(true), 3200);
+    aiSpeak(0,'kiss','💋 ...好害羞');
+    setTimeout(()=>aiSpeak(1,'kiss','💋 ...好幸福'), 2200);
+    updateHeartGauge(); updateBars(0); updateBars(1);
+    saveD(D); refreshInfoBar();
+  }
+
+  // 데이트
+  const DATE_THEMES = [
+    { sky:'linear-gradient(180deg,#42a5f5 0%,#90caf9 55%,#e3f2fd 100%)', ground:'linear-gradient(180deg,#a5d6a7 0%,#66bb6a 100%)', name:'春季野餐 🌸' },
+    { sky:'linear-gradient(180deg,#7e57c2 0%,#ef6c00 45%,#ffb74d 100%)', ground:'linear-gradient(180deg,#bf8040 0%,#8d5524 100%)', name:'晚霞約會 🌇' },
+    { sky:'linear-gradient(180deg,#0d0d1a 0%,#0d1b3e 60%,#1a237e 100%)', ground:'linear-gradient(180deg,#e8eaf6 0%,#c5cae9 100%)', name:'去看星星 🌙' },
+  ];
+  let dateTimer = null;
+
+  function doDate() {
+    if (dateTimer) { showBubble(activePanel,'已經在約會中囉 🌸'); return; }
+    specialCdUntil.date = Date.now() + 30*60*1000;
+    saveSpecialCd();
+    D.common.affinity = Math.min(1000, D.common.affinity+80);
+
+    const theme = DATE_THEMES[Math.floor(Math.random()*DATE_THEMES.length)];
+    document.getElementById('sky').style.background    = theme.sky;
+    document.getElementById('ground').style.background = theme.ground;
+
+    const banner = document.getElementById('growth-banner');
+    banner.innerHTML = `🌸 ${theme.name} 중...`;
+    banner.classList.add('show');
+
+    // 캐릭터 가까이
+    const s = sc();
+    const c0 = document.getElementById('char0');
+    const c1 = document.getElementById('char1');
+    c0.style.transition = 'left .8s cubic-bezier(.34,1.56,.64,1)';
+    c1.style.transition = 'left .8s cubic-bezier(.34,1.56,.64,1)';
+    c0.style.left = (100*s) + 'px';
+    c1.style.left = (142*s) + 'px';
+    spawnHeart(0); spawnHeart(1); spawnHeart(0); spawnHeart(1);
+    aiSpeak(0,'date',`正在和 ${D.chars[1].name} 約會中 🌸`);
+    setTimeout(()=>aiSpeak(1,'date',`和 ${D.chars[0].name} 在一起的話，時間過得真快 💕`), 2400);
+
+    // 데이트 중 버튼 비활성화
+    document.querySelectorAll('.act-btn, .sact-btn').forEach(b=>{
+      b.disabled = true; b.style.opacity='0.4'; b.style.cursor='not-allowed';
+    });
+
+    // 30초 후 원복
+    dateTimer = setTimeout(()=>{
+      banner.classList.remove('show');
+      applyAffinityPositions(true);
+      applyBackground();
+      dateTimer = null;
+      // 버튼 다시 활성화
+      document.querySelectorAll('.act-btn, .sact-btn').forEach(b=>{
+        b.disabled = false; b.style.opacity=''; b.style.cursor='';
+      });
+      updateSpecialBtns();
+    }, 10000);
+
+    updateHeartGauge(); updateBars(0); updateBars(1);
+    saveD(D); refreshInfoBar();
+  }
+
+  // settings opener
+  document.getElementById('open-settings-btn').addEventListener('click',()=>{
+    saveD(D);
+    const p=window.open(location.href,'deskpet_settings');
+   /* const p=window.open(location.href,'deskpet_settings',
+      `width=496,height=700,left=${screen.width-512},top=60,resizable=yes,scrollbars=yes,toolbar=no,menubar=no,location=no,status=no`);
+    if(!p) alert('設定彈出視窗被封鎖了！'); */
+  }); 
+  document.getElementById('close-btn').addEventListener('click',()=>window.close());
+
+  // ── AI system (pool-only) ──
+  const bubEls=[document.getElementById('bub0'),document.getElementById('bub1')];
+  const bubTimers=[null,null];
+
+  // ALL triggers use pool — no real-time API calls
+  const ALL_TRIGGERS = ['idle','click','hungry','sleepy','sick','feed','play','pet','clean','medicine','wakeup','greeting','interact','gift','kiss','date'];
+
+  // batch rate limiter: max 5 batch calls/min
+  const BATCH_LOG = [];
+  let batchRunning = false;
+  let blockedUntil = 0;
+  let lastRefillTime = [0, 0]; // per-char cooldown
+
+  function getPoolTotal(ci) {
+    const p = loadPool();
+    if (!p[ci]) return 0;
+    return Object.values(p[ci]).reduce((sum, arr) => sum + (Array.isArray(arr) ? arr.length : 0), 0);
+  }
+
+  function canBatch(ci, force=false) {
+    if (Date.now() < blockedUntil) return false;
+    if (batchRunning) return false;
+    if (!force && Date.now() - lastRefillTime[ci] < 10 * 60 * 1000) return false; // 10분 per-char 쿨다운
+    const cutoff = Date.now() - 60000;
+    while (BATCH_LOG.length && BATCH_LOG[0] < cutoff) BATCH_LOG.shift();
+    return BATCH_LOG.length < 2; // 분당 최대 2회
+  }
+
+  // hardcoded fallbacks per trigger
+  const FALLBACKS = {
+    idle:     ['謝謝你今天也陪著我 😊','肚子好餓...','好想睡午覺喔~','你在做什麼呀？','嘻嘻~ 😄','今天天氣真好！'],
+    click:    ['哈囉！ 😊','為什麼要戳我呀~ 😳','嘻嘻好癢喔！','你又戳我了？'],
+    hungry:   ['我肚子餓了... 🍎 給我飯飯！','咕嚕嚕... 😫','快要餓扁了 🍎'],
+    sleepy:   ['好睏喔... 💤 讓我睡覺嘛~','眼睛快閉上了 😴','好想睡覺喔... 💤'],
+    sick:     ['我身體有點不舒服... 💊','好痛喔 😢','給我藥藥 💊'],
+    feed:     ['嚼嚼！好好吃喔 😋','謝謝你 🍎','吃飽了~ 😊'],
+    play:     ['陪我玩嘛~ 🎾','好興奮喔！ 😄','好有趣喔 嘻嘻~'],
+    pet:      ['好舒服喔~ ✨','心情最棒了！ 😊','還要還要~'],
+    clean:    ['變乾淨了！ ✨','好清爽喔 🛁','謝謝你~'],
+    medicine: ['好苦喔... 謝謝你 💊','我會快點好起來的！','呃... 好苦喔 😣'],
+    wakeup:   ['睡得好飽喔~ ☀️','早安！ 😊','我起床囉~'],
+    greeting: ['你好呀~ 😊','很高興見到你！ 🎉','今天也請多指教囉~'],
+    interact: ['能在一起真好 💕','好幸福喔 ✨','幸好有你在~'],
+    gift:     ['這是送你的禮物！請收下 🎁','謝謝你！好開心喔 🎁','我會好好珍惜的 💛'],
+    kiss:     ['💋 ...好害羞喔','心跳得好快 💕','...好幸福喔 💋'],
+    date:     ['最喜歡約會了 🌸','好想一直在一起 💕','這是最幸福的時光了 ✨'],
+  };
+  function randFallback(trigger) {
+    const arr = FALLBACKS[trigger] || FALLBACKS.idle;
+    return arr[Math.floor(Math.random()*arr.length)];
+  }
+
+  function showBubble(ci, txt, dur=3200){
+    const b=bubEls[ci]; if(!b) return;
+    b.classList.remove('thinking'); b.textContent=txt; b.classList.add('show');
+    clearTimeout(bubTimers[ci]); bubTimers[ci]=setTimeout(()=>b.classList.remove('show'),dur);
+  }
+
+  function pushLog(entry){
+    const log=loadLog(); log.push(entry); saveLog(log);
+  }
+
+  // ── refill: one API call → all triggers ──
+  async function refillPool(ci, force=false) {
+    if (!D.common.apiKey || !canBatch(ci, force)) return;
+    batchRunning = true;
+    BATCH_LOG.push(Date.now());
+    lastRefillTime[ci] = Date.now();
+    try {
+      const other = charCount===2 ? D.chars[1-ci] : null;
+      const rel   = D.common.relation||(charCount===2?getAffinityLabel(D.common.affinity)[2]:'');
+      const result = await geminiAllTriggers({
+        apiKey: D.common.apiKey, me: D.chars[ci], other, relation: rel,
+      });
+      let saved = 0;
+      Object.entries(result).forEach(([trigger, value]) => {
+        const lines = Array.isArray(value) ? value : [value];
+        lines.forEach(line => {
+          if (typeof line === 'string' && line.trim()) {
+            poolPush(ci, trigger, line.trim());
+            saved++;
+          }
+        });
+      });
+      pushLog({ ci, trigger:'[全部]', time:Date.now(), line:`[已儲存 ${saved} 個觸發器]`, fail:null });
+    } catch(err) {
+      const msg = err.message||'錯誤';
+      if (msg.includes('429') || msg.includes('503')) blockedUntil = Date.now() + 120000;
+      pushLog({ ci, trigger:'[全部]', time:Date.now(), line:null, fail:`批次處理: ${msg}` });
+    } finally {
+      batchRunning = false;
+    }
+  }
+
+  // check if ANY trigger pool is low → refill all at once
+  function checkAndRefill(ci, trigger) {
+    if (!D.common.apiKey) return;
+    const p = loadPool();
+    const count = p[ci]?.[trigger]?.length || 0;
+    if (count <= 10) refillPool(ci); // 10개 이하면 미리 보충
+  }
+
+  // ── main speak: always pool → fallback ──
+  function aiSpeak(ci, trigger, _fallback) {
+    const pooled = poolPick(ci, trigger);
+    showBubble(ci, pooled || randFallback(trigger));
+    checkAndRefill(ci, trigger); // top up in background
+  }
+
+  // idle speak alias (same as aiSpeak)
+  function idleSpeak(ci) { aiSpeak(ci, 'idle'); }
+
+  // ── particles ──
+  const stage=document.getElementById('stage');
+  function spawnHeart(ci){
+    const s=sc(), h=document.createElement('div'); h.className='heart';
+    h.textContent=['❤️','💛','💚','💜','🧡'][Math.floor(Math.random()*5)];
+    const x=ci===0?(8+Math.random()*90)*s:(162+Math.random()*90)*s;
+    h.style.cssText=`left:${x}px;top:${(12+Math.random()*80)*s}px`;
+    stage.appendChild(h); setTimeout(()=>h.remove(),1300);
+  }
+  function spawnZzz(ci){
+    const s=sc(), z=document.createElement('div'); z.className='zzz'; z.textContent='z';
+    z.style.cssText=`left:${(ci===0?58:216)*s}px;top:${28*s}px`;
+    stage.appendChild(z); setTimeout(()=>z.remove(),2100);
+  }
+  function spawnInteract(emoji){
+    const el=document.createElement('div'); el.className='interact-pop'; el.textContent=emoji;
+    stage.appendChild(el); setTimeout(()=>el.remove(),1500);
+  }
+
+  // ── bounce ──
+  const B=[{vel:0,y:0,sx:1,sy:1,on:false},{vel:0,y:0,sx:1,sy:1,on:false}];
+  function bounce(ci){B[ci].vel=-10;B[ci].on=true;}
+  function stepB(ci){
+    const b=B[ci];
+    if(!b.on){b.sx+=(1-b.sx)*.18;b.sy+=(1-b.sy)*.18;return;}
+    b.vel+=0.82;b.y+=b.vel;
+    if(b.y>=0){
+      b.y=0;const imp=Math.abs(b.vel);
+      if(imp<1.5){b.on=false;b.vel=0;b.sx=1;b.sy=1;}
+      else{
+        b.vel=-b.vel*.52;const sq=Math.min(.3,imp*.022);
+        b.sx=1+sq*1.2;b.sy=1-sq;
+        setTimeout(()=>{b.sx=1-sq*.3;b.sy=1+sq*.3;},55);
+        setTimeout(()=>{b.sx=1;b.sy=1;},130);
+      }
+    }else{const st=Math.min(.15,Math.abs(b.vel)*.011);b.sx=1-st*.5;b.sy=1+st;}
+  }
+
+  // ── actions ──
+  document.querySelectorAll('.act-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const ci=parseInt(btn.dataset.ci),act=btn.dataset.act;
+      const C=D.chars[ci]; if(!C) return;
+      if (!C.actionCounts) C.actionCounts={feed:0,play:0,clean:0,medicine:0,pet:0};
+      if (!C.care) C.care=0;
+      if(C.asleep&&act!=='sleep'){showBubble(ci,'現在正在睡覺... 💤');return;}
+      if(act==='feed'){
+        if(C.hunger>=98){showBubble(ci,'肚子很飽！ 🍎');return;}
+        C.hunger=Math.min(100,C.hunger+25);C.happy=Math.min(100,C.happy+3);
+        C.care+=3; C.actionCounts.feed++;
+        spawnHeart(ci);bounce(ci);aiSpeak(ci,'feed','好吃好吃！ 😋');
+        if(charCount===2){ D.common.affinity=Math.min(1000,D.common.affinity+1); recordAction(ci,'feed'); }
+        if(C.actionCounts.feed===1) unlock('first_feed');
+        if(C.actionCounts.feed>=50) unlock('feed_50');
+      }else if(act==='play'){
+        if(C.sleep>=78){showBubble(ci,'好睏不能玩 😴');return;}
+        C.happy=Math.min(100,C.happy+20);C.hunger=Math.max(0,C.hunger-6);C.sleep=Math.min(100,C.sleep+8);
+        C.care+=4; C.actionCounts.play++;
+        spawnHeart(ci);spawnHeart(ci);bounce(ci);aiSpeak(ci,'play','一起玩吧~ 🎾');
+        if(charCount===2){ D.common.affinity=Math.min(1000,D.common.affinity+1); recordAction(ci,'play'); }
+        if(C.actionCounts.play===1) unlock('first_play');
+        if(C.actionCounts.play>=30) unlock('play_30');
+      }else if(act==='sleep'){
+        C.asleep=!C.asleep;
+        if(C.asleep)showBubble(ci,'Zzz... 💤');
+        else{bounce(ci);aiSpeak(ci,'wakeup','睡得好飽~ ☀️');}
+      }else if(act==='clean'){
+        C.clean=Math.min(100,C.clean+35);C.happy=Math.min(100,C.happy+5);
+        C.care+=3; C.actionCounts.clean++;
+        spawnHeart(ci);bounce(ci);aiSpeak(ci,'clean','變得乾淨了！ ✨');
+        if(charCount===2) recordAction(ci,'clean');
+        if(C.actionCounts.clean===1) unlock('first_clean');
+        if(C.clean>=100) unlock('clean_100');
+      }else if(act==='medicine'){
+        if(C.health>=85){showBubble(ci,'現在很健康！ 😊');return;}
+        C.health=Math.min(100,C.health+30); C.actionCounts.medicine++;
+        aiSpeak(ci,'medicine','雖然很苦... 謝謝你 💊');
+        if(C.actionCounts.medicine>=10) unlock('medicine_10');
+      }else if(act==='pet'){
+        C.happy=Math.min(100,C.happy+15);
+        C.care+=2; C.actionCounts.pet++;
+        spawnHeart(ci);spawnHeart(ci);spawnHeart(ci);bounce(ci);aiSpeak(ci,'pet','好舒服喔~ ✨');
+        if(charCount===2){ D.common.affinity=Math.min(1000,D.common.affinity+0.5); recordAction(ci,'pet'); }
+      }
+      checkGrowth(ci);
+      updateBars(ci);
+      if(charCount===2) updateHeartGauge();
+      saveD(D);refreshInfoBar();
+    });
+  });
+
+  // ── stat bars ──
+  function updateBars(ci){
+    ['hunger','happy','sleep','clean','health'].forEach(k=>{
+      const v=Math.round(D.chars[ci]?.[k]??0);
+      document.getElementById(`b${ci}-${k}`).style.width=v+'%';
+      const n=document.getElementById(`n${ci}-${k}`);
+      n.textContent=v; n.className='stat-num'+(v<20?' warning':'');
+    });
+  }
+  function getMoodEmoji(ci){
+    const C=D.chars[ci]; if(!C) return '😊';
+    return C.asleep?'😴':C.health<30?'🤒':C.hunger<20?'😫':C.happy<20?'😢':C.clean<20?'🤢':C.happy>80&&C.hunger>70?'😻':'😊';
+  }
+  [0,1].forEach(i=>updateBars(i));
+
+  // ── stat decay ──
+  function statTick(){
+    const preset=PRESETS[D.common.preset||'normal'];
+    for(let ci=0;ci<charCount;ci++){
+      const C=D.chars[ci]; if(!C) continue;
+      if(C.asleep){
+        C.sleep=Math.max(0,C.sleep-15);C.hunger=Math.max(0,C.hunger-preset.hunger*.3);
+        if(C.sleep<=0){C.asleep=false;bounce(ci);aiSpeak(ci,'wakeup','睡得好嗎~ ☀️');}
+      }else{
+        C.hunger=Math.max(0,C.hunger-preset.hunger);
+        C.happy =Math.max(0,C.happy -preset.happy);
+        C.sleep =Math.min(100,C.sleep+preset.happy);
+        C.clean =Math.max(0,C.clean -preset.clean);
+      }
+      // health degrades from neglect
+      const neglect=(C.hunger<20?1:0)+(C.happy<20?1:0)+(C.clean<20?1:0);
+      if(neglect>0) C.health=Math.max(0,C.health-neglect*1.5);
+      else if(C.hunger>60&&C.happy>60&&C.clean>60) C.health=Math.min(100,C.health+0.5);
+
+      // warnings → AI speak
+      if     (C.hunger<20&&!C.asleep)aiSpeak(ci,'hungry','好餓喔... 🍎');
+      else if(C.sleep>88&&!C.asleep) aiSpeak(ci,'sleepy','好想睡... 💤');
+      else if(C.happy<20&&!C.asleep) aiSpeak(ci,'idle','好無聊喔 😢');
+      else if(C.clean<20&&!C.asleep) aiSpeak(ci,'idle','想洗澡... 🛁');
+      else if(C.health<25)           aiSpeak(ci,'sick','身體不舒服 💊');
+      C.age = calcAge(ci);
+      // health streak — track by day, not by tick
+      if (C.health >= 100) {
+        const today = C.age;
+        if ((C.healthStreakDay||0) !== today) {
+          // new day with full health
+          C.healthStreakDay = today;
+          C.healthStreak = (C.healthStreak||0) + 1;
+          if (C.healthStreak >= 7) unlock('health_7days');
+        }
+      } else {
+        C.healthStreak = 0;
+        C.healthStreakDay = -1;
+      }
+      // age achievements
+      if(C.age>=7)   unlock('day_7');
+      if(C.age>=30)  unlock('day_30');
+      if(C.age>=100) unlock('day_100');
+      // affinity achievements
+      if(charCount===2){
+        if(D.common.affinity>=800)  unlock('affinity_80');
+        if(D.common.affinity>=1000) unlock('affinity_100');
+      }
+      // growth check
+      checkGrowth(ci);
+      updateBars(ci);
+    }
+    // ── affinity tick ──
+    if (charCount===2) {
+      const c0=D.chars[0], c1=D.chars[1];
+      let delta = -0.3; // 자연 감소 (강화)
+      if (c0.hunger<20||c1.hunger<20) delta -= 2;
+      if (c0.happy<20 ||c1.happy<20)  delta -= 2;
+      if (c0.clean<20 ||c1.clean<20)  delta -= 1;
+      if (c0.health<30||c1.health<30) delta -= 3;
+      if (c0.asleep  ||c1.asleep)     delta -= 0.5;
+      // 보너스 — 둘 다 아주 좋은 상태일 때만 소폭
+      if (c0.happy>=80&&c1.happy>=80) delta += 0.1;
+      if (c0.clean>=80&&c1.clean>=80) delta += 0.05;
+      D.common.affinity = Math.max(0, Math.min(1000, D.common.affinity + delta));
+      applyAffinityPositions(false);
+      updateHeartGauge();
+      if(D.common.affinity>=800)  unlock('affinity_80');
+      if(D.common.affinity>=1000) unlock('affinity_100');
+    }
+    saveD(D); refreshInfoBar();
+  }
+
+  // ── affinity position + heart gauge ──
+  // stage width 300px, char width ~78px
+  // 호감도 높을수록 가까워짐 (left값이 서로 좁아짐)
+  function getAffinityPositions(affinity) {
+    const s = sc();
+    if (affinity <= 200) return [8*s,   214*s];
+    if (affinity <= 400) return [22*s,  200*s];
+    if (affinity <= 600) return [38*s,  184*s];
+    if (affinity <= 800) return [55*s,  167*s];
+    return [72*s, 150*s];
+  }
+
+  function applyAffinityPositions(animate=true) {
+    if (charCount < 2) return;
+    const [l0, l1] = getAffinityPositions(D.common.affinity);
+    const c0 = document.getElementById('char0');
+    const c1 = document.getElementById('char1');
+    if (animate) {
+      c0.style.transition = 'left 1.2s cubic-bezier(.34,1.56,.64,1)';
+      c1.style.transition = 'left 1.2s cubic-bezier(.34,1.56,.64,1)';
+    } else {
+      c0.style.transition = 'none';
+      c1.style.transition = 'none';
+    }
+    c0.style.left = l0 + 'px';
+    c1.style.left = l1 + 'px';
+    // 서먹서먹(0~200)이면 img0 좌우 반전 (등 돌리기)
+    const img0 = document.getElementById('img0');
+    if (D.common.affinity <= 200) {
+      img0.style.transform = (img0.style.transform||'').replace(' scaleX(-1)','') + ' scaleX(-1)';
+    } else {
+      img0.style.transform = (img0.style.transform||'').replace(' scaleX(-1)','');
+    }
+  }
+
+  function updateHeartGauge() {
+    const gauge = document.getElementById('heart-gauge');
+    if (charCount < 2) { gauge.classList.remove('show'); return; }
+    gauge.classList.add('show');
+    const filled = Math.round((D.common.affinity / 1000) * 5);
+    for (let i = 0; i < 5; i++) {
+      const el = document.getElementById('hg' + i);
+      if (!el) continue;
+      if (i < filled) {
+        el.classList.add('filled'); el.classList.remove('empty');
+        el.textContent = '❤️';
+      } else {
+        el.classList.add('empty'); el.classList.remove('filled');
+        el.textContent = '🖤';
+      }
+    }
+  }
+
+  // ── consecutive action detection ──
+  const lastAction = [null, null];
+  function recordAction(ci, act) {
+    lastAction[ci] = { act, time: Date.now() };
+    const other = lastAction[1-ci];
+    if (other && other.act===act && Date.now()-other.time<=5000) {
+      D.common.affinity = Math.min(1000, D.common.affinity+2); // +5 → +2
+      spawnInteract('✨');
+      updateHeartGauge(); saveD(D); refreshInfoBar();
+    }
+  }
+
+  // ── interaction events by affinity tier ──
+  let iaCd=false;
+
+  function tryInteract() {
+    if (charCount<2||iaCd) return;
+    const C0=D.chars[0], C1=D.chars[1];
+    const i0=document.getElementById('img0'), i1=document.getElementById('img1');
+    if (!i0.src||i0.style.display==='none'||!i1.src||i1.style.display==='none') return;
+    if (C0.asleep||C1.asleep) return;
+    const aff = D.common.affinity;
+
+    // 아픈 쪽 걱정 (항상 우선)
+    if (C0.health<30) {
+      iaCd=true; setTimeout(()=>iaCd=false,20000);
+      spawnInteract('💊'); aiSpeak(1,'interact',`${C0.name}啊，還好嗎？ 💊`); return;
+    }
+    if (C1.health<30) {
+      iaCd=true; setTimeout(()=>iaCd=false,20000);
+      spawnInteract('💊'); aiSpeak(0,'interact',`${C1.name}啊，還好嗎？ 💊`); return;
+    }
+
+    if (aff <= 200) {
+      // 😒 生疏 — 尷尬的反應
+      iaCd=true; setTimeout(()=>iaCd=false,25000);
+      showBubble(0,['...','呃...好尷尬','嗯...'][Math.floor(Math.random()*3)]);
+      setTimeout(()=>showBubble(1,['...','幹嘛啊...','真尷尬'][Math.floor(Math.random()*3)]),1200);
+
+    } else if (aff <= 400) {
+      // 🙂 슬쩍 쳐다보다 고개 돌리기
+      iaCd=true; setTimeout(()=>iaCd=false,25000);
+      spawnInteract('👀');
+      const [l0,l1]=getAffinityPositions(aff);
+      const c0el=document.getElementById('char0'), c1el=document.getElementById('char1');
+      c0el.style.left=(l0+10)+'px'; c1el.style.left=(l1-10)+'px';
+      setTimeout(()=>applyAffinityPositions(true),1600);
+
+    } else if (aff <= 600) {
+      // 😊 가까워지기
+      iaCd=true; setTimeout(()=>iaCd=false,25000);
+      spawnInteract(['💫','🎵','✨'][Math.floor(Math.random()*3)]);
+      D.common.affinity=Math.min(1000,D.common.affinity+1.5);
+      const c0el=document.getElementById('char0'), c1el=document.getElementById('char1');
+      c0el.style.left=`${72*sc()}px`; c1el.style.left=`${150*sc()}px`;
+      setTimeout(()=>applyAffinityPositions(true),3500);
+      aiSpeak(0,'interact',`和 ${C1.name} 在一起的話很好 💕`);
+      setTimeout(()=>aiSpeak(1,'interact',`和 ${C0.name} 在一起很幸福 ✨`),2600);
+
+    } else if (aff <= 800) {
+      // 😄 같이 점프 + 하트 교환
+      iaCd=true; setTimeout(()=>iaCd=false,20000);
+      spawnInteract('💕');
+      D.common.affinity=Math.min(1000,D.common.affinity+2);
+      bounce(0); setTimeout(()=>bounce(1),150);
+      spawnHeart(0); spawnHeart(1);
+      aiSpeak(0,'interact',`和 ${C1.name} 在一起好幸福喔 💕`);
+      setTimeout(()=>aiSpeak(1,'interact',`和 ${C0.name} 在一起最棒了！ 💕`),2400);
+
+    } else {
+      // 💕 摯友 — 粒子爆炸
+      iaCd=true; setTimeout(()=>iaCd=false,15000);
+      spawnInteract('🌟');
+      D.common.affinity=Math.min(1000,D.common.affinity+2);
+      spawnConfetti();
+      spawnHeart(0); spawnHeart(0); spawnHeart(1); spawnHeart(1);
+      bounce(0); setTimeout(()=>bounce(1),80);
+      aiSpeak(0,'interact',`${C1.name}是我最好的朋友！ 🌟`);
+      setTimeout(()=>aiSpeak(1,'interact',`要永遠和 ${C0.name} 在一起 💕`),2200);
+    }
+
+    updateHeartGauge(); saveD(D); refreshInfoBar();
+  }
+
+  setInterval(tryInteract, 15000);
+
+  // ══════════════════════════════
+  //  BACKGROUND SYSTEM
+  // ══════════════════════════════
+
+  // time-of-day themes
+  const TIME_THEMES = {
+    dawn: {  // 05~08
+      sky: 'linear-gradient(180deg,#ffb347 0%,#ffcc80 40%,#ffe0b2 100%)',
+      celestial: '🌤️', stars: 0,
+    },
+    day: {   // 08~17
+      sky: 'linear-gradient(180deg,#42a5f5 0%,#90caf9 55%,#e3f2fd 100%)',
+      celestial: '☀️', stars: 0,
+    },
+    dusk: {  // 17~19
+      sky: 'linear-gradient(180deg,#7e57c2 0%,#ef6c00 45%,#ffb74d 100%)',
+      celestial: '🌇', stars: 0,
+    },
+    evening: { // 19~22
+      sky: 'linear-gradient(180deg,#1a237e 0%,#283593 50%,#3949ab 100%)',
+      celestial: '🌙', stars: 3,
+    },
+    night: {  // 22~05
+      sky: 'linear-gradient(180deg,#0d0d1a 0%,#0d1b3e 60%,#1a237e 100%)',
+      celestial: '🌕', stars: 7,
+    },
+  };
+
+  // season ground + particle config
+  const SEASON_THEMES = {
+    spring: {
+      ground: 'linear-gradient(180deg,#a5d6a7 0%,#66bb6a 100%)',
+      particle: '🌸', rate: 3000, count: 1,
+    },
+    summer: {
+      ground: 'linear-gradient(180deg,#2e7d32 0%,#388e3c 100%)',
+      particle: null, rate: 0, count: 0,
+    },
+    autumn: {
+      ground: 'linear-gradient(180deg,#bf8040 0%,#8d5524 100%)',
+      particle: '🍂', rate: 2500, count: 1,
+    },
+    winter: {
+      ground: 'linear-gradient(180deg,#e8eaf6 0%,#c5cae9 100%)',
+      particle: '❄️', rate: 2000, count: 1,
+    },
+  };
+
+  function getTimeOfDay(h) {
+    if (h>=5  && h<8)  return 'dawn';
+    if (h>=8  && h<17) return 'day';
+    if (h>=17 && h<19) return 'dusk';
+    if (h>=19 && h<22) return 'evening';
+    return 'night';
+  }
+
+  function getSeason(m) { // m: 0-indexed month
+    if (m>=2  && m<=4)  return 'spring';
+    if (m>=5  && m<=7)  return 'summer';
+    if (m>=8  && m<=10) return 'autumn';
+    return 'winter';
+  }
+
+  // DOM refs
+  const skyEl       = document.getElementById('sky');
+  const groundEl    = document.getElementById('ground');
+  const celestialEl = document.getElementById('celestial');
+
+  let bgStarEls = [];
+  let seasonParticleTimer = null;
+  let currentSeason = null;
+
+  function applyBackground() {
+    const now     = new Date();
+    const tod     = getTimeOfDay(now.getHours());
+    const season  = getSeason(now.getMonth());
+    const tTheme  = TIME_THEMES[tod];
+    const sTheme  = SEASON_THEMES[season];
+
+    // sky + celestial
+    skyEl.style.background    = tTheme.sky;
+    celestialEl.textContent   = tTheme.celestial;
+    celestialEl.style.opacity = '1';
+
+    // ground
+    groundEl.style.background = sTheme.ground;
+
+    // stars
+    bgStarEls.forEach(s=>s.remove());
+    bgStarEls = [];
+    const s2=sc();
+    for (let i=0; i<tTheme.stars; i++) {
+      const s = document.createElement('div');
+      s.className = 'star';
+      const sz = (1.5 + Math.random()*2)*s2;
+      s.style.cssText = `width:${sz}px;height:${sz}px;top:${(5+Math.random()*70)*s2}px;left:${Math.random()*260*s2}px;animation-delay:${Math.random()*2}s;animation-duration:${1.5+Math.random()*2}s;`;
+      stage.appendChild(s);
+      bgStarEls.push(s);
+    }
+
+    // season particles — restart if season changed
+    if (season !== currentSeason) {
+      clearInterval(seasonParticleTimer);
+      currentSeason = season;
+      if (sTheme.particle && sTheme.rate > 0) {
+        seasonParticleTimer = setInterval(()=>spawnSeasonParticle(sTheme.particle), sTheme.rate);
+      }
+    }
+  }
+
+  function spawnSeasonParticle(emoji) {
+    const s=sc(), p = document.createElement('div');
+    p.className = 'season-particle';
+    p.textContent = emoji;
+    const dur = 3 + Math.random()*3;
+    p.style.cssText = `left:${Math.random()*290*s}px;top:-10px;font-size:${(10+Math.random()*8)*s}px;animation-duration:${dur}s;`;
+    stage.appendChild(p);
+    setTimeout(()=>p.remove(), dur*1000+200);
+  }
+
+  // apply now + refresh every minute
+  applyBackground();
+  setInterval(applyBackground, 60000);
+
+  // ── clouds ──
+  function addCloud(){
+    const s=sc(), now = new Date();
+    const tod = getTimeOfDay(now.getHours());
+    const cloudColors = {
+      dawn:'rgba(255,220,180,.85)', day:'rgba(255,255,255,.88)',
+      dusk:'rgba(255,180,120,.8)', evening:'rgba(100,120,200,.6)', night:'rgba(60,70,130,.5)',
+    };
+    const c=document.createElement('div'); c.className='cloud';
+    const cw=(Math.random()*55+32)*s, ch=(Math.random()*8+5)*s;
+    c.style.cssText=`width:${cw}px;height:${ch}px;top:${(Math.random()*55+4)*s}px;left:-${cw}px;background:${cloudColors[tod]};border-radius:20px;`;
+    const dur=Math.random()*14+11; c.style.transition=`left ${dur}s linear`;
+    stage.appendChild(c);
+    requestAnimationFrame(()=>{c.style.left=(300*s+cw+10)+'px';});
+    setTimeout(()=>c.remove(),(dur+1)*1000);
+  }
+  addCloud();addCloud();setInterval(addCloud,7000);
+
+  // ── main render loop ──
+  let f=0;
+  (function loop(){
+    f++;
+    for(let ci=0;ci<charCount;ci++){
+      stepB(ci);
+      const b=B[ci],img=document.getElementById('img'+ci),wrap=document.getElementById('char'+ci);
+      if(!D.chars[ci]) continue;
+      const bob=b.on?0:Math.sin(f*.07+ci*1.5)*2.3;
+      if(D.chars[ci].asleep){
+        img.style.transform=`rotate(12deg) scaleX(${b.sx}) scaleY(${b.sy})`;
+        wrap.style.transform='';
+        if(f%88===0)spawnZzz(ci);
+      }else{
+        img.style.transform=`scaleX(${b.sx}) scaleY(${b.sy})`;
+        wrap.style.transform=`translateY(${b.y+bob}px)`;
+      }
+      if(!D.chars[ci].asleep&&f%(3600+ci*600)===0) idleSpeak(ci);
+    }
+    requestAnimationFrame(loop);
+  })();
+
+  // greeting + initial pool refill
+  setTimeout(()=>{
+    const img=document.getElementById('img0');
+    if(img.src&&img.style.display!=='none') aiSpeak(0,'greeting');
+
+    // "초기 집중 충전" — 풀이 부족하면 쿨다운 무시하고 즉시 채움
+    // 트리거 13개 × 3개 = 39개가 만땅. 15개 이하면 초반으로 판단
+    setTimeout(()=>{
+      const FULL_THRESHOLD = 325; // 50개 × 13트리거 / 2
+      if (getPoolTotal(0) < FULL_THRESHOLD) {
+        refillPool(0, true);
+      }
+      if (charCount >= 2) {
+        setTimeout(()=>{
+          if (getPoolTotal(1) < FULL_THRESHOLD) {
+            refillPool(1, true);
+          }
+        }, 4000);
+      }
+    }, 500);
+
+    if(D.chars[0]?.name && D.chars[0].name!=='角色1') unlock('first_name');
+    const h = new Date().getHours();
+    if(h>=0 && h<4) unlock('night_owl');
+    applyAffinityPositions(false);
+    updateHeartGauge();
+  },1000);
+
+  // ── notification system ──
+  const STAT_LABELS = { hunger:'🍎 食物', happy:'😊 心情', clean:'🛁 清潔', health:'❤️ 健康' };
+  let lastNotifyTime = {};
+
+  function checkAndNotify() {
+    const nc = D.common;
+    if (!nc.notifyOn) return;
+    if (Notification.permission !== 'granted') return;
+    // only notify when window is hidden (minimised / background)
+    if (document.visibilityState !== 'hidden') return;
+
+    const now = Date.now();
+    const gapMs = (nc.notifyIntervalMin||10) * 60 * 1000;
+    const threshold = nc.notifyThreshold || 20;
+    const stats = nc.notifyStats || { hunger:true, health:true };
+
+    for (let ci=0; ci<charCount; ci++) {
+      const C = D.chars[ci]; if (!C || C.asleep) continue;
+      const key = `c${ci}`;
+      if (now - (lastNotifyTime[key]||0) < gapMs) continue;
+
+      const lowStats = Object.entries(stats)
+        .filter(([k,on])=> on && (C[k]??100) < threshold)
+        .map(([k])=> STAT_LABELS[k]);
+
+      if (lowStats.length === 0) continue;
+
+      lastNotifyTime[key] = now;
+      const statStr = lowStats.join(', ');
+      new Notification('🐾 桌面寵物', {
+        body: `${C.name}需要照顧！ (${statStr})`,
+        icon: localStorage.getItem(IMG_KEYS[ci]) || undefined,
+        tag: `deskpet-${ci}`,
+        silent: false,
+      });
+    }
+  }
+
+  // run check every minute
+  setInterval(checkAndNotify, 60000);
+  // also run on visibility change (tab unfocused → background)
+  document.addEventListener('visibilitychange', ()=>{
+    if (document.visibilityState==='hidden') checkAndNotify();
+  });
+}
+
+// ══════════════════════════════════════════════════
+//  SETTINGS PAGE
+// ══════════════════════════════════════════════════
+function notifySettings(){
+  localStorage.setItem(TS_KEY,Date.now().toString());
+}
+
+function runSettings(){
+  let D=loadD();
+  if(!D.chars)  D.chars=[defChar(0)];
+  if(!D.common) D.common=defCommon();
+
+  // tabs
+  document.querySelectorAll('.set-tab').forEach(tab=>{
+    tab.addEventListener('click',()=>{
+      document.querySelectorAll('.set-tab').forEach(t=>t.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('panel-'+tab.dataset.tab).classList.add('active');
+      if(tab.dataset.tab==='log')   renderLog('all');
+      if(tab.dataset.tab==='diary') renderDiary();
+      if(tab.dataset.tab==='achv')  renderAchv();
+    });
+  });
+  // render achievement on load
+  renderAchv();
+
+  document.getElementById('set-close').addEventListener('click',()=>window.close());
+
+  // relation section visibility
+  if(D.common.hasChar1) document.getElementById('relation-wrap').style.display='flex';
+
+  // fill fields
+  document.getElementById('set-apikey').value  =D.common.apiKey||'';
+  document.getElementById('set-relation').value=D.common.relation||'';
+  document.getElementById('set-name0').value   =D.chars[0]?.name||'';
+  document.getElementById('set-persona0').value=D.chars[0]?.persona||'';
+  if(D.chars[1]){
+    document.getElementById('set-name1').value   =D.chars[1].name||'';
+    document.getElementById('set-persona1').value=D.chars[1].persona||'';
+  }
+
+  // size buttons
+  document.querySelectorAll('.sz-btn').forEach(b=>{
+    b.classList.toggle('active', parseFloat(b.dataset.sc)===(D.common.scale||1.5));
+    b.addEventListener('click',()=>{
+      document.querySelectorAll('.sz-btn').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      D.common.scale = parseFloat(b.dataset.sc); // store for save-common
+    });
+  });
+
+  // preset buttons (decay speed)
+  document.querySelectorAll('.ps-btn[data-ps]').forEach(b=>{
+    b.classList.toggle('active',b.dataset.ps===(D.common.preset||'normal'));
+    b.addEventListener('click',()=>{
+      document.querySelectorAll('.ps-btn[data-ps]').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active'); D.common.preset=b.dataset.ps;
+    });
+  });
+
+  // day speed buttons
+  document.querySelectorAll('.ps-btn[data-ds]').forEach(b=>{
+    b.classList.toggle('active',b.dataset.ds===(D.common.daySpeed||'normal'));
+    b.addEventListener('click',()=>{
+      document.querySelectorAll('.ps-btn[data-ds]').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active'); D.common.daySpeed=b.dataset.ds;
+    });
+  });
+
+  // diary tab render
+  function renderDiary(){
+    const list=document.getElementById('diary-list');
+    const entries=loadDiary().slice().reverse();
+    if(!entries.length){ list.innerHTML='<div class="log-empty">目前還沒有日記喔 📔</div>'; return; }
+    list.innerHTML=entries.map(e=>{
+      const name=D.chars[e.ci]?.name||`角色${e.ci+1}`;
+      return `<div class="diary-item">
+        <div class="diary-date">📔 ${name} · 第 ${e.day} 天 · ${e.date}</div>
+        <div class="diary-body">${e.text}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // achievement tab render
+  function renderAchv(){
+    const unlocked = D.common.achievements||[];
+    document.getElementById('achv-list').innerHTML = ACHIEVEMENTS.map(a=>{
+      const done = unlocked.includes(a.id);
+      return `<div class="achv-item${done?'':' locked'}">
+        <div class="achv-emoji">${a.emoji}</div>
+        <div class="achv-info">
+          <div class="achv-name">${a.name}${done?' ✅':''}</div>
+          <div class="achv-desc">${a.desc}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // image previews
+  [0,1].forEach(i=>{
+    const prev=document.getElementById('setprev'+i);
+    const lbl =document.getElementById('imglbl'+i);
+    try{
+      const src=localStorage.getItem(IMG_KEYS[i]);
+      if(src&&src.length>100){prev.src=src;prev.style.display='block';lbl.textContent='✅ 有圖片 (點擊可變更)';}
+    }catch(e){}
+    document.getElementById('imgbox'+i).addEventListener('click',()=>document.getElementById('setfile'+i).click());
+    document.getElementById('setfile'+i).addEventListener('change',e=>{
+      const f=e.target.files[0];if(!f)return;
+      const r=new FileReader();
+      r.onload=ev=>{
+        try{localStorage.setItem(IMG_KEYS[i],ev.target.result);}catch(x){}
+        prev.src=ev.target.result;prev.style.display='block';
+        lbl.textContent='✅ 有圖片 (點擊可變更)';
+        // signal main popup to unlock first_image achievement
+        try{ localStorage.setItem('deskpet_img_uploaded', Date.now().toString()); }catch(x){}
+        notifySettings();
+      };
+      r.readAsDataURL(f);
+    });
+  });
+
+  function flash(id){
+    const btn=document.getElementById(id);
+    btn.classList.add('ok');const orig=btn.textContent;btn.textContent='✅ 已儲存！';
+    setTimeout(()=>{btn.classList.remove('ok');btn.textContent=orig;},1600);
+  }
+
+  // ── notification UI ──
+  const notifyOnEl    = document.getElementById('set-notify-on');
+  const threshEl      = document.getElementById('set-notify-threshold');
+  const threshValEl   = document.getElementById('threshold-val');
+  const intervalEl    = document.getElementById('set-notify-interval');
+  const intervalValEl = document.getElementById('interval-val');
+  const permWarn      = document.getElementById('notify-perm-warn');
+
+  // restore saved values
+  const nc = D.common;
+  notifyOnEl.checked        = nc.notifyOn||false;
+  threshEl.value            = nc.notifyThreshold||20;
+  threshValEl.textContent   = nc.notifyThreshold||20;
+  intervalEl.value          = nc.notifyIntervalMin||10;
+  intervalValEl.textContent = nc.notifyIntervalMin||10;
+  const nstats = nc.notifyStats||{hunger:true,happy:false,clean:false,health:true};
+  document.getElementById('nstat-hunger').checked = !!nstats.hunger;
+  document.getElementById('nstat-happy').checked  = !!nstats.happy;
+  document.getElementById('nstat-clean').checked  = !!nstats.clean;
+  document.getElementById('nstat-health').checked = !!nstats.health;
+
+  // live slider labels
+  threshEl.addEventListener('input',   ()=> threshValEl.textContent   = threshEl.value);
+  intervalEl.addEventListener('input', ()=> intervalValEl.textContent = intervalEl.value);
+
+  // request permission when toggled on
+  notifyOnEl.addEventListener('change', async ()=>{
+    if (!notifyOnEl.checked) return;
+    if (!('Notification' in window)) { notifyOnEl.checked=false; permWarn.style.display='block'; return; }
+    const perm = await Notification.requestPermission();
+    if (perm !== 'granted') {
+      notifyOnEl.checked = false;
+      permWarn.style.display = 'block';
+    } else {
+      permWarn.style.display = 'none';
+    }
+  });
+  if (typeof Notification!=='undefined' && Notification.permission==='denied')
+    permWarn.style.display='block';
+
+  // save common — now includes notification settings
+  document.getElementById('btn-save-common').addEventListener('click',()=>{
+    const fresh = loadD();
+    if (!fresh.common) fresh.common = defCommon();
+    fresh.common.apiKey            = document.getElementById('set-apikey').value.trim();
+    fresh.common.relation          = document.getElementById('set-relation').value.trim();
+    fresh.common.scale             = D.common.scale;
+    fresh.common.preset            = D.common.preset;
+    const newDaySpeed = document.querySelector('.ps-btn[data-ds].active')?.dataset.ds || 'normal';
+    // 날짜 속도가 바뀌면 현재 나이를 ageOffset에 고정하고 playedMs 리셋
+    if (newDaySpeed !== (fresh.common.daySpeed||'normal')) {
+      fresh.chars?.forEach((c)=>{
+        if (!c) return;
+        const totalMs = c.playedMs||0;
+        const oldDayMs = DAY_SPEEDS[fresh.common.daySpeed||'normal'];
+        c.ageOffset = (c.ageOffset||0) + Math.floor(totalMs / oldDayMs);
+        c.playedMs = 0;
+      });
+    }
+    fresh.common.daySpeed          = newDaySpeed;
+    fresh.common.notifyOn          = notifyOnEl.checked;
+    fresh.common.notifyThreshold   = parseInt(threshEl.value);
+    fresh.common.notifyIntervalMin = parseInt(intervalEl.value);
+    fresh.common.notifyStats = {
+      hunger: document.getElementById('nstat-hunger').checked,
+      happy:  document.getElementById('nstat-happy').checked,
+      clean:  document.getElementById('nstat-clean').checked,
+      health: document.getElementById('nstat-health').checked,
+    };
+    Object.assign(D.common, fresh.common);
+    saveD(fresh); notifySettings(); flash('btn-save-common');
+  });
+
+  // save chars — clear pool if persona changed, never overwrite game state
+  [0,1].forEach(i=>{
+    document.getElementById('btn-save'+i).addEventListener('click',()=>{
+      // load fresh data from storage to avoid overwriting game state
+      const fresh = loadD();
+      if (!fresh.chars) fresh.chars = [defChar(0), defChar(1)];
+      if (!fresh.chars[i]) fresh.chars[i] = defChar(i);
+      const newPersona = document.getElementById('set-persona'+i).value.trim();
+      if(newPersona !== fresh.chars[i].persona) poolClear(i);
+      fresh.chars[i].name    = document.getElementById('set-name'+i).value.trim()||defChar(i).name;
+      fresh.chars[i].persona = newPersona;
+      // sync D.chars name/persona for local reference
+      if (D.chars[i]) { D.chars[i].name=fresh.chars[i].name; D.chars[i].persona=fresh.chars[i].persona; }
+      saveD(fresh); notifySettings(); flash('btn-save'+i);
+    });
+  });
+
+  // ── log rendering ──
+  let logFilter='all';
+  document.querySelectorAll('.log-filter-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.log-filter-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      logFilter=btn.dataset.lf;
+      renderLog(logFilter);
+    });
+  });
+
+  function renderLog(filter){
+    const log=loadLog();
+    const list=document.getElementById('log-list');
+    let items=log.slice().reverse();
+    if(filter==='0')     items=items.filter(e=>e.ci===0);
+    else if(filter==='1')items=items.filter(e=>e.ci===1);
+    else if(filter==='fail')items=items.filter(e=>e.fail);
+
+    if(items.length===0){list.innerHTML='<div class="log-empty">目前還沒有台詞喔</div>';return;}
+
+    list.innerHTML=items.map(e=>{
+      const name=D.chars[e.ci]?.name||`角色${e.ci+1}`;
+      const t=new Date(e.time);
+      const timeStr=`${t.getHours().toString().padStart(2,'0')}:${t.getMinutes().toString().padStart(2,'0')}`;
+      const trigLabel=TRIGGER_LABELS[e.trigger]||e.trigger;
+      const lineHtml=e.fail
+        ?`<div class="log-line log-fail">❌ ${e.fail}</div>`
+        :`<div class="log-line">${e.line||'(無)'}</div>`;
+      return `<div class="log-item">
+        <div class="log-meta"><span class="log-who">${name}</span><span class="log-time">${timeStr}</span></div>
+        <div class="log-trigger">狀況: ${trigLabel}</div>
+        ${lineHtml}
+      </div>`;
+    }).join('');
+  }
+}
+</script>
+</body>
+</html>
