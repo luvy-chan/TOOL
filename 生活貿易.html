@@ -207,16 +207,15 @@
  
 
 body {
-  user-select: none;
+  cursor: default; 
 }
 input {
-  user-select: auto;
+  cursor: text; 
 }
 
 .name-text.has-hover-text {
   text-decoration: underline solid var(--border); 
   text-underline-offset: 2px;
-  cursor: help;
 }
 
 .special-tracker {
@@ -229,13 +228,7 @@ input {
   gap: 12px;
   margin: -2px 0 6px 36px;
 }
-.sp-title {
-  font-size: 11.5px;
-  font-weight: 700;
-  color: var(--muted);
-  border-right: 1px solid var(--border);
-  padding-right: 12px;
-}
+
 .sp-items {
   display: flex;
   flex-wrap: wrap;
@@ -253,7 +246,7 @@ input {
   font-size: 11px;
 }
 .sp-items input {
-  width: 40px;
+  width: 60px;
   border: 1px solid var(--border);
   border-radius: 3px;
   padding: 1px 4px;
@@ -335,6 +328,7 @@ input {
       <h1 class="page-title">生活貿易材料表</h1>
       <div class="header-controls">
         <button id="btnClear" class="btn-clear">清空</button>
+        <button id="btnMinus" class="btn-clear">-1組</button>
         <div class="sets-global">
           組數
           <div class="sets-btns" id="globalSetsBtns">
@@ -376,8 +370,8 @@ input {
   </div>
 
   <div class="tab-panel" id="tab-other">
-    <p class="page-title" style="margin-bottom:10px;">其他表格資料</p>
-    <p class="placeholder-note">（先留空，之後再補其他表格資料）</p>
+    <p class="page-title" style="margin-bottom:10px;">其他資料</p>
+    <p class="placeholder-note">窩鋪知道</p>
   </div>
 
 
@@ -559,7 +553,6 @@ input {
 
 <script>
 
-// --- (保持原有的 AREAS 和 CATEGORIES 不變，直接從這裡開始覆蓋) ---
 const AREAS = [
   { name:'佩拉火山', items:[
     {name:'拉斯帕黑豹的皮革', lv:5, note:'基因突變體×3、特級木材×9、波斯菊香水×6'},
@@ -618,7 +611,7 @@ const CATEGORIES = [
   ]},
   { key:'potion', name:'藥水', note:'藥師宗師', recipes:[
     { target:{name:'強化生命藥水(效果500)<br>', suffix:'佩拉｜黑豹皮革', per:14, hoverText:'醫療所兼職'}, source:{area:'佩拉火山', item:'火山蜥蜴的卵'}, materials:[
-      {name:'幸運草', per:1, hoverText:'艾名花店兼職'},{name:'強化生命藥水(效果300)', per:1},{name:'水', per:1},
+      {name:'幸運草', per:1, hoverText:'艾明花店兼職'},{name:'強化生命藥水(效果300)', per:1},{name:'水', per:1},
     ]},
     { target:{name:'精靈的白葡萄酒', suffix:'綠洲｜仙人掌花', per:7}, source:{area:'綠洲', item:'仙人掌花'}, materials:[
       {name:'白色藥草', per:1},{name:'古代精靈的化石碎片', per:1, hoverText:'班克爾雜貨店吉爾摩販賣5000 [精靈 巴里地下城通行證]\n礦脈挖取 古代精靈化石\n找班克爾 艾頓換取 古代精靈化石碎片'},{name:'自然力消除', per:2, hoverText:'堤村魔法學校麗莎販賣'},
@@ -707,23 +700,20 @@ function escapeHtml(s){
   if(!s) return '';
   return String(s)
     .replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))
-    .replace(/&lt;br&gt;/gi, '<br>'); // 保留原本設定的 <br> 標籤可以換行
+    .replace(/&lt;br&gt;/gi, '<br>'); 
 }
 
-// 取得目標主材料所需的總數
 function getTargetTotal(catKey, ri) {
   const cat = CATEGORIES.find(c => c.key === catKey);
   return cat.recipes[ri].target.per * state.globalSets;
 }
 
-// 取得子材料所需的總數 (基於主材料的總數)
 function getSubTotal(catKey, ri, mi) {
   const cat = CATEGORIES.find(c => c.key === catKey);
   const targetTotal = getTargetTotal(catKey, ri);
   return cat.recipes[ri].materials[mi].per * targetTotal;
 }
 
-// 判斷某一行是否已完成
 function isRowDone(rowId, totalRequired) {
   const st = state.rows[rowId] || {};
   const have = Number(st.have) || 0;
@@ -808,11 +798,9 @@ function buildStructure(){
     });
     catHtml += `</div></div>`;
 
-    // 插入魔法製造與稀原工學中間的特殊追蹤區塊
     if(cat.key === 'magic') {
       catHtml += `
         <div class="special-tracker">
-          <div class="sp-title">特殊材料統計</div>
           <div class="sp-items">
             <label>稀原<span>需 <span id="sp-req-rare">0</span> / 有 <input type="number" id="sp-have-rare" placeholder="0"></span></label>
             <label>稀原礦石碎片<span>需 <span id="sp-req-rare-frag">0</span> / 有 <input type="number" id="sp-have-rare-frag" placeholder="0"></span></label>
@@ -832,7 +820,6 @@ function rowHTML(rowId, item, cls){
   const suffixHtml = item.suffix ? `<span class="name-suffix">${escapeHtml(item.suffix)}</span>` : '';
   const nameClass = item.hoverText ? 'name-text has-hover-text' : 'name-text';
 
-  // Hover 獨立綁在 name-text 上，不影響後綴小字
   return `<div class="row ${cls}" data-row="${rowId}" data-per="${item.per}">
     <div class="name"><span class="${nameClass}"${tooltipHtml}>${escapeHtml(item.name)}</span>${suffixHtml}</div>
     <div class="per">${item.per}</div>
@@ -866,6 +853,30 @@ function wireEvents(){
     }
   };
 
+
+  document.getElementById('btnMinus').onclick = ()=>{
+    CATEGORIES.forEach(cat=>{
+      cat.recipes.forEach((r, ri)=>{
+        const rowId = `t-${cat.key}-${ri}`; 
+        const per = r.target.per; 
+        const st = state.rows[rowId];
+        
+        if(st && st.have) {
+          let currentHave = Number(st.have);
+          if (currentHave >= per) {
+            state.rows[rowId].have = currentHave - per;
+          } else {
+            state.rows[rowId].have = 0; 
+          }
+        }
+      });
+    });
+    scheduleSave(); 
+    updateUI();
+  };
+
+  
+
   document.querySelectorAll('.row').forEach(rowEl=>{
     const rowId = rowEl.dataset.row;
     const haveInput = rowEl.querySelector('.have input');
@@ -883,7 +894,6 @@ function wireEvents(){
     };
   });
 
-  // 綁定特殊追蹤輸入框
   ['rare', 'rare-frag', 'sili', 'sili-crys'].forEach(key => {
     const input = document.getElementById(`sp-have-${key}`);
     if(input) {
@@ -904,7 +914,6 @@ function updateUI(){
     btn.classList.toggle('active', Number(btn.dataset.n)===sets);
   });
 
-  // 特殊統計計算變數
   let reqRare = 0, reqRareFrag = 0, reqSili = 0, reqSiliCrys = 0;
 
   CATEGORIES.forEach(cat=>{
@@ -916,7 +925,6 @@ function updateUI(){
         const subTotal = getSubTotal(cat.key, ri, mi);
         updateRowUI(`m-${cat.key}-${ri}-${mi}`, subTotal, subDisplayDone(cat.key, ri, mi));
 
-        // 計算隱藏的特殊總數
         const mName = m.name;
         if(mName === '稀原') {
           reqRare += subTotal;
@@ -936,7 +944,7 @@ function updateUI(){
     });
   });
 
-  // 更新特殊統計 DOM
+
   const elRare = document.getElementById('sp-req-rare');
   if(elRare){
     elRare.textContent = reqRare;
