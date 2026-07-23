@@ -204,10 +204,72 @@
   .map-img{ max-width:100%; border:1px solid var(--border); border-radius:6px; display:block; margin-top:10px; }
   .placeholder-note{ color:var(--muted); font-size:13px; }
 
-  .name.has-hover-text {
-    text-decoration: underline dashed var(--muted);
-    text-underline-offset: 2px;
-  }
+ 
+
+body {
+  user-select: none;
+}
+input {
+  user-select: auto;
+}
+
+.name-text.has-hover-text {
+  text-decoration: underline solid var(--border); 
+  text-underline-offset: 2px;
+  cursor: help;
+}
+
+.special-tracker {
+  background: #faf9f5;
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: -2px 0 6px 36px;
+}
+.sp-title {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--muted);
+  border-right: 1px solid var(--border);
+  padding-right: 12px;
+}
+.sp-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  font-size: 11.5px;
+  color: var(--text);
+}
+.sp-items label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.sp-items span {
+  color: var(--muted);
+  font-size: 11px;
+}
+.sp-items input {
+  width: 40px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1px 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  background: var(--panel);
+  text-align: center;
+}
+@media (max-width:760px){
+  .special-tracker { flex-direction: column; align-items: flex-start; gap: 8px; margin: 0 0 10px 0; }
+  .sp-title { border-right: none; border-bottom: 1px solid var(--border); padding-right: 0; padding-bottom: 4px; width: 100%; }
+}
+
+
+
+  
 
 /* 另一邊ㄉ */
   .part-time-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 12px; margin-top: 10px; background: var(--panel); box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
@@ -326,9 +388,9 @@
     </div>
 
     <div class="table-controls">
-      <button onclick="setAllRows('ignore', true)">全部不用做 (-)</button>
+      <button onclick="setAllRows('ignore', true)">全選略過</button>
       <button onclick="setAllRows('ignore', false)">重置</button>
-      <button onclick="setAllRows('done', true)">全部已完成 (✓)</button>
+      <button onclick="setAllRows('done', true)">全選完成</button>
       <button onclick="setAllRows('done', false)">重置</button>
     </div>
 
@@ -497,6 +559,7 @@
 
 <script>
 
+// --- (保持原有的 AREAS 和 CATEGORIES 不變，直接從這裡開始覆蓋) ---
 const AREAS = [
   { name:'佩拉火山', items:[
     {name:'拉斯帕黑豹的皮革', lv:5, note:'基因突變體×3、特級木材×9、波斯菊香水×6'},
@@ -518,7 +581,6 @@ const AREAS = [
   ]},
 ];
 
-// 後綴(note)、產物後綴(suffix)、滑鼠提示字(hoverText)  , hoverText:'×'
 const CATEGORIES = [
   { key:'metal', name:'金屬', note:'', recipes:[
     { target:{name:'銀板', suffix:'綠洲｜仙人掌花', per:14}, source:{area:'綠洲', item:'仙人掌花'}, materials:[{name:'銀塊', per:1, hoverText:'合成\n金屬塊+祝福藥水+阿蘭特結晶(貿易所有賣)'}]},
@@ -604,7 +666,7 @@ const CATEGORIES = [
   ]},
 ];
 
-let state = { globalSets:1, rows:{}, areaManual:{} };
+let state = { globalSets:1, rows:{}, areaManual:{}, spInputs:{} };
 let saveTimer = null;
 const reverseIndex = {};
 
@@ -642,14 +704,30 @@ function switchTab(tab){
 document.querySelectorAll('.tab-btn').forEach(b=>b.addEventListener('click', ()=>switchTab(b.dataset.tab)));
 
 function escapeHtml(s){
-  return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  if(!s) return '';
+  return String(s)
+    .replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))
+    .replace(/&lt;br&gt;/gi, '<br>'); // 保留原本設定的 <br> 標籤可以換行
 }
 
-function rowOwnDone(rowId, per, sets){
+// 取得目標主材料所需的總數
+function getTargetTotal(catKey, ri) {
+  const cat = CATEGORIES.find(c => c.key === catKey);
+  return cat.recipes[ri].target.per * state.globalSets;
+}
+
+// 取得子材料所需的總數 (基於主材料的總數)
+function getSubTotal(catKey, ri, mi) {
+  const cat = CATEGORIES.find(c => c.key === catKey);
+  const targetTotal = getTargetTotal(catKey, ri);
+  return cat.recipes[ri].materials[mi].per * targetTotal;
+}
+
+// 判斷某一行是否已完成
+function isRowDone(rowId, totalRequired) {
   const st = state.rows[rowId] || {};
   const have = Number(st.have) || 0;
-  const missing = Math.max(0, per*sets - have);
-  return { missing, ownDone: missing===0 || !!st.checked };
+  return (totalRequired > 0 && have >= totalRequired) || !!st.checked;
 }
 
 function overviewAutoDone(areaName, itemName){
@@ -658,9 +736,9 @@ function overviewAutoDone(areaName, itemName){
   return links.every(l=>{
     const cat = CATEGORIES.find(c=>c.key===l.cat);
     const recipe = cat.recipes[l.ri];
-    const sets = state.globalSets;
-    const targetOwn = rowOwnDone(`t-${l.cat}-${l.ri}`, recipe.target.per, sets).ownDone;
-    const subsOwn = recipe.materials.every((m,mi)=>rowOwnDone(`m-${l.cat}-${l.ri}-${mi}`, m.per, sets).ownDone);
+    const targetTotal = getTargetTotal(l.cat, l.ri);
+    const targetOwn = isRowDone(`t-${l.cat}-${l.ri}`, targetTotal);
+    const subsOwn = recipe.materials.every((m,mi)=> isRowDone(`m-${l.cat}-${l.ri}-${mi}`, getSubTotal(l.cat, l.ri, mi)));
     return targetOwn || subsOwn;
   });
 }
@@ -670,12 +748,12 @@ function overviewDisplayDone(areaIdx, itemIdx, areaName, itemName){
 }
 
 function targetDisplayDone(catKey, ri){
+  const targetTotal = getTargetTotal(catKey, ri);
+  if(isRowDone(`t-${catKey}-${ri}`, targetTotal)) return true;
+  
   const cat = CATEGORIES.find(c=>c.key===catKey);
   const recipe = cat.recipes[ri];
-  const sets = state.globalSets;
-  if(rowOwnDone(`t-${catKey}-${ri}`, recipe.target.per, sets).ownDone) return true;
-  
-  const allSubsDone = recipe.materials.every((m,mi)=>rowOwnDone(`m-${catKey}-${ri}-${mi}`, m.per, sets).ownDone);
+  const allSubsDone = recipe.materials.every((m,mi)=> isRowDone(`m-${catKey}-${ri}-${mi}`, getSubTotal(catKey, ri, mi)));
   if(allSubsDone) return true;
 
   const areaIdx = AREAS.findIndex(a=>a.name===recipe.source.area);
@@ -685,23 +763,17 @@ function targetDisplayDone(catKey, ri){
 }
 
 function subDisplayDone(catKey, ri, mi){
-  const cat = CATEGORIES.find(c=>c.key===catKey);
-  const recipe = cat.recipes[ri];
-  const m = recipe.materials[mi];
-  const sets = state.globalSets;
-  if(rowOwnDone(`m-${catKey}-${ri}-${mi}`, m.per, sets).ownDone) return true;
+  const subTotal = getSubTotal(catKey, ri, mi);
+  if(isRowDone(`m-${catKey}-${ri}-${mi}`, subTotal)) return true;
   return targetDisplayDone(catKey, ri);
 }
 
-
 function buildStructure(){
-
   const grid = document.getElementById('areaGrid');
   let areaHtml = '';
   AREAS.forEach((area, ai)=>{
     areaHtml += `<div class="area-col">
       <div class="area-name">${escapeHtml(area.name)}</div>`;
-    
     area.items.forEach((it, ii)=>{
       areaHtml += `<label class="area-item" data-aid="a-${ai}-${ii}">
         <input type="checkbox">
@@ -715,7 +787,6 @@ function buildStructure(){
     areaHtml += `</div>`;
   });
   grid.innerHTML = areaHtml;
-
 
   const wrap = document.getElementById('catGrid');
   let catHtml = '';
@@ -736,20 +807,34 @@ function buildStructure(){
       catHtml += `</div></div>`;
     });
     catHtml += `</div></div>`;
+
+    // 插入魔法製造與稀原工學中間的特殊追蹤區塊
+    if(cat.key === 'magic') {
+      catHtml += `
+        <div class="special-tracker">
+          <div class="sp-title">特殊材料統計</div>
+          <div class="sp-items">
+            <label>稀原<span>需 <span id="sp-req-rare">0</span> / 有 <input type="number" id="sp-have-rare" placeholder="0"></span></label>
+            <label>稀原礦石碎片<span>需 <span id="sp-req-rare-frag">0</span> / 有 <input type="number" id="sp-have-rare-frag" placeholder="0"></span></label>
+            <label>希里原<span>需 <span id="sp-req-sili">0</span> / 有 <input type="number" id="sp-have-sili" placeholder="0"></span></label>
+            <label>希里原結晶<span>需 <span id="sp-req-sili-crys">0</span> / 有 <input type="number" id="sp-have-sili-crys" placeholder="0"></span></label>
+          </div>
+        </div>
+      `;
+    }
   });
   wrap.innerHTML = catHtml;
-
   wireEvents();
 }
 
 function rowHTML(rowId, item, cls){
-  const tooltip = item.hoverText ? item.hoverText : item.name; 
+  const tooltipHtml = item.hoverText ? ` title="${escapeHtml(item.hoverText)}"` : ''; 
   const suffixHtml = item.suffix ? `<span class="name-suffix">${escapeHtml(item.suffix)}</span>` : '';
-  
-  const nameClass = item.hoverText ? 'name has-hover-text' : 'name';
+  const nameClass = item.hoverText ? 'name-text has-hover-text' : 'name-text';
 
+  // Hover 獨立綁在 name-text 上，不影響後綴小字
   return `<div class="row ${cls}" data-row="${rowId}" data-per="${item.per}">
-    <div class="${nameClass}" title="${escapeHtml(tooltip)}">${escapeHtml(item.name)}${suffixHtml}</div>
+    <div class="name"><span class="${nameClass}"${tooltipHtml}>${escapeHtml(item.name)}</span>${suffixHtml}</div>
     <div class="per">${item.per}</div>
     <div class="total">0</div>
     <div class="have"><input type="number" min="0" value="" placeholder="0"></div>
@@ -776,7 +861,7 @@ function wireEvents(){
 
   document.getElementById('btnClear').onclick = ()=>{
     if(confirm('確定要清空所有紀錄？')){
-      state = { globalSets:1, rows:{}, areaManual:{} };
+      state = { globalSets:1, rows:{}, areaManual:{}, spInputs:{} };
       scheduleSave(); updateUI();
     }
   };
@@ -797,6 +882,19 @@ function wireEvents(){
       scheduleSave(); updateUI();
     };
   });
+
+  // 綁定特殊追蹤輸入框
+  ['rare', 'rare-frag', 'sili', 'sili-crys'].forEach(key => {
+    const input = document.getElementById(`sp-have-${key}`);
+    if(input) {
+      input.value = state.spInputs ? (state.spInputs[key] || '') : '';
+      input.oninput = (e) => {
+        state.spInputs = state.spInputs || {};
+        state.spInputs[key] = e.target.value;
+        scheduleSave();
+      };
+    }
+  });
 }
 
 function updateUI(){
@@ -806,14 +904,46 @@ function updateUI(){
     btn.classList.toggle('active', Number(btn.dataset.n)===sets);
   });
 
+  // 特殊統計計算變數
+  let reqRare = 0, reqRareFrag = 0, reqSili = 0, reqSiliCrys = 0;
+
   CATEGORIES.forEach(cat=>{
     cat.recipes.forEach((r, ri)=>{
-      updateRowUI(`t-${cat.key}-${ri}`, r.target, sets, targetDisplayDone(cat.key, ri));
+      const targetTotal = getTargetTotal(cat.key, ri);
+      updateRowUI(`t-${cat.key}-${ri}`, targetTotal, targetDisplayDone(cat.key, ri));
+      
       r.materials.forEach((m, mi)=>{
-        updateRowUI(`m-${cat.key}-${ri}-${mi}`, m, sets, subDisplayDone(cat.key, ri, mi));
+        const subTotal = getSubTotal(cat.key, ri, mi);
+        updateRowUI(`m-${cat.key}-${ri}-${mi}`, subTotal, subDisplayDone(cat.key, ri, mi));
+
+        // 計算隱藏的特殊總數
+        const mName = m.name;
+        if(mName === '稀原') {
+          reqRare += subTotal;
+          reqRareFrag += subTotal * 5;
+        } else if (mName === '希里原') {
+          reqSili += subTotal;
+          reqSiliCrys += subTotal * 5;
+        } else if (mName === '能量轉換器') {
+          reqSili += subTotal;
+          reqRare += subTotal;
+          reqSiliCrys += subTotal * 5;
+          reqRareFrag += subTotal * 5;
+        } else if (mName === '六角螺絲' || mName === '六角螺帽') {
+          reqRareFrag += subTotal;
+        }
       });
     });
   });
+
+  // 更新特殊統計 DOM
+  const elRare = document.getElementById('sp-req-rare');
+  if(elRare){
+    elRare.textContent = reqRare;
+    document.getElementById('sp-req-rare-frag').textContent = reqRareFrag;
+    document.getElementById('sp-req-sili').textContent = reqSili;
+    document.getElementById('sp-req-sili-crys').textContent = reqSiliCrys;
+  }
 
   AREAS.forEach((area, ai)=>{
     area.items.forEach((it, ii)=>{
@@ -829,11 +959,13 @@ function updateUI(){
   });
 }
 
-function updateRowUI(rowId, item, sets, displayDone){
+function updateRowUI(rowId, total, displayDone){
   const el = document.querySelector(`.row[data-row="${rowId}"]`);
   if(!el) return;
-  const total = item.per * sets;
-  const { missing } = rowOwnDone(rowId, item.per, sets);
+
+  const st = state.rows[rowId] || {};
+  const have = Number(st.have) || 0;
+  const missing = Math.max(0, total - have);
 
   el.querySelector('.total').textContent = total;
   el.querySelector('.missing').textContent = missing;
@@ -843,7 +975,6 @@ function updateRowUI(rowId, item, sets, displayDone){
   if(chk.checked !== displayDone) chk.checked = displayDone;
 
   const haveInput = el.querySelector('.have input');
-  const st = state.rows[rowId] || {};
   const expectedHave = st.have ?? '';
   if(String(haveInput.value) !== String(expectedHave) && document.activeElement !== haveInput){
     haveInput.value = expectedHave;
