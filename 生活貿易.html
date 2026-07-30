@@ -579,7 +579,7 @@ const CATEGORIES = [
   { key:'metal', name:'金屬', note:'', recipes:[
     { target:{name:'銀板', suffix:'綠洲｜仙人掌花', per:14}, source:{area:'綠洲', item:'仙人掌花'}, materials:[{name:'銀塊', per:1, hoverText:'合成\n金屬塊+祝福藥水+阿蘭特結晶(貿易所有賣)'}]},
     { target:{name:'秘銀鐵釘', suffix:'凱麗達｜玫瑰鹽', per:9}, source:{area:'凱麗達營地', item:'玫瑰鹽'}, materials:[{name:'秘銀塊', per:20, hoverText:'合成\n金屬塊+祝福藥水+阿蘭特結晶(貿易所有賣)'}]},
-    { target:{name:'金板', suffix:'佩拉｜伊克西翁角', per:35}, source:{area:'佩拉火山', item:'伊克西翁的角'}, materials:[{name:'銀塊', per:1, hoverText:'合成\n金屬塊+祝福藥水+阿蘭特結晶(貿易所有賣)'}]},
+    { target:{name:'金板', suffix:'佩拉｜伊克西翁角', per:35}, source:{area:'佩拉火山', item:'伊克西翁的角'}, materials:[{name:'金塊', per:1, hoverText:'合成\n金屬塊+祝福藥水+阿蘭特結晶(貿易所有賣)'}]},
   ]},
   { key:'magic', name:'魔法製造', note:'寵物宗師', recipes:[
     { target:{name:'基因突變體', suffix:'佩拉｜黑豹皮革', per:3}, source:{area:'佩拉火山', item:'拉斯帕黑豹的皮革'}, materials:[
@@ -636,7 +636,7 @@ const CATEGORIES = [
     { target:{name:'高級絲綢', suffix:'卡魯｜卡魯香菇', per:28}, source:{area:'卡魯', item:'卡魯香菇'}, materials:[{name:'細線團', per:5}]},
     { target:{name:'高級布料', suffix:'綠洲｜仙人掌花', per:28}, source:{area:'綠洲', item:'仙人掌花'}, materials:[{name:'粗線團', per:4}]},
     { target:{name:'優質布料', suffix:'佩拉｜火蜥蜴卵', per:35}, source:{area:'佩拉火山', item:'火山蜥蜴的卵'}, materials:[{name:'粗線團', per:6}]},
-    { target:{name:'堅固之鏈', suffix:'卡魯｜貝殼化石', per:3, hoverText:'！推薦兼職獲取！\n繩結線×1+蘊藏黑暗的刀刃碎片×1'}, source:{area:'卡魯', item:'貝殼化石'}, materials:[{name:'細線團', per:1},{name:'粗線團', per:1}]},
+    { target:{name:'堅固之鏈', suffix:'卡魯｜貝殼化石', per:3, hoverText:'！推薦兼職獲取！\n繩結線=細線團×1+粗線團×1'}, source:{area:'卡魯', item:'貝殼化石'}, materials:[{name:'繩結線', per:1},{name:'蘊藏黑暗的刀刃碎片', per:1}]},
     { target:{name:'高級皮繩', suffix:'凱麗達｜露營帳篷', per:35}, source:{area:'凱麗達營地', item:'大型露營帳篷'}, materials:[{name:'高級皮革', per:1}]},
   ]},
   { key:'other', name:'其他材料', recipes:[
@@ -744,8 +744,8 @@ function targetDisplayDone(catKey, ri){
   
   const cat = CATEGORIES.find(c=>c.key===catKey);
   const recipe = cat.recipes[ri];
-  const allSubsDone = recipe.materials.every((m,mi)=> isRowDone(`m-${catKey}-${ri}-${mi}`, getSubTotal(catKey, ri, mi)));
-  if(allSubsDone) return true;
+  //const allSubsDone = recipe.materials.every((m,mi)=> isRowDone(`m-${catKey}-${ri}-${mi}`, getSubTotal(catKey, ri, mi)));
+  //if(allSubsDone) return true;
 
   const areaIdx = AREAS.findIndex(a=>a.name===recipe.source.area);
   if(areaIdx===-1) return false;
