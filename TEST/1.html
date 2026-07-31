@@ -1,0 +1,751 @@
+https://youda0403.github.io/Color/
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>캐릭터 컬러랩</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=IBM+Plex+Mono:wght@400;600&family=Fraunces:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --tint:#8f87c9;
+    --paper:#f2f1f6;
+    --ink:#2b2733;
+    --sub:#7d7789;
+    --line:#dcd9e4;
+    --card:#ffffff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{
+    font-family:'Pretendard',sans-serif;background:var(--paper);color:var(--ink);
+    min-height:100vh;padding:20px 16px 60px;
+  }
+  .wrap{max-width:520px;margin:0 auto}
+  header{text-align:center;margin:18px 0 26px}
+  header h1{font-family:'Gowun Dodum',sans-serif;font-size:26px;letter-spacing:1px}
+  header h1 .dot{color:var(--tint);transition:color .4s}
+  header p{font-size:12.5px;color:var(--sub);margin-top:6px;letter-spacing:.4px}
+
+  .mode{display:flex;background:#e6e3ee;border-radius:99px;padding:4px;margin-bottom:22px}
+  .mode button{
+    flex:1;border:0;background:transparent;padding:10px 0;border-radius:99px;
+    font-family:inherit;font-size:14px;font-weight:600;color:var(--sub);cursor:pointer;transition:.25s;
+  }
+  .mode button.on{background:var(--ink);color:#fff}
+
+  .slot{background:var(--card);border-radius:20px;padding:18px;margin-bottom:16px;border:1px solid var(--line)}
+  .slot h2{font-size:13px;font-weight:700;color:var(--sub);letter-spacing:1px;margin-bottom:12px}
+  .drop{
+    border:1.5px dashed var(--line);border-radius:14px;min-height:140px;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:8px;cursor:pointer;transition:.2s;overflow:hidden;position:relative;
+  }
+  .drop:hover{border-color:var(--tint)}
+  .drop img{width:100%;max-height:260px;object-fit:contain;display:block}
+  .drop .hint{color:var(--sub);font-size:13px}
+  .drop .hint b{color:var(--tint);transition:color .4s}
+  .cropframe{position:relative;width:100%;aspect-ratio:418/520;overflow:hidden;border-radius:12px;background:#faf9fc;touch-action:none;cursor:grab}
+  .cropframe img{position:absolute;max-width:none;max-height:none;pointer-events:none}
+  .crophint{margin:10px 0;font-size:11.5px;color:var(--sub);text-align:center}
+  .changebtn{border:0;background:none;color:var(--tint);font-family:inherit;font-size:11.5px;text-decoration:underline;cursor:pointer;padding:0}
+  .namein{
+    width:100%;margin-top:12px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;
+    font-family:inherit;font-size:14px;background:#faf9fc;color:var(--ink);
+  }
+  .namein:focus{outline:none;border-color:var(--tint)}
+
+  .chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+  .chip{
+    display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;border:0;background:none;
+    font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--sub);
+  }
+  .chip .sw{width:44px;height:44px;border-radius:12px;border:2.5px solid transparent;transition:.15s;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}
+  .chip.on .sw{border-color:#fff;box-shadow:0 0 0 2.5px var(--ink),inset 0 0 0 1px rgba(0,0,0,.06);transform:scale(1.08)}
+  .chip.on{color:var(--ink);font-weight:600}
+  .chiplabel{font-size:11px;color:var(--sub);margin-top:12px}
+
+  .result{background:var(--card);border-radius:20px;padding:18px;border:1px solid var(--line);margin-bottom:16px}
+  .result h2{font-size:13px;font-weight:700;color:var(--sub);letter-spacing:1px;margin-bottom:12px}
+  .repline{display:flex;align-items:center;gap:14px}
+  .repline .big{width:64px;height:64px;border-radius:16px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}
+  .repline .hex{font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:600}
+  .repline .rgb{font-size:12px;color:var(--sub);margin-top:2px}
+  .blendviz{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .blendviz .s{width:36px;height:36px;border-radius:10px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}
+  .blendviz .op{color:var(--sub);font-size:14px}
+  .blendviz .bar{flex:1;height:10px;border-radius:99px}
+
+  .palgroup{margin-top:18px}
+  .pal{
+    border:1.5px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px;transition:.15s;
+  }
+  .pal.on{border-color:var(--ink)}
+  .pal .pname{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
+  .pal .row{display:flex;gap:6px}
+  .pal .row div{flex:1;height:34px;border-radius:8px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.05)}
+  .palhexes{display:flex;gap:6px;margin-top:6px}
+  .palhexes span{flex:1;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:8.5px;color:var(--sub)}
+
+  .exportbtn{
+    width:100%;border:0;border-radius:16px;padding:16px;font-family:inherit;font-size:15px;font-weight:700;
+    background:var(--tint);color:#fff;cursor:pointer;transition:background .4s;margin-top:4px;
+  }
+  .exportbtn:active{transform:scale(.98)}
+  .exportbtn.sub{background:transparent;color:var(--ink);border:1.5px solid var(--line);margin-top:10px}
+  .empty{color:var(--sub);font-size:13px;text-align:center;padding:20px 0}
+  .hidden{display:none}
+  footer{text-align:center;color:var(--sub);font-size:11px;margin-top:30px;letter-spacing:.5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>캐릭터 컬러랩 <span class="dot">●</span></h1>
+    <p>캐릭터의 대표색을 찾아 컬러 카드로 남겨요</p>
+  </header>
+
+  <div class="mode">
+    <button id="mSolo" class="on">1인 카드</button>
+    <button id="mDuo">2인 · 중간색</button>
+  </div>
+
+  <div class="slot" id="slot0">
+    <h2 id="slot0title">CHARACTER</h2>
+    <div class="drop" id="drop0">
+      <span class="hint"><b>사진 선택</b> 또는 드래그</span>
+      <span class="hint" style="font-size:11px">투명 배경 PNG면 더 정확해요</span>
+    </div>
+    <input type="file" id="file0" accept="image/*" class="hidden">
+    <input type="text" id="name0" class="namein" placeholder="캐릭터 이름 (선택)">
+    <div id="chipwrap0" class="hidden">
+      <div class="chiplabel">추출된 색 · 탭해서 대표색 선택</div>
+      <div class="chips" id="chips0"></div>
+    </div>
+  </div>
+
+  <div class="slot hidden" id="slot1">
+    <h2>CHARACTER B</h2>
+    <div class="drop" id="drop1">
+      <span class="hint"><b>사진 선택</b> 또는 드래그</span>
+    </div>
+    <input type="file" id="file1" accept="image/*" class="hidden">
+    <input type="text" id="name1" class="namein" placeholder="캐릭터 이름 (선택)">
+    <div id="chipwrap1" class="hidden">
+      <div class="chiplabel">추출된 색 · 탭해서 대표색 선택</div>
+      <div class="chips" id="chips1"></div>
+    </div>
+  </div>
+
+  <div class="result" id="resultBox">
+    <h2 id="resultTitle">대표색</h2>
+    <div class="empty" id="resultEmpty">이미지를 올리면 결과가 표시돼요</div>
+    <div id="resultBody" class="hidden">
+      <div class="blendviz hidden" id="blendviz">
+        <div class="s" id="bvA"></div><span class="op">+</span>
+        <div class="s" id="bvB"></div><span class="op">→</span>
+        <div class="bar" id="bvBar"></div>
+      </div>
+      <div class="repline">
+        <div class="big" id="repSw"></div>
+        <div>
+          <div class="hex" id="repHex">#000000</div>
+          <div class="rgb" id="repRgb"></div>
+        </div>
+      </div>
+      <div class="palgroup" id="palGroup"></div>
+      <button class="exportbtn" id="exportBtn">컬러 카드 PNG 저장</button>
+      <button class="exportbtn sub" id="palExportBtn">추천 팔레트 PNG 저장</button>
+    </div>
+  </div>
+
+  <footer>CHARACTER COLOR CARD</footer>
+</div>
+
+<script>
+/* ---------- state ---------- */
+const state = {
+  mode:'solo',
+  slots:[{img:null,colors:[],rep:0,pos:{x:.5,y:.5},zoom:1},{img:null,colors:[],rep:0,pos:{x:.5,y:.5},zoom:1}]
+};
+
+/* ---------- color utils ---------- */
+const hex = c => '#'+[c.r,c.g,c.b].map(v=>Math.round(v).toString(16).padStart(2,'0')).join('').toUpperCase();
+function rgbToHsl(r,g,b){
+  r/=255;g/=255;b/=255;
+  const mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;
+  let h=0;
+  if(d){
+    if(mx===r)h=((g-b)/d)%6; else if(mx===g)h=(b-r)/d+2; else h=(r-g)/d+4;
+    h*=60; if(h<0)h+=360;
+  }
+  const l=(mx+mn)/2;
+  const s=d===0?0:d/(1-Math.abs(2*l-1));
+  return {h,s,l};
+}
+function hslToRgb(h,s,l){
+  h=((h%360)+360)%360; s=Math.min(1,Math.max(0,s)); l=Math.min(1,Math.max(0,l));
+  const c=(1-Math.abs(2*l-1))*s, x=c*(1-Math.abs((h/60)%2-1)), m=l-c/2;
+  let r,g,b;
+  if(h<60)[r,g,b]=[c,x,0]; else if(h<120)[r,g,b]=[x,c,0]; else if(h<180)[r,g,b]=[0,c,x];
+  else if(h<240)[r,g,b]=[0,x,c]; else if(h<300)[r,g,b]=[x,0,c]; else [r,g,b]=[c,0,x];
+  return {r:(r+m)*255,g:(g+m)*255,b:(b+m)*255};
+}
+/* oklab for perceptual blending */
+function srgbToLin(v){v/=255;return v<=0.04045?v/12.92:Math.pow((v+0.055)/1.055,2.4);}
+function linToSrgb(v){return 255*(v<=0.0031308?12.92*v:1.055*Math.pow(v,1/2.4)-0.055);}
+function rgbToOklab(c){
+  const r=srgbToLin(c.r),g=srgbToLin(c.g),b=srgbToLin(c.b);
+  const l=Math.cbrt(0.4122214708*r+0.5363325363*g+0.0514459929*b);
+  const m=Math.cbrt(0.2119034982*r+0.6806995451*g+0.1073969566*b);
+  const s=Math.cbrt(0.0883024619*r+0.2817188376*g+0.6299787005*b);
+  return {L:0.2104542553*l+0.7936177850*m-0.0040720468*s,
+          A:1.9779984951*l-2.4285922050*m+0.4505937099*s,
+          B:0.0259040371*l+0.7827717662*m-0.8086757660*s};
+}
+function oklabToRgb(o){
+  const l=o.L+0.3963377774*o.A+0.2158037573*o.B;
+  const m=o.L-0.1055613458*o.A-0.0638541728*o.B;
+  const s=o.L-0.0894841775*o.A-1.2914855480*o.B;
+  const l3=l*l*l,m3=m*m*m,s3=s*s*s;
+  const r=+4.0767416621*l3-3.3077115913*m3+0.2309699292*s3;
+  const g=-1.2684380046*l3+2.6097574011*m3-0.3413193965*s3;
+  const b=-0.0041960863*l3-0.7034186147*m3+1.7076147010*s3;
+  const cl=v=>Math.min(255,Math.max(0,linToSrgb(v)));
+  return {r:cl(r),g:cl(g),b:cl(b)};
+}
+function mixOklab(a,b,t){
+  const oa=rgbToOklab(a),ob=rgbToOklab(b);
+  return oklabToRgb({L:oa.L+(ob.L-oa.L)*t,A:oa.A+(ob.A-oa.A)*t,B:oa.B+(ob.B-oa.B)*t});
+}
+const dist=(a,b)=>Math.hypot(a.r-b.r,a.g-b.g,a.b-b.b);
+
+/* ---------- extraction ---------- */
+function extractColors(img){
+  const cv=document.createElement('canvas');
+  const scale=Math.min(1,110/Math.max(img.naturalWidth,img.naturalHeight));
+  cv.width=Math.max(1,Math.round(img.naturalWidth*scale));
+  cv.height=Math.max(1,Math.round(img.naturalHeight*scale));
+  cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
+  return extractColorsFromCanvas(cv);
+}
+function extractColorsFromCanvas(cv){
+  const cx=cv.getContext('2d');
+  const d=cx.getImageData(0,0,cv.width,cv.height).data;
+
+  // corner colors = likely background
+  const corners=[];
+  const cs=Math.max(2,Math.floor(cv.width*0.06));
+  [[0,0],[cv.width-cs,0],[0,cv.height-cs],[cv.width-cs,cv.height-cs]].forEach(([x0,y0])=>{
+    let r=0,g=0,b=0,n=0;
+    for(let y=y0;y<y0+cs;y++)for(let x=x0;x<x0+cs;x++){
+      const i=(y*cv.width+x)*4;
+      if(d[i+3]<125)continue;
+      r+=d[i];g+=d[i+1];b+=d[i+2];n++;
+    }
+    if(n)corners.push({r:r/n,g:g/n,b:b/n});
+  });
+
+  const buckets=new Map();
+  for(let i=0;i<d.length;i+=4){
+    if(d[i+3]<125)continue;
+    const r=d[i],g=d[i+1],b=d[i+2];
+    const key=((r>>4)<<8)|((g>>4)<<4)|(b>>4);
+    const bk=buckets.get(key)||{r:0,g:0,b:0,n:0};
+    bk.r+=r;bk.g+=g;bk.b+=b;bk.n++;
+    buckets.set(key,bk);
+  }
+  let list=[...buckets.values()].map(bk=>{
+    const c={r:bk.r/bk.n,g:bk.g/bk.n,b:bk.b/bk.n,n:bk.n};
+    const {s,l}=rgbToHsl(c.r,c.g,c.b);
+    let score=bk.n*(0.18+0.82*Math.pow(s,0.9));
+    if(l>0.93||l<0.07)score*=0.3;
+    if(corners.some(cc=>dist(c,cc)<40))score*=0.15;
+    c.score=score;
+    return c;
+  }).sort((a,b)=>b.score-a.score);
+
+  const picked=[];
+  for(const c of list){
+    if(picked.every(p=>dist(p,c)>=48))picked.push(c);
+    if(picked.length>=6)break;
+  }
+  return picked.map(c=>({r:c.r,g:c.g,b:c.b,hex:hex(c)}));
+}
+
+/* ---------- palettes ---------- */
+function makePalettes(base){
+  const {h,s,l}=rgbToHsl(base.r,base.g,base.b);
+  const P=(hh,ss,ll)=>{const c=hslToRgb(hh,ss,ll);return{...c,hex:hex(c)};};
+  return [
+    {name:'tonal',colors:[
+      P(h,s*0.30,l+(1-l)*0.75),P(h,s*0.50,l+(1-l)*0.45),P(h,s*0.72,l+(1-l)*0.18),
+      {...base,hex:hex(base)},P(h,Math.min(1,s*0.9),Math.max(0.14,l*0.5))
+    ]},
+    {name:'analogue',colors:[
+      P(h-28,s*0.55+0.12,l+(1-l)*0.45),P(h-14,s*0.65+0.10,Math.max(0.12,l*0.82)),
+      {...base,hex:hex(base)},P(h+14,s*0.65+0.10,Math.max(0.10,l*0.78)),P(h+28,s*0.55+0.12,l+(1-l)*0.35)
+    ]},
+    {name:'accent',colors:[
+      {...base,hex:hex(base)},P(h+32,s*0.45,l+(1-l)*0.55),P(h+180,s*0.5+0.12,0.35+l*0.4),
+      P(h,0.08,l+(1-l)*0.7),P(h,s*0.6,Math.max(0.12,l*0.42))
+    ]}
+  ];
+}
+
+/* ---------- current base color ---------- */
+const repOf=s=>s.img&&s.colors.length?s.colors[s.rep]:null;
+function currentBase(){
+  if(state.mode==='solo')return repOf(state.slots[0]);
+  const a=repOf(state.slots[0]),b=repOf(state.slots[1]);
+  if(!a||!b)return null;
+  const m=mixOklab(a,b,0.5);
+  return {...m,hex:hex(m)};
+}
+
+/* ---------- UI ---------- */
+const $=id=>document.getElementById(id);
+
+function setupSlot(i){
+  const drop=$('drop'+i),file=$('file'+i);
+  drop.addEventListener('click',()=>{if(drop.querySelector('.cropframe'))return;file.click();});
+  drop.addEventListener('dragover',e=>e.preventDefault());
+  drop.addEventListener('drop',e=>{
+    e.preventDefault();
+    if(e.dataTransfer.files[0])loadFile(i,e.dataTransfer.files[0]);
+  });
+  file.addEventListener('change',()=>{if(file.files[0])loadFile(i,file.files[0]);});
+  $('name'+i).addEventListener('input',updatePreviewOnly);
+}
+function loadFile(i,f){
+  const rd=new FileReader();
+  rd.onload=()=>{
+    const img=new Image();
+    img.onload=()=>{
+      state.slots[i].img=img;
+      state.slots[i].colors=extractColors(img);
+      state.slots[i].rep=0;
+      state.slots[i].pos={x:0.5,y:0.5};
+      state.slots[i].zoom=1;
+      renderPreview(i);
+      renderChips(i);
+      updateAll();
+    };
+    img.src=rd.result;
+  };
+  rd.readAsDataURL(f);
+}
+function renderPreview(i){
+  const s=state.slots[i],drop=$('drop'+i);
+  if(!s.img)return;
+  drop.innerHTML='<div class="cropframe"><img alt=""></div>'+
+    '<div class="crophint">드래그 이동 · 휠/두 손가락 확대<br>'+
+    '<button type="button" class="changebtn">사진 변경</button> · '+
+    '<button type="button" class="reextbtn changebtn">보이는 영역으로 색 재추출</button></div>';
+  const frame=drop.querySelector('.cropframe'),im=frame.querySelector('img');
+  frame.style.aspectRatio=state.mode==='duo'?'418 / 520':'860 / 540';
+  im.src=s.img.src;im.draggable=false;
+  const layout=()=>{
+    const rW=frame.clientWidth,rH=frame.clientHeight;
+    if(!rW||!rH)return;
+    const sc=Math.max(rW/s.img.naturalWidth,rH/s.img.naturalHeight)*s.zoom;
+    const dw=s.img.naturalWidth*sc,dh=s.img.naturalHeight*sc;
+    im.style.width=dw+'px';im.style.height=dh+'px';
+    im.style.left=(-(dw-rW)*s.pos.x)+'px';
+    im.style.top=(-(dh-rH)*s.pos.y)+'px';
+  };
+  layout();
+  new ResizeObserver(layout).observe(frame);
+  const ptrs=new Map();
+  let pinch=null;
+  const pdist=()=>{const a=[...ptrs.values()];return Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);};
+  frame.addEventListener('pointerdown',e=>{
+    ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    frame.setPointerCapture(e.pointerId);
+    if(ptrs.size===2)pinch={dist:pdist(),zoom:s.zoom};
+  });
+  frame.addEventListener('pointermove',e=>{
+    const p=ptrs.get(e.pointerId);
+    if(!p)return;
+    if(ptrs.size===2&&pinch){
+      p.x=e.clientX;p.y=e.clientY;
+      s.zoom=Math.min(4,Math.max(1,pinch.zoom*pdist()/pinch.dist));
+      layout();
+    }else if(ptrs.size===1){
+      const rW=frame.clientWidth,rH=frame.clientHeight;
+      const sc=Math.max(rW/s.img.naturalWidth,rH/s.img.naturalHeight)*s.zoom;
+      const oX=s.img.naturalWidth*sc-rW,oY=s.img.naturalHeight*sc-rH;
+      if(oX>1)s.pos.x=Math.min(1,Math.max(0,s.pos.x-(e.clientX-p.x)/oX));
+      if(oY>1)s.pos.y=Math.min(1,Math.max(0,s.pos.y-(e.clientY-p.y)/oY));
+      p.x=e.clientX;p.y=e.clientY;
+      layout();
+    }
+  });
+  const endPtr=e=>{ptrs.delete(e.pointerId);pinch=null;};
+  frame.addEventListener('pointerup',endPtr);
+  frame.addEventListener('pointercancel',endPtr);
+  frame.addEventListener('wheel',e=>{
+    e.preventDefault();
+    s.zoom=Math.min(4,Math.max(1,s.zoom*(e.deltaY<0?1.08:1/1.08)));
+    layout();
+  },{passive:false});
+  drop.querySelector('.changebtn').onclick=e=>{e.stopPropagation();$('file'+i).click();};
+  drop.querySelector('.reextbtn').onclick=e=>{e.stopPropagation();extractFromRegion(i);};
+}
+function extractFromRegion(i){
+  const s=state.slots[i];
+  if(!s.img)return;
+  const fr=state.mode==='duo'?{w:418,h:520}:{w:860,h:540};
+  const iw=s.img.naturalWidth,ih=s.img.naturalHeight;
+  const sc=Math.max(fr.w/iw,fr.h/ih)*s.zoom;
+  const dw=iw*sc,dh=ih*sc;
+  const sx=((dw-fr.w)*s.pos.x)/sc, sy=((dh-fr.h)*s.pos.y)/sc;
+  const sw=fr.w/sc, sh=fr.h/sc;
+  const c=document.createElement('canvas');
+  const k=Math.min(1,110/Math.max(sw,sh));
+  c.width=Math.max(1,Math.round(sw*k));
+  c.height=Math.max(1,Math.round(sh*k));
+  c.getContext('2d').drawImage(s.img,sx,sy,sw,sh,0,0,c.width,c.height);
+  s.colors=extractColorsFromCanvas(c);
+  s.rep=0;
+  renderChips(i);
+  updateAll();
+}
+function renderChips(i){
+  const s=state.slots[i],wrap=$('chips'+i);
+  wrap.innerHTML='';
+  s.colors.forEach((c,idx)=>{
+    const btn=document.createElement('button');
+    btn.className='chip'+(idx===s.rep?' on':'');
+    btn.innerHTML=`<div class="sw" style="background:${c.hex}"></div>${c.hex}`;
+    btn.onclick=()=>{s.rep=idx;renderChips(i);updateAll();};
+    wrap.appendChild(btn);
+  });
+  $('chipwrap'+i).classList.remove('hidden');
+}
+
+function updateAll(){
+  const base=currentBase();
+  if(!base){
+    $('resultEmpty').classList.remove('hidden');
+    $('resultBody').classList.add('hidden');
+    return;
+  }
+  $('resultEmpty').classList.add('hidden');
+  $('resultBody').classList.remove('hidden');
+
+  document.documentElement.style.setProperty('--tint',base.hex);
+  $('repSw').style.background=base.hex;
+  $('repHex').textContent=base.hex;
+  $('repRgb').textContent=`RGB ${Math.round(base.r)}, ${Math.round(base.g)}, ${Math.round(base.b)}`;
+
+  if(state.mode==='duo'){
+    const a=repOf(state.slots[0]),b=repOf(state.slots[1]);
+    $('blendviz').classList.remove('hidden');
+    $('bvA').style.background=a.hex;
+    $('bvB').style.background=b.hex;
+    $('bvBar').style.background=`linear-gradient(90deg,${a.hex},${base.hex},${b.hex})`;
+    $('resultTitle').textContent='두 색의 중간색';
+  }else{
+    $('blendviz').classList.add('hidden');
+    $('resultTitle').textContent='대표색';
+  }
+
+  const pals=makePalettes(base);
+  const pg=$('palGroup');
+  pg.innerHTML='<div class="chiplabel" style="margin:0 0 8px">추천 팔레트</div>';
+  pals.forEach(p=>{
+    const el=document.createElement('div');
+    el.className='pal';
+    el.innerHTML=`<div class="pname">${p.name}</div>
+      <div class="row">${p.colors.map(c=>`<div style="background:${c.hex}"></div>`).join('')}</div>
+      <div class="palhexes">${p.colors.map(c=>`<span>${c.hex}</span>`).join('')}</div>`;
+    pg.appendChild(el);
+  });
+}
+function updatePreviewOnly(){/* names only affect export */}
+
+$('mSolo').onclick=()=>setMode('solo');
+$('mDuo').onclick=()=>setMode('duo');
+function setMode(m){
+  state.mode=m;
+  $('mSolo').classList.toggle('on',m==='solo');
+  $('mDuo').classList.toggle('on',m==='duo');
+  $('slot1').classList.toggle('hidden',m==='solo');
+  $('slot0title').textContent=m==='solo'?'CHARACTER':'CHARACTER A';
+  renderPreview(0);renderPreview(1);
+  updateAll();
+}
+
+/* ---------- PNG export ---------- */
+function rr(cx,x,y,w,h,r){
+  cx.beginPath();
+  cx.moveTo(x+r,y);
+  cx.arcTo(x+w,y,x+w,y+h,r);
+  cx.arcTo(x+w,y+h,x,y+h,r);
+  cx.arcTo(x,y+h,x,y,r);
+  cx.arcTo(x,y,x+w,y,r);
+  cx.closePath();
+}
+function drawCoverPos(cx,img,x,y,w,h,r,pos,zoom){
+  cx.save();rr(cx,x,y,w,h,r);cx.clip();
+  const sc=Math.max(w/img.naturalWidth,h/img.naturalHeight)*(zoom||1);
+  const dw=img.naturalWidth*sc,dh=img.naturalHeight*sc;
+  cx.drawImage(img,x-(dw-w)*pos.x,y-(dh-h)*pos.y,dw,dh);
+  cx.restore();
+  rr(cx,x,y,w,h,r);
+  cx.strokeStyle='rgba(0,0,0,.07)';cx.lineWidth=1.5;cx.stroke();
+}
+const tintBg=b=>hex(mixOklab(b,{r:255,g:255,b:255},0.88));
+const tintDeep=b=>hex(mixOklab(b,{r:30,g:26,b:38},0.55));
+
+$('exportBtn').onclick=async()=>{
+  const base=currentBase(); if(!base)return;
+  await Promise.all([
+    document.fonts.load('italic 600 64px Fraunces'),
+    document.fonts.load('italic 400 24px Fraunces'),
+    document.fonts.load('600 20px "IBM Plex Mono"'),
+    document.fonts.load('700 40px Pretendard')
+  ]).catch(()=>{});
+  await document.fonts.ready;
+
+  const W=1000,pad=70,inner=W-pad*2;
+  const duo=state.mode==='duo';
+  const nameA=$('name0').value.trim(),nameB=$('name1').value.trim();
+  const deep=tintDeep(base);
+  const d=new Date();
+  const date=d.getFullYear()+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0');
+  const mono=w=>w+'px "IBM Plex Mono"';
+
+  // ----- height plan -----
+  let H;
+  if(duo){
+    const nameRow=(nameA||nameB)?46:12;
+    H=pad+64+520+8+nameRow+34+186+238+70+pad;
+  }else{
+    const nameH=nameA?74:12;
+    H=pad+64+540+26+nameH+170+38+142+70+pad;
+  }
+
+  const cv=document.createElement('canvas');
+  cv.width=W*2;cv.height=H*2;
+  const cx=cv.getContext('2d');cx.scale(2,2);
+
+  // background + top accent band
+  cx.fillStyle=tintBg(base);cx.fillRect(0,0,W,H);
+  cx.fillStyle=base.hex;cx.fillRect(0,0,W,10);
+
+  // ----- header -----
+  let y=pad;
+  try{cx.letterSpacing='4px';}catch(e){}
+  cx.textAlign='left';cx.fillStyle=deep;cx.font='600 '+mono(17);
+  cx.fillText('COLOR ARCHIVE',pad,y+20);
+  try{cx.letterSpacing='0px';}catch(e){}
+  cx.textAlign='right';cx.font='italic 400 24px Fraunces';
+  cx.fillText(date,W-pad,y+22);
+  cx.strokeStyle='rgba(0,0,0,.18)';cx.lineWidth=1;
+  cx.beginPath();cx.moveTo(pad,y+44);cx.lineTo(W-pad,y+44);cx.stroke();
+  y+=64;
+
+  // strip of extracted colors (rep gets a deep outline)
+  const drawStrip=(cols,rep,x,yy,w,chipH,gap,hexSize)=>{
+    const n=cols.length,chipW=(w-(n-1)*gap)/n;
+    cols.forEach((c,i)=>{
+      const cxp=x+i*(chipW+gap);
+      rr(cx,cxp,yy,chipW,chipH,Math.min(14,chipH/3));
+      cx.fillStyle=c.hex;cx.fill();
+      if(i===rep){
+        cx.strokeStyle='#fff';cx.lineWidth=6;cx.stroke();
+        cx.strokeStyle=deep;cx.lineWidth=2;cx.stroke();
+      }else{
+        cx.strokeStyle='rgba(0,0,0,.06)';cx.lineWidth=1;cx.stroke();
+      }
+      cx.fillStyle='rgba(0,0,0,.5)';cx.font='400 '+mono(hexSize);
+      cx.textAlign='center';
+      cx.fillText(c.hex,cxp+chipW/2,yy+chipH+hexSize+7);
+    });
+    cx.textAlign='left';
+  };
+
+  if(duo){
+    const a=repOf(state.slots[0]),b=repOf(state.slots[1]);
+    const half=(inner-24)/2,imgH=520;
+    drawCoverPos(cx,state.slots[0].img,pad,y,half,imgH,28,state.slots[0].pos,state.slots[0].zoom);
+    drawCoverPos(cx,state.slots[1].img,pad+half+24,y,half,imgH,28,state.slots[1].pos,state.slots[1].zoom);
+    y+=imgH+8;
+    const nameRow=(nameA||nameB)?46:12;
+    if(nameA||nameB){
+      cx.font='600 26px Pretendard';cx.textAlign='center';
+      [[nameA,a,pad+half/2],[nameB,b,pad+half+24+half/2]].forEach(([nm,c,cxr])=>{
+        if(!nm)return;
+        const w2=cx.measureText(nm).width;
+        cx.beginPath();cx.arc(cxr-w2/2-16,y+21,6,0,Math.PI*2);
+        cx.fillStyle=c.hex;cx.fill();
+        cx.fillStyle=deep;cx.fillText(nm,cxr,y+30);
+      });
+    }
+    y+=nameRow+34;
+    // blend color block (left) + compact A + B = C (right)
+    cx.textAlign='left';
+    cx.fillStyle='rgba(0,0,0,.45)';cx.font='italic 400 24px Fraunces';
+    cx.fillText('blend color',pad,y+34);
+    cx.fillStyle=deep;cx.font='italic 600 56px Fraunces';
+    cx.fillText(base.hex,pad,y+96);
+    cx.fillStyle='rgba(0,0,0,.45)';cx.font='400 '+mono(20);
+    cx.fillText('RGB '+Math.round(base.r)+' '+Math.round(base.g)+' '+Math.round(base.b),pad,y+134);
+    // swatch row top matches label line, bottom hex line matches RGB line
+    const sw=96,gapS=30,rowW=sw*3+gapS*2,swY=y+16;
+    let x=W-pad-rowW;
+    cx.textAlign='center';
+    [[a,'+'],[b,'='],[base,null]].forEach(([c,sym])=>{
+      rr(cx,x,swY,sw,sw,20);cx.fillStyle=c.hex;cx.fill();
+      cx.strokeStyle='rgba(0,0,0,.08)';cx.lineWidth=1.5;cx.stroke();
+      cx.fillStyle='rgba(0,0,0,.5)';cx.font='400 '+mono(13);
+      cx.fillText(c.hex,x+sw/2,swY+sw+22);
+      if(sym){
+        cx.fillStyle=deep;cx.font='italic 400 28px Fraunces';
+        cx.fillText(sym,x+sw+gapS/2,swY+sw/2+10);
+      }
+      x+=sw+gapS;
+    });
+    y+=186;
+    // extracted colors per character
+    [[state.slots[0],nameA||'CHARACTER A'],[state.slots[1],nameB||'CHARACTER B']].forEach(([s,label],i)=>{
+      cx.fillStyle='rgba(0,0,0,.55)';cx.font='600 19px Pretendard';cx.textAlign='left';
+      cx.fillText(label,pad,y+18);
+      const lw=cx.measureText(label).width;
+      cx.font='italic 400 17px Fraunces';cx.fillStyle='rgba(0,0,0,.4)';
+      cx.fillText('· extracted',pad+lw+14,y+18);
+      drawStrip(s.colors,s.rep,pad,y+34,inner,44,10,13);
+      y+=110+(i===0?18:0);
+    });
+  }else{
+    const slot=state.slots[0],imgH=540;
+    drawCoverPos(cx,slot.img,pad,y,inner,imgH,32,slot.pos,slot.zoom);
+    y+=imgH+26;
+    const nameH=nameA?74:12;
+    if(nameA){
+      cx.font='600 26px Pretendard';cx.textAlign='center';
+      const w2=cx.measureText(nameA).width;
+      cx.beginPath();cx.arc(W/2-w2/2-16,y+21,6,0,Math.PI*2);
+      cx.fillStyle=base.hex;cx.fill();
+      cx.fillStyle=deep;cx.fillText(nameA,W/2,y+30);
+    }
+    y+=nameH;
+    // representative color
+    rr(cx,pad,y,200,160,28);cx.fillStyle=base.hex;cx.fill();
+    cx.strokeStyle='rgba(0,0,0,.08)';cx.lineWidth=1.5;cx.stroke();
+    cx.textAlign='left';
+    cx.fillStyle='rgba(0,0,0,.45)';cx.font='italic 400 24px Fraunces';
+    cx.fillText('main color',pad+236,y+38);
+    cx.fillStyle=deep;cx.font='italic 600 64px Fraunces';
+    cx.fillText(base.hex,pad+236,y+108);
+    cx.fillStyle='rgba(0,0,0,.45)';cx.font='400 '+mono(20);
+    cx.fillText('RGB '+Math.round(base.r)+' '+Math.round(base.g)+' '+Math.round(base.b),pad+236,y+148);
+    y+=170+38;
+    // extracted colors
+    cx.fillStyle='rgba(0,0,0,.45)';cx.font='italic 400 24px Fraunces';
+    cx.fillText('extracted colors',pad,y+24);
+    const tw=cx.measureText('extracted colors').width;
+    cx.strokeStyle='rgba(0,0,0,.15)';cx.lineWidth=1;
+    cx.beginPath();cx.moveTo(pad+tw+20,y+16);cx.lineTo(W-pad,y+16);cx.stroke();
+    drawStrip(slot.colors,slot.rep,pad,y+44,inner,64,12,15);
+    y+=142;
+  }
+
+  // ----- footer -----
+  cx.strokeStyle='rgba(0,0,0,.18)';cx.lineWidth=1;
+  cx.beginPath();cx.moveTo(pad,y+18);cx.lineTo(W-pad,y+18);cx.stroke();
+  try{cx.letterSpacing='4px';}catch(e){}
+  cx.textAlign='center';cx.fillStyle='rgba(0,0,0,.35)';cx.font='400 '+mono(16);
+  cx.fillText('CHARACTER COLOR CARD',W/2,y+52);
+  try{cx.letterSpacing='0px';}catch(e){}
+
+  const link=document.createElement('a');
+  const fname=(duo?[nameA,nameB].filter(Boolean).join('_'):nameA)||'character';
+  link.download=fname+'_color_card.png';
+  link.href=cv.toDataURL('image/png');
+  link.click();
+};
+
+$('palExportBtn').onclick=async()=>{
+  const base=currentBase(); if(!base)return;
+  await Promise.all([
+    document.fonts.load('italic 400 24px Fraunces'),
+    document.fonts.load('600 26px "IBM Plex Mono"'),
+    document.fonts.load('600 22px Pretendard')
+  ]).catch(()=>{});
+  await document.fonts.ready;
+
+  const W=1000,pad=70,inner=W-pad*2;
+  const deep=tintDeep(base);
+  const pals=makePalettes(base);
+  const d=new Date();
+  const date=d.getFullYear()+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0');
+
+  const H=pad+64+90+162*3+26*2+70+pad;
+  const cv=document.createElement('canvas');
+  cv.width=W*2;cv.height=H*2;
+  const cx=cv.getContext('2d');cx.scale(2,2);
+
+  cx.fillStyle=tintBg(base);cx.fillRect(0,0,W,H);
+  cx.fillStyle=base.hex;cx.fillRect(0,0,W,10);
+
+  let y=pad;
+  try{cx.letterSpacing='4px';}catch(e){}
+  cx.textAlign='left';cx.fillStyle=deep;cx.font='600 17px "IBM Plex Mono"';
+  cx.fillText('COLOR PALETTE',pad,y+20);
+  try{cx.letterSpacing='0px';}catch(e){}
+  cx.textAlign='right';cx.font='italic 400 24px Fraunces';
+  cx.fillText(date,W-pad,y+22);
+  cx.strokeStyle='rgba(0,0,0,.18)';cx.lineWidth=1;
+  cx.beginPath();cx.moveTo(pad,y+44);cx.lineTo(W-pad,y+44);cx.stroke();
+  y+=64;
+
+  // base color reference
+  rr(cx,pad,y+8,56,56,14);cx.fillStyle=base.hex;cx.fill();
+  cx.strokeStyle='rgba(0,0,0,.08)';cx.lineWidth=1.5;cx.stroke();
+  cx.textAlign='left';
+  cx.fillStyle='rgba(0,0,0,.45)';cx.font='italic 400 20px Fraunces';
+  cx.fillText('base color',pad+74,y+30);
+  cx.fillStyle=deep;cx.font='600 26px "IBM Plex Mono"';
+  cx.fillText(base.hex,pad+74,y+60);
+  y+=90;
+
+  pals.forEach((p,pi)=>{
+    cx.fillStyle=deep;cx.textAlign='left';
+    try{cx.letterSpacing='3px';}catch(e){}
+    cx.font='600 19px "IBM Plex Mono"';
+    cx.fillText(p.name.toUpperCase(),pad,y+24);
+    try{cx.letterSpacing='0px';}catch(e){}
+    const chipW=(inner-4*14)/5;
+    p.colors.forEach((c,i)=>{
+      const x=pad+i*(chipW+14);
+      rr(cx,x,y+38,chipW,90,18);cx.fillStyle=c.hex;cx.fill();
+      cx.strokeStyle='rgba(0,0,0,.06)';cx.lineWidth=1;cx.stroke();
+      cx.fillStyle='rgba(0,0,0,.5)';cx.font='400 16px "IBM Plex Mono"';
+      cx.textAlign='center';cx.fillText(c.hex,x+chipW/2,y+152);
+      cx.textAlign='left';
+    });
+    y+=162+(pi<2?26:0);
+  });
+
+  // footer
+  cx.strokeStyle='rgba(0,0,0,.18)';cx.lineWidth=1;
+  cx.beginPath();cx.moveTo(pad,y+18);cx.lineTo(W-pad,y+18);cx.stroke();
+  try{cx.letterSpacing='4px';}catch(e){}
+  cx.textAlign='center';cx.fillStyle='rgba(0,0,0,.35)';cx.font='400 16px "IBM Plex Mono"';
+  cx.fillText('RECOMMENDED PALETTES',W/2,y+52);
+  try{cx.letterSpacing='0px';}catch(e){}
+
+  const link=document.createElement('a');
+  const fname=($('name0').value.trim()||'character');
+  link.download=fname+'_palettes.png';
+  link.href=cv.toDataURL('image/png');
+  link.click();
+};
+
+setupSlot(0);setupSlot(1);
+</script>
+</body>
+</html>
