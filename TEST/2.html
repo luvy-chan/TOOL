@@ -1,0 +1,1322 @@
+https://wizvixen.naru.pub/
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WizvixeN 메인트윗 편집기</title>
+<style>
+  /* Paperozi (Paperlogy), via jsdelivr — real weights 100~900, so the card
+     no longer needs to fake intermediate/bold weights with a stroke hack.
+     Only the weights actually used below get fetched by the browser. */
+  @font-face{
+    font-family:'Paperozi'; font-weight:100; font-display:swap;
+    src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-1Thin.woff2') format('woff2');
+  }
+  @font-face{
+    font-family:'Paperozi'; font-weight:200; font-display:swap;
+    src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-2ExtraLight.woff2') format('woff2');
+  }
+  @font-face{
+    font-family:'Paperozi'; font-weight:300; font-display:swap;
+    src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-3Light.woff2') format('woff2');
+  }
+  @font-face{
+    font-family:'Paperozi'; font-weight:400; font-display:swap;
+    src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-4Regular.woff2') format('woff2');
+  }
+  @font-face{
+    font-family:'Paperozi'; font-weight:500; font-display:swap;
+    src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-5Medium.woff2') format('woff2');
+  }
+  @font-face{
+    font-family:'Paperozi'; font-weight:600; font-display:swap;
+    src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-6SemiBold.woff2') format('woff2');
+  }
+  @font-face{
+    font-family:'Paperozi'; font-weight:700; font-display:swap;
+    src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-7Bold.woff2') format('woff2');
+  }
+  @font-face{
+    font-family:'Paperozi'; font-weight:800; font-display:swap;
+    src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-8ExtraBold.woff2') format('woff2');
+  }
+  @font-face{
+    font-family:'Paperozi'; font-weight:900; font-display:swap;
+    src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-9Black.woff2') format('woff2');
+  }
+  :root{
+    --bg:#f4f4f7;
+    --panel:#ffffff;
+    --border:#e3e3ea;
+    --text:#1c1c22;
+    --muted:#7a7a85;
+    --ui-accent:#4a98c5;
+    --ui-accent-soft:#eeeeff;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Paperozi', 'Malgun Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+  }
+  .app{ display:flex; min-height:100vh; }
+  .panel{
+    width:440px; flex-shrink:0;
+    background:var(--panel);
+    border-right:1px solid var(--border);
+    padding:26px 24px 60px;
+    overflow-y:auto; max-height:100vh;
+  }
+  .stage{
+    flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:40px 24px; gap:18px;
+  }
+  .back-link{
+    display:inline-flex; align-items:center; gap:4px;
+    font-size:12.5px; font-weight:700; color:var(--muted);
+    text-decoration:none; margin-bottom:12px;
+  }
+  .back-link:hover{ color:var(--text); text-decoration:underline; }
+  h1{ font-size:18px; font-weight:900; margin:0 0 4px; }
+  .sub{ font-size:12.5px; color:var(--muted); margin:0 0 22px; line-height:1.5; }
+  .field{ margin-bottom:18px; }
+  .field > label{ display:block; font-size:12.5px; font-weight:700; margin-bottom:7px; }
+  .hint{ font-size:11px; color:var(--muted); margin-top:5px; line-height:1.4; }
+  input[type="text"], textarea{
+    width:100%; border:1px solid var(--border); border-radius:9px;
+    padding:9px 11px; font-size:13px; font-family:inherit;
+    background:#fafafc; color:var(--text); resize:none;
+  }
+  input[type="text"]:focus, textarea:focus{ outline:none; border-color:var(--ui-accent); background:#fff; }
+  textarea{ min-height:74px; line-height:1.5; }
+  .row2{ display:flex; gap:9px; }
+  .row2 > div{ flex:1; }
+  .row4{ display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+
+  .upload-box{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .thumb{
+    width:44px; height:44px; border-radius:10px; background:var(--ui-accent-soft);
+    display:flex; align-items:center; justify-content:center; overflow:hidden;
+    flex-shrink:0; border:1px solid var(--border); font-size:10px; color:var(--muted);
+    background-size:cover; background-position:center;
+  }
+  .btn{
+    border:1px solid var(--border); background:#fff; border-radius:8px;
+    padding:7px 12px; font-size:12px; font-weight:700; cursor:pointer; color:var(--text);
+  }
+  .btn:hover{ background:#f6f6fa; }
+  .btn-edit{ border-color:var(--ui-accent); color:var(--ui-accent); }
+  .btn-edit:hover{ background:var(--ui-accent-soft); }
+  .btn-ghost{ border:none; background:none; color:var(--muted); font-size:11px; cursor:pointer; text-decoration:underline; padding:0; }
+  input[type="file"]{ display:none; }
+
+  details.rowbox{
+    border:1px solid var(--border); border-radius:12px; margin-bottom:14px; overflow:hidden;
+  }
+  details.rowbox summary{
+    padding:10px 14px; font-size:13px; font-weight:800; cursor:pointer; background:#fafafc;
+    list-style:none;
+  }
+  details.rowbox summary::-webkit-details-marker{ display:none; }
+  details.rowbox .rowbox-body{ padding:14px; border-top:1px solid var(--border); }
+  .item-block{ padding:10px 0; border-top:1px dashed var(--border); }
+  .item-block:first-child{ border-top:none; }
+  .item-block-title{ font-size:11.5px; font-weight:700; color:var(--muted); margin-bottom:8px; }
+
+  .theme-grid{ display:grid; grid-template-columns:repeat(6,1fr); gap:9px; margin-bottom:10px; }
+  .swatch{ aspect-ratio:1; border-radius:9px; cursor:pointer; border:2px solid transparent; }
+  .swatch.active{ border-color:var(--text); box-shadow:0 0 0 2px #fff inset; }
+  .custom-color-row{ display:flex; align-items:center; gap:10px; }
+  input[type="color"]{ width:40px; height:32px; border:1px solid var(--border); border-radius:6px; padding:2px; background:#fff; cursor:pointer; }
+
+  .download-btn{
+    width:100%; padding:14px; border:none; border-radius:12px; background:var(--ui-accent);
+    color:#fff; font-size:14.5px; font-weight:900; cursor:pointer; margin-top:6px;
+  }
+  .download-btn:hover{ background:#4747d6; }
+  .divider-ui{ height:1px; background:var(--border); margin:22px 0; }
+  .privacy{
+    font-size:11px; color:var(--muted); line-height:1.6; background:#fafafc;
+    border:1px solid var(--border); border-radius:10px; padding:11px 13px; margin-top:20px;
+  }
+
+  #card{
+    width:100%; max-width:min(960px, 90vw); height:auto; display:block;
+    border-radius:22px; box-shadow:0 12px 40px rgba(0,0,0,.14); background:#fff;
+    touch-action:none;
+  }
+
+  .sticker-row{ display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .sticker-row input[type="range"]{ flex:1; accent-color:var(--ui-accent); }
+  .sticker-row .btn-ghost{ flex-shrink:0; }
+  #stickerList:empty{ display:none; }
+
+  .field-slider{ display:flex; align-items:center; gap:10px; }
+  .field-slider input[type="range"]{ flex:1; accent-color:var(--ui-accent); }
+  .field-slider .slider-val{ font-size:11.5px; color:var(--muted); width:40px; text-align:right; flex-shrink:0; }
+
+  /* ---------- image editor modal ---------- */
+  .overlay{
+    display:none; position:fixed; inset:0; background:rgba(20,20,26,.55);
+    align-items:center; justify-content:center; z-index:50; padding:20px;
+  }
+  .overlay.open{ display:flex; }
+  .editor{
+    background:#fff; border-radius:16px; padding:20px; width:min(460px, 100%);
+    box-shadow:0 20px 60px rgba(0,0,0,.3);
+  }
+  .editor h2{ font-size:15px; font-weight:900; margin:0 0 4px; }
+  .editor .hint{ margin-top:0; margin-bottom:14px; }
+  .editor-frame{
+    background:#f0f0f4; border-radius:10px; overflow:hidden;
+    display:flex; align-items:center; justify-content:center;
+    border:1px solid var(--border);
+  }
+  #editorCanvas{ display:block; cursor:grab; touch-action:none; max-width:100%; }
+  #editorCanvas.dragging{ cursor:grabbing; }
+  .zoom-row{ display:flex; align-items:center; gap:10px; margin-top:14px; }
+  .zoom-row label{ font-size:12px; font-weight:700; flex-shrink:0; }
+  .zoom-row input[type="range"]{ flex:1; accent-color:var(--ui-accent); }
+  .zoom-val{ font-size:11.5px; color:var(--muted); width:42px; text-align:right; }
+  .editor-actions{ display:flex; gap:8px; margin-top:16px; }
+  .editor-actions .btn{ flex:1; padding:10px; }
+  .btn-primary{ background:var(--ui-accent); color:#fff; border-color:var(--ui-accent); }
+  .btn-primary:hover{ background:#4747d6; }
+
+  /* ---------- mobile: stack the form above the preview ---------- */
+  @media (max-width: 860px){
+    .app{ flex-direction:column; min-height:0; }
+    .panel{
+      width:100%; max-height:none; overflow-y:visible;
+      border-right:none; border-bottom:1px solid var(--border);
+      padding:20px 16px 36px;
+    }
+    .stage{ padding:28px 16px 40px; }
+    .theme-grid{ grid-template-columns:repeat(6,1fr); gap:6px; }
+    input[type="text"], textarea{ font-size:16px; } /* avoids iOS auto-zoom on focus */
+    .editor{ padding:16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="panel">
+    <a class="back-link" href="https://wizvixen.naru.pub">← 뒤로가기</a>
+    <h1>WizvixeN 메인트윗 편집기</h1>
+    <p class="sub">간단하게 메인트윗을 만들 수 있는 편집기입니다.</p>
+
+    <div class="field">
+      <label>배경(배너) 사진</label>
+      <div class="upload-box">
+        <div class="thumb" id="bannerThumb">없음</div>
+        <button type="button" class="btn" data-upload="banner">사진 선택</button>
+        <button type="button" class="btn btn-edit" data-edit="banner" style="display:none;">편집</button>
+        <button type="button" class="btn-ghost" data-remove="banner" style="display:none;">제거</button>
+      </div>
+      <input type="file" id="bannerInput" accept="image/*">
+    </div>
+
+    <div class="field">
+      <label>아바타 사진</label>
+      <div class="upload-box">
+        <div class="thumb" id="avatarThumb">없음</div>
+        <button type="button" class="btn" data-upload="avatar">사진 선택</button>
+        <button type="button" class="btn btn-edit" data-edit="avatar" style="display:none;">편집</button>
+        <button type="button" class="btn-ghost" data-remove="avatar" style="display:none;">제거</button>
+      </div>
+      <input type="file" id="avatarInput" accept="image/*">
+    </div>
+
+    <div class="row2">
+      <div class="field"><label>이름 (영문/메인)</label><input type="text" id="nameEn" maxlength="16"></div>
+      <div class="field"><label>이름 (한글)</label><input type="text" id="nameKr" maxlength="16"></div>
+    </div>
+
+    <div class="field"><label>트위터 아이디</label><input type="text" id="handle" maxlength="30"></div>
+    <div class="field">
+      <label>다른 연락처</label>
+      <input type="text" id="contact" maxlength="40">
+      <p class="hint">이메일, 오픈카톡 링크 등 자유롭게 적어주세요.</p>
+    </div>
+
+    <div class="field">
+      <label>태그 (최대 4개)</label>
+      <div class="row4">
+        <input type="text" id="tag0" maxlength="14">
+        <input type="text" id="tag1" maxlength="14">
+        <input type="text" id="tag2" maxlength="14">
+        <input type="text" id="tag3" maxlength="14">
+      </div>
+      <p class="hint">4개가 한 줄에 들어가되, 글자가 길면 자동으로 한 줄에 2개씩 배치됩니다.</p>
+    </div>
+
+    <div class="field">
+      <label>주의 사항</label>
+      <textarea id="notices"></textarea>
+      <p class="hint">한 줄에 하나씩 입력하세요. 줄 수는 자유입니다. *텍스트*로 감싸면 강조(굵게+테마색)됩니다.</p>
+    </div>
+    <div class="field">
+      <label>설명</label>
+      <textarea id="descriptions"></textarea>
+      <p class="hint">한 줄에 하나씩 입력하세요. *텍스트*로 감싸면 강조됩니다.</p>
+    </div>
+    <div class="field">
+      <label>주의사항 / 설명 줄 간격</label>
+      <div class="field-slider">
+        <input type="range" id="lineSpacing" min="0" max="24" step="1" value="0">
+        <span class="slider-val" id="lineSpacingVal">+0px</span>
+      </div>
+    </div>
+    <div class="field"><label>한마디 (말풍선)</label><input type="text" id="comment" maxlength="30"></div>
+
+    <div class="divider-ui"></div>
+
+    <div class="field"><label>카테고리 제목</label><input type="text" id="categoryTitle" maxlength="14"></div>
+    <div id="rowsPanel"></div>
+
+    <div class="field">
+      <label>테마 색상</label>
+      <div class="theme-grid" id="themeGrid"></div>
+      <div class="custom-color-row">
+        <input type="color" id="customColor">
+        <span class="hint" style="margin:0;">직접 색상 선택 (프리셋 대신 사용)</span>
+      </div>
+    </div>
+
+    <div class="divider-ui"></div>
+
+    <div class="field">
+      <label>스티커</label>
+      <div class="upload-box">
+        <button type="button" class="btn" id="addStickerBtn">스티커 추가</button>
+      </div>
+      <input type="file" id="stickerInput" accept="image/png,image/webp,image/*" multiple>
+      <p class="hint">투명 배경 PNG를 올려보세요. 미리보기 화면에서 스티커를 직접 드래그해 위치를 옮기고, 슬라이더로 크기를 조정할 수 있습니다.</p>
+      <div id="stickerList"></div>
+    </div>
+
+    <div class="divider-ui"></div>
+    <button type="button" class="download-btn" id="downloadBtn">JPG로 다운로드</button>
+
+    <div class="privacy">
+      🔒 서버 없이 브라우저에서만 동작합니다. 입력한 내용과 업로드한 사진은 저장·전송되지 않으며 새로고침하면 사라집니다. 다운로드 시 1500px 폭의 고화질 JPG로 저장됩니다.
+    </div>
+  </div>
+
+  <div class="stage">
+    <canvas id="card" width="1080" height="1000"></canvas>
+  </div>
+</div>
+
+<div class="overlay" id="editorOverlay">
+  <div class="editor">
+    <h2>이미지 편집</h2>
+    <p class="hint">이미지를 드래그하면 위치가, 슬라이더를 움직이면 크기가 조정됩니다.</p>
+    <div class="editor-frame"><canvas id="editorCanvas"></canvas></div>
+    <div class="zoom-row">
+      <label>확대</label>
+      <input type="range" id="editorZoom" min="1" max="4" step="0.01" value="1">
+      <span class="zoom-val" id="editorZoomVal">100%</span>
+    </div>
+    <div class="editor-actions">
+      <button type="button" class="btn" id="editorReset">초기화</button>
+      <button type="button" class="btn" id="editorCancel">취소</button>
+      <button type="button" class="btn btn-primary" id="editorApply">적용</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const FONT = `'Paperozi','Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',sans-serif`;
+  const CREDIT = 'Designed by @wizardingvixen';
+
+  // all layout math below stays in this 1080-wide "logical" space; the
+  // canvas is physically rendered at EXPORT_W via a scale transform in
+  // draw(), so text/images/strokes come out sharp rather than a blurry
+  // upscale of a smaller raster.
+  const CARD_W = 1080;
+  const EXPORT_W = 1500;
+  const EXPORT_SCALE = EXPORT_W / CARD_W;
+  const PAD_SIDE = 46, PAD_TOP = 44, PAD_BOTTOM = 48;
+  const BANNER_H = 170, OVERLAP = 34;
+  // extra breathing room between the window chrome and the body below it
+  const CHROME_H = 76;
+  // the comment bubble overhangs to the left of the profile column,
+  // so the column itself is inset from the card padding.
+  const PROFILE_INSET = 18;
+  // reference sits closer to ~43:57 (profile:category) than a plain 1/3–2/3 split
+  const PROFILE_W = 390, GAP = 56;
+  const PROFILE_X = PAD_SIDE + PROFILE_INSET;
+  const CAT_X = PROFILE_X + PROFILE_W + GAP;
+  const CAT_W = CARD_W - PAD_SIDE - CAT_X;
+  const GAP_ITEMS = 14;
+  const CAPTION_H = 30;
+  // title font shrunk from 40px; the 14px this frees up is handed to row 1's images
+  const TITLE_H = 40;
+  const LABEL_COL_W = 30;
+  // divider sits closer to the row above it, leaving more clearance below
+  // before the next row of thumbnails starts (rows 2-3 were reading as too
+  // close to the divider above them)
+  const ROW_GAP = 34, ROW_GAP_TOP = 10;
+  const BARCODE_H = 22, BARCODE_MARGIN_TOP = 16;
+  // height trimmed off the barcode + the smaller title both feed row 1's images
+  const ROW0_EXTRA_H = 8 + 14;
+  // credit sits outside the card, centred at the very bottom (as in the reference)
+  const FOOTER_H = 52;
+  const BAR_WIDTHS = [2,3,2,4,2,2,3,5,2,3,2,2,4,3,2,5,2,2,3,2,4,2,3,2,2,5,3,2,2,4,2,3,2,2,3];
+
+  const THEMES = [
+    { name:'블루', accent:'#1f5fa8', from:'#8ec9ef', to:'#1f5fa8' },
+    { name:'레드', accent:'#b52a2a', from:'#f2a9a9', to:'#b52a2a' },
+    { name:'핑크', accent:'#c23a6b', from:'#ffc2d9', to:'#c23a6b' },
+    { name:'옐로', accent:'#b8860b', from:'#ffe6a3', to:'#b8860b' },
+    { name:'그린', accent:'#1f7a4d', from:'#a9e3c3', to:'#1f7a4d' },
+    { name:'블랙', accent:'#222226', from:'#c9c9cf', to:'#222226' },
+  ];
+
+  const newTf = ()=>({ scale:1, ox:0, oy:0 });
+
+  const state = {
+    banner:null, bannerImgEl:null, bannerTf:newTf(),
+    avatar:null, avatarImgEl:null, avatarTf:newTf(),
+    nameEn:'NAME', nameKr:'이름',
+    handle:'twitter_id', contact:'email@gmail.com',
+    tags:['계정 성향','계정 성향','계정 성향','계정 성향'],
+    notices:'주의 사항 1\n주의 사항 2\n주의 사항 3\n주의 사항 4\n주의 사항 5',
+    descriptions:'설명 1\n설명 2\n설명 3\n설명 4\n설명 5',
+    lineSpacing:0,
+    comment:'한마디',
+    categoryTitle:'CATEGORY',
+    rows:[
+      { label:'', items:[0,1,2].map(()=>({img:null,imgEl:null,tf:newTf(),topic:'TOPIC',credit:'credit'})) },
+      { label:'CATEGORY', items:[0,1,2].map(()=>({img:null,imgEl:null,tf:newTf(),topic:'TOPIC',credit:'credit'})) },
+      { label:'CATEGORY', items:[0,1,2].map(()=>({img:null,imgEl:null,tf:newTf(),topic:'TOPIC',credit:'credit'})) },
+    ],
+    themeIndex:0,
+    customColor:null,
+    stickers:[]
+  };
+
+  function currentAccent(){ return state.customColor || THEMES[state.themeIndex].accent; }
+
+  // ---------- field bindings ----------
+  function bindText(id, key){
+    const el = document.getElementById(id);
+    el.value = state[key];
+    el.addEventListener('input', ()=>{ state[key] = el.value; draw(); });
+  }
+  bindText('nameEn','nameEn'); bindText('nameKr','nameKr');
+  bindText('handle','handle'); bindText('contact','contact');
+  bindText('comment','comment'); bindText('categoryTitle','categoryTitle');
+
+  ['notices','descriptions'].forEach(key=>{
+    const el = document.getElementById(key);
+    el.value = state[key];
+    el.addEventListener('input', ()=>{ state[key] = el.value; draw(); });
+  });
+
+  const lineSpacingEl = document.getElementById('lineSpacing');
+  const lineSpacingVal = document.getElementById('lineSpacingVal');
+  lineSpacingEl.addEventListener('input', ()=>{
+    state.lineSpacing = parseInt(lineSpacingEl.value, 10);
+    lineSpacingVal.textContent = '+'+state.lineSpacing+'px';
+    draw();
+  });
+
+  [0,1,2,3].forEach(i=>{
+    const el = document.getElementById('tag'+i);
+    el.value = state.tags[i];
+    el.addEventListener('input', ()=>{ state.tags[i] = el.value; draw(); });
+  });
+
+  function loadImageEl(dataUrl, cb){
+    const img = new Image();
+    img.onload = ()=> cb(img);
+    img.src = dataUrl;
+  }
+
+  // ================= IMAGE EDITOR =================
+  const overlay = document.getElementById('editorOverlay');
+  const ec = document.getElementById('editorCanvas');
+  const ectx = ec.getContext('2d');
+  const zoomSlider = document.getElementById('editorZoom');
+  const zoomVal = document.getElementById('editorZoomVal');
+  const ed = { img:null, tf:null, work:null, onApply:null, dragging:false, lastX:0, lastY:0 };
+
+  function clampTf(tf, img, w, h){
+    const base = Math.max(w/img.width, h/img.height);
+    const s = base*tf.scale;
+    const dw = img.width*s, dh = img.height*s;
+    const maxOx = (dw-w)/(2*w), maxOy = (dh-h)/(2*h);
+    tf.ox = Math.max(-maxOx, Math.min(maxOx, tf.ox));
+    tf.oy = Math.max(-maxOy, Math.min(maxOy, tf.oy));
+    return tf;
+  }
+  function drawTransformed(c, img, x, y, w, h, tf){
+    const t = tf || { scale:1, ox:0, oy:0 };
+    const base = Math.max(w/img.width, h/img.height);
+    const s = base*t.scale;
+    const dw = img.width*s, dh = img.height*s;
+    const maxOx = (dw-w)/(2*w), maxOy = (dh-h)/(2*h);
+    const ox = Math.max(-maxOx, Math.min(maxOx, t.ox));
+    const oy = Math.max(-maxOy, Math.min(maxOy, t.oy));
+    c.drawImage(img, x+(w-dw)/2+ox*w, y+(h-dh)/2+oy*h, dw, dh);
+  }
+
+  function drawEditor(){
+    ectx.fillStyle = '#f0f0f4';
+    ectx.fillRect(0,0,ec.width,ec.height);
+    if(ed.img) drawTransformed(ectx, ed.img, 0, 0, ec.width, ec.height, ed.work);
+  }
+
+  function openEditor(img, tf, aspect, onApply){
+    ed.img = img;
+    ed.work = { scale:tf.scale, ox:tf.ox, oy:tf.oy };
+    ed.onApply = onApply;
+    const maxW = 400, maxH = 300;
+    let w = maxW, h = Math.round(maxW/aspect);
+    if(h > maxH){ h = maxH; w = Math.round(maxH*aspect); }
+    ec.width = w; ec.height = h;
+    zoomSlider.value = ed.work.scale;
+    zoomVal.textContent = Math.round(ed.work.scale*100)+'%';
+    overlay.classList.add('open');
+    drawEditor();
+  }
+  function closeEditor(){ overlay.classList.remove('open'); ed.img = null; ed.onApply = null; }
+
+  zoomSlider.addEventListener('input', ()=>{
+    if(!ed.img) return;
+    ed.work.scale = parseFloat(zoomSlider.value);
+    clampTf(ed.work, ed.img, ec.width, ec.height);
+    zoomVal.textContent = Math.round(ed.work.scale*100)+'%';
+    drawEditor();
+  });
+  function pointerPos(e){
+    const r = ec.getBoundingClientRect();
+    return { x:(e.clientX-r.left)*(ec.width/r.width), y:(e.clientY-r.top)*(ec.height/r.height) };
+  }
+  ec.addEventListener('pointerdown', (e)=>{
+    if(!ed.img) return;
+    ed.dragging = true; ec.classList.add('dragging');
+    const p = pointerPos(e); ed.lastX = p.x; ed.lastY = p.y;
+    ec.setPointerCapture(e.pointerId);
+  });
+  ec.addEventListener('pointermove', (e)=>{
+    if(!ed.dragging || !ed.img) return;
+    const p = pointerPos(e);
+    ed.work.ox += (p.x-ed.lastX)/ec.width;
+    ed.work.oy += (p.y-ed.lastY)/ec.height;
+    ed.lastX = p.x; ed.lastY = p.y;
+    clampTf(ed.work, ed.img, ec.width, ec.height);
+    drawEditor();
+  });
+  function endDrag(){ ed.dragging = false; ec.classList.remove('dragging'); }
+  ec.addEventListener('pointerup', endDrag);
+  ec.addEventListener('pointercancel', endDrag);
+
+  document.getElementById('editorReset').addEventListener('click', ()=>{
+    if(!ed.img) return;
+    ed.work = newTf();
+    zoomSlider.value = 1; zoomVal.textContent = '100%';
+    drawEditor();
+  });
+  document.getElementById('editorCancel').addEventListener('click', closeEditor);
+  document.getElementById('editorApply').addEventListener('click', ()=>{
+    if(ed.onApply) ed.onApply(ed.work);
+    closeEditor();
+    draw();
+  });
+  overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closeEditor(); });
+
+  // ---------- uploads ----------
+  function setupUpload(kind, inputId, thumbId, aspect){
+    const input = document.getElementById(inputId);
+    const thumb = document.getElementById(thumbId);
+    const uploadBtn = document.querySelector(`[data-upload="${kind}"]`);
+    const editBtn = document.querySelector(`[data-edit="${kind}"]`);
+    const removeBtn = document.querySelector(`[data-remove="${kind}"]`);
+
+    uploadBtn.addEventListener('click', ()=> input.click());
+    input.addEventListener('change', (e)=>{
+      const file = e.target.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev)=>{
+        state[kind] = ev.target.result;
+        state[kind+'Tf'] = newTf();
+        thumb.style.backgroundImage = `url(${ev.target.result})`;
+        thumb.textContent = '';
+        editBtn.style.display = 'inline-block';
+        removeBtn.style.display = 'inline';
+        loadImageEl(ev.target.result, img=>{ state[kind+'ImgEl'] = img; draw(); });
+      };
+      reader.readAsDataURL(file);
+    });
+    editBtn.addEventListener('click', ()=>{
+      const img = state[kind+'ImgEl'];
+      if(!img) return;
+      openEditor(img, state[kind+'Tf'], aspect, (tf)=>{ state[kind+'Tf'] = tf; });
+    });
+    removeBtn.addEventListener('click', ()=>{
+      state[kind] = null; state[kind+'ImgEl'] = null; state[kind+'Tf'] = newTf();
+      input.value = '';
+      thumb.style.backgroundImage = '';
+      thumb.textContent = '없음';
+      editBtn.style.display = 'none';
+      removeBtn.style.display = 'none';
+      draw();
+    });
+  }
+  setupUpload('banner','bannerInput','bannerThumb', CARD_W/BANNER_H);
+  setupUpload('avatar','avatarInput','avatarThumb', 1);
+
+  // ---------- stickers: uploaded separately, dragged/sized on the live canvas ----------
+  const stickerList = document.getElementById('stickerList');
+  const stickerInput = document.getElementById('stickerInput');
+  document.getElementById('addStickerBtn').addEventListener('click', ()=> stickerInput.click());
+
+  function addStickerRow(sticker){
+    const row = document.createElement('div');
+    row.className = 'sticker-row';
+    const thumb = document.createElement('div');
+    thumb.className = 'thumb';
+    thumb.style.backgroundImage = `url(${sticker.img})`;
+    const slider = document.createElement('input');
+    slider.type = 'range'; slider.min = '0.04'; slider.max = '0.5'; slider.step = '0.005';
+    slider.value = sticker.wFrac;
+    slider.addEventListener('input', ()=>{ sticker.wFrac = parseFloat(slider.value); draw(); });
+    const delBtn = document.createElement('button');
+    delBtn.type = 'button'; delBtn.className = 'btn-ghost'; delBtn.textContent = '삭제';
+    delBtn.addEventListener('click', ()=>{
+      const idx = state.stickers.indexOf(sticker);
+      if(idx >= 0) state.stickers.splice(idx,1);
+      row.remove();
+      draw();
+    });
+    row.appendChild(thumb); row.appendChild(slider); row.appendChild(delBtn);
+    stickerList.appendChild(row);
+  }
+
+  stickerInput.addEventListener('change', (e)=>{
+    [...e.target.files].forEach(file=>{
+      const reader = new FileReader();
+      reader.onload = (ev)=>{
+        loadImageEl(ev.target.result, img=>{
+          const sticker = {
+            img: ev.target.result, imgEl: img,
+            xFrac: 0.5, yFrac: 0.5,
+            wFrac: 0.18, aspect: img.height / img.width
+          };
+          state.stickers.push(sticker);
+          addStickerRow(sticker);
+          draw();
+        });
+      };
+      reader.readAsDataURL(file);
+    });
+    stickerInput.value = '';
+  });
+
+  const themeGrid = document.getElementById('themeGrid');
+  THEMES.forEach((t,i)=>{
+    const el = document.createElement('div');
+    el.className = 'swatch' + (i===0 ? ' active':'');
+    el.style.background = t.accent;
+    el.title = t.name;
+    el.addEventListener('click', ()=>{
+      state.themeIndex = i; state.customColor = null;
+      customColorInput.value = t.accent;
+      [...themeGrid.children].forEach(c=>c.classList.remove('active'));
+      el.classList.add('active');
+      draw();
+    });
+    themeGrid.appendChild(el);
+  });
+  const customColorInput = document.getElementById('customColor');
+  customColorInput.value = THEMES[0].accent;
+  customColorInput.addEventListener('input', ()=>{
+    state.customColor = customColorInput.value;
+    [...themeGrid.children].forEach(c=>c.classList.remove('active'));
+    draw();
+  });
+
+  // row 0 shows tall portraits, rows 1-2 short landscape frames
+  const ROW_ASPECT = ri => (ri === 0) ? 3/4 : 1/0.72;
+
+  const rowsPanel = document.getElementById('rowsPanel');
+  state.rows.forEach((row, ri)=>{
+    const details = document.createElement('details');
+    details.className = 'rowbox';
+    if(ri===0) details.open = true;
+    const summary = document.createElement('summary');
+    summary.textContent = `${ri+1}행`;
+    details.appendChild(summary);
+
+    const body = document.createElement('div');
+    body.className = 'rowbox-body';
+
+    const labelField = document.createElement('div');
+    labelField.className = 'field';
+    labelField.innerHTML = `<label>행 라벨 (세로 텍스트, 비우면 숨김)</label>`;
+    const labelInput = document.createElement('input');
+    labelInput.type = 'text'; labelInput.maxLength = 12;
+    labelInput.value = row.label;
+    labelInput.addEventListener('input', ()=>{ row.label = labelInput.value; draw(); });
+    labelField.appendChild(labelInput);
+    body.appendChild(labelField);
+
+    row.items.forEach((item, ii)=>{
+      const block = document.createElement('div');
+      block.className = 'item-block';
+      const title = document.createElement('div');
+      title.className = 'item-block-title';
+      title.textContent = `이미지 ${ii+1}`;
+      block.appendChild(title);
+
+      const uploadBox = document.createElement('div');
+      uploadBox.className = 'upload-box';
+      const thumb = document.createElement('div');
+      thumb.className = 'thumb'; thumb.textContent = '없음';
+      const upBtn = document.createElement('button');
+      upBtn.type='button'; upBtn.className='btn'; upBtn.textContent='사진 선택';
+      const edBtn = document.createElement('button');
+      edBtn.type='button'; edBtn.className='btn btn-edit'; edBtn.textContent='편집'; edBtn.style.display='none';
+      const rmBtn = document.createElement('button');
+      rmBtn.type='button'; rmBtn.className='btn-ghost'; rmBtn.textContent='제거'; rmBtn.style.display='none';
+      const fileInput = document.createElement('input');
+      fileInput.type='file'; fileInput.accept='image/*';
+
+      upBtn.addEventListener('click', ()=> fileInput.click());
+      fileInput.addEventListener('change', (e)=>{
+        const file = e.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev)=>{
+          item.img = ev.target.result;
+          item.tf = newTf();
+          thumb.style.backgroundImage = `url(${ev.target.result})`;
+          thumb.textContent = '';
+          edBtn.style.display = 'inline-block';
+          rmBtn.style.display = 'inline';
+          loadImageEl(ev.target.result, img=>{ item.imgEl = img; draw(); });
+        };
+        reader.readAsDataURL(file);
+      });
+      edBtn.addEventListener('click', ()=>{
+        if(!item.imgEl) return;
+        openEditor(item.imgEl, item.tf, ROW_ASPECT(ri), (tf)=>{ item.tf = tf; });
+      });
+      rmBtn.addEventListener('click', ()=>{
+        item.img = null; item.imgEl = null; item.tf = newTf();
+        fileInput.value = '';
+        thumb.style.backgroundImage = '';
+        thumb.textContent = '없음';
+        edBtn.style.display = 'none';
+        rmBtn.style.display = 'none';
+        draw();
+      });
+
+      uploadBox.appendChild(thumb); uploadBox.appendChild(upBtn);
+      uploadBox.appendChild(edBtn); uploadBox.appendChild(rmBtn);
+      block.appendChild(uploadBox);
+
+      const row2 = document.createElement('div');
+      row2.className = 'row2'; row2.style.marginTop = '8px';
+      const topicInput = document.createElement('input');
+      topicInput.type='text'; topicInput.placeholder='TOPIC'; topicInput.maxLength=16;
+      topicInput.value = item.topic;
+      topicInput.addEventListener('input', ()=>{ item.topic = topicInput.value; draw(); });
+      const creditInput = document.createElement('input');
+      creditInput.type='text'; creditInput.placeholder='credit'; creditInput.maxLength=16;
+      creditInput.value = item.credit;
+      creditInput.addEventListener('input', ()=>{ item.credit = creditInput.value; draw(); });
+      const topicWrap = document.createElement('div'); topicWrap.appendChild(topicInput);
+      const creditWrap = document.createElement('div'); creditWrap.appendChild(creditInput);
+      row2.appendChild(topicWrap); row2.appendChild(creditWrap);
+      block.appendChild(row2);
+      block.appendChild(fileInput);
+      body.appendChild(block);
+    });
+
+    details.appendChild(body);
+    rowsPanel.appendChild(details);
+  });
+
+  // ================= CANVAS DRAWING =================
+  const canvas = document.getElementById('card');
+  const ctx = canvas.getContext('2d');
+  // logical (1080-space) height of the current render, kept in sync with
+  // canvas.height (which is physically EXPORT_SCALE times bigger)
+  let logicalH = 1000;
+
+  function roundRectPath(c, x, y, w, h, r){
+    r = Math.min(r, w/2, h/2);
+    if(c.roundRect){ c.beginPath(); c.roundRect(x,y,w,h,r); return; }
+    c.beginPath();
+    c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r);
+    c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath();
+  }
+  function topRoundRectPath(c,x,y,w,h,r){
+    c.beginPath();
+    c.moveTo(x+r,y); c.lineTo(x+w-r,y); c.arcTo(x+w,y,x+w,y+r,r);
+    c.lineTo(x+w,y+h); c.lineTo(x,y+h); c.lineTo(x,y+r); c.arcTo(x,y,x+r,y,r);
+    c.closePath();
+  }
+  function drawSparkle(c, cx, cy, size, color){
+    c.save(); c.fillStyle = color;
+    c.beginPath();
+    c.moveTo(cx, cy-size);
+    c.quadraticCurveTo(cx+size*0.18, cy-size*0.18, cx+size, cy);
+    c.quadraticCurveTo(cx+size*0.18, cy+size*0.18, cx, cy+size);
+    c.quadraticCurveTo(cx-size*0.18, cy+size*0.18, cx-size, cy);
+    c.quadraticCurveTo(cx-size*0.18, cy-size*0.18, cx, cy-size);
+    c.closePath(); c.fill(); c.restore();
+  }
+  // cog / scalloped circle used as the avatar mask
+  function scallopPath(c, cx, cy, r, teeth){
+    const inner = r*0.9;
+    const steps = teeth*2;
+    c.beginPath();
+    for(let i=0;i<steps;i++){
+      const a = (i/steps)*Math.PI*2 - Math.PI/2;
+      const rad = (i%2===0) ? r : inner;
+      const px = cx + Math.cos(a)*rad, py = cy + Math.sin(a)*rad;
+      if(i===0) c.moveTo(px,py); else c.lineTo(px,py);
+    }
+    c.closePath();
+  }
+  // ---- *emphasis* markup used in notices/descriptions ----
+  // requires a closing '*' to actually turn anything on — a single stray
+  // '*' (odd count) is left as plain literal text instead of emphasising
+  // everything after it.
+  function tokenizeEmphasis(line){
+    const asteriskCount = (line.match(/\*/g) || []).length;
+    if(asteriskCount % 2 !== 0){
+      return line.split(' ').filter(w=>w.length).map(w=>({ text:w, em:false }));
+    }
+    let em = false;
+    return line.split(' ').filter(w=>w.length).map(word=>{
+      let w = word;
+      if(w.startsWith('*')){ em = !em; w = w.slice(1); }
+      const wordEm = em;
+      if(w.endsWith('*') && w.length){ w = w.slice(0,-1); em = !em; }
+      return { text:w, em:wordEm };
+    });
+  }
+  function richFont(em){ return (em ? '700 ' : '500 ') + '17px ' + FONT; }
+  function richWidth(c, w){ c.font = richFont(w.em); return c.measureText(w.text).width; }
+  function splitOverwideWord(c, w, maxWidth){
+    c.font = richFont(w.em);
+    if(c.measureText(w.text).width <= maxWidth || !w.text) return [w];
+    const out = []; let chunk = '';
+    for(const ch of w.text){
+      const t = chunk+ch;
+      if(c.measureText(t).width > maxWidth && chunk){ out.push({text:chunk, em:w.em}); chunk = ch; }
+      else chunk = t;
+    }
+    if(chunk) out.push({text:chunk, em:w.em});
+    return out;
+  }
+  function wrapRichWords(c, words, maxWidth){
+    c.font = richFont(false);
+    const spaceW = c.measureText(' ').width;
+    const lines = []; let cur = [], curW = 0;
+    words.forEach(w=>{
+      if(!w.text) return;
+      const ww = richWidth(c, w);
+      const extra = cur.length ? spaceW : 0;
+      if(cur.length && curW+extra+ww > maxWidth){ lines.push(cur); cur = []; curW = 0; }
+      cur.push(w);
+      curW += (cur.length===1 ? 0 : spaceW) + ww;
+    });
+    if(cur.length) lines.push(cur);
+    return lines;
+  }
+  function buildRichLines(c, rawLine, maxWidth){
+    const words = tokenizeEmphasis(rawLine).flatMap(w=>splitOverwideWord(c,w,maxWidth));
+    return wrapRichWords(c, words, maxWidth);
+  }
+  function drawRichLine(c, lineWords, x, y, baseColor, accentColor){
+    let cx = x;
+    c.textAlign = 'left'; c.textBaseline = 'alphabetic';
+    c.font = richFont(false);
+    const spaceW = c.measureText(' ').width;
+    lineWords.forEach((w,i)=>{
+      if(i>0) cx += spaceW;
+      c.font = richFont(w.em);
+      // plain fill only — no stroke reinforcement. Malgun Gothic's real
+      // Regular(400)/Bold(700) faces render cleanly on their own; stroking
+      // on top of either one is what caused the blurry/smeared look.
+      c.fillStyle = w.em ? accentColor : baseColor;
+      c.fillText(w.text, cx, y);
+      cx += c.measureText(w.text).width;
+    });
+  }
+  // condenses letter-spacing/width (자간·장평) so a vertical label never
+  // outgrows the row of thumbnails it sits beside
+  function drawFittedVerticalLabel(c, text, cx, bottomWorldY, maxLen, color){
+    const font = `800 17px ${FONT}`;
+    c.font = font;
+    let w = c.measureText(text).width;
+    const supportsSpacing = 'letterSpacing' in c;
+    if(w > maxLen && supportsSpacing){ c.letterSpacing = '-1.2px'; w = c.measureText(text).width; }
+    const scaleX = (w > maxLen && w > 0) ? Math.max(maxLen / w, 0.55) : 1;
+    c.save();
+    c.translate(cx, bottomWorldY);
+    c.rotate(-Math.PI/2);
+    c.scale(scaleX, 1);
+    c.font = font; c.fillStyle = color;
+    c.textAlign = 'left'; c.textBaseline = 'middle';
+    c.fillText(text, 0, 0);
+    c.restore();
+    if(supportsSpacing) c.letterSpacing = '0px';
+    c.textBaseline = 'alphabetic';
+  }
+
+  // --- vector chrome icons so they follow the theme colour ---
+  function drawGlobe(c, cx, cy, r, color){
+    c.save();
+    c.strokeStyle = color; c.lineWidth = 3.2; c.lineCap='round';
+    c.beginPath(); c.arc(cx,cy,r,0,Math.PI*2); c.stroke();
+    c.beginPath(); c.moveTo(cx-r,cy); c.lineTo(cx+r,cy); c.stroke();
+    c.beginPath(); c.ellipse(cx,cy,r*0.46,r,0,0,Math.PI*2); c.stroke();
+    c.restore();
+  }
+  function drawClose(c, cx, cy, r, color){
+    c.save();
+    c.strokeStyle = color; c.lineWidth = 4; c.lineCap='round';
+    c.beginPath(); c.moveTo(cx-r,cy-r); c.lineTo(cx+r,cy+r); c.stroke();
+    c.beginPath(); c.moveTo(cx+r,cy-r); c.lineTo(cx-r,cy+r); c.stroke();
+    c.restore();
+  }
+  function drawDots(c, x, cy, color){
+    c.save(); c.fillStyle = color;
+    for(let i=0;i<3;i++){
+      c.beginPath(); c.arc(x+i*17, cy, 5.5, 0, Math.PI*2); c.fill();
+    }
+    c.restore();
+  }
+  function drawEnvelope(c, x, y, w, h, color){
+    c.save();
+    c.strokeStyle = color; c.lineWidth = 1.7; c.lineJoin='round'; c.lineCap='round';
+    roundRectPath(c, x, y, w, h, 2.5); c.stroke();
+    c.beginPath(); c.moveTo(x+2, y+3); c.lineTo(x+w/2, y+h*0.62); c.lineTo(x+w-2, y+3); c.stroke();
+    c.restore();
+  }
+  function drawAtIcon(c, cx, cy, r, color){
+    c.save();
+    c.font = `900 ${Math.round(r*2.5)}px ${FONT}`;
+    c.fillStyle = color; c.textAlign='center'; c.textBaseline='middle';
+    c.fillText('@', cx, cy+1);
+    c.restore();
+  }
+
+  // Renders the left profile column. Returns its total height.
+  // When doDraw is false it only measures, so the canvas can be sized first.
+  function renderProfileColumn(c, x, yStart, doDraw, targetH){
+    const accent = currentAccent();
+    const W = PROFILE_W;
+    let y = yStart;
+
+    // ---- top block: avatar on the left, name + contact stacked on the right ----
+    // avatar stays square (1:1) but its side matches the full height of the
+    // name+contact block beside it, so the two blocks line up top and bottom
+    const cPad = 13, cRowH = 26;
+    const contactOffsetY = 52;
+    const contactH = cPad*2 + cRowH*2;
+    const AV = contactOffsetY + contactH, AV_GAP = 16;
+    const rightX = x + AV + AV_GAP;
+    const rightW = W - AV - AV_GAP;
+
+    if(doDraw){
+      const acx = x+AV/2, acy = y+AV/2, ar = AV/2;
+      c.save(); scallopPath(c, acx, acy, ar, 22); c.clip();
+      if(state.avatarImgEl) drawTransformed(c, state.avatarImgEl, x, y, AV, AV, state.avatarTf);
+      else { c.fillStyle = '#e8e8ee'; c.fillRect(x,y,AV,AV); }
+      c.restore();
+      // sparkle centres sit just inside the photo's edge so each one
+      // straddles the boundary — part on the photo, part floating off it
+      const s1 = ar*0.86, s2 = ar*0.86;
+      drawSparkle(c, acx - s1*0.707, acy - s1*0.707, 15, accent);
+      drawSparkle(c, acx + s2*0.707, acy + s2*0.707, 10, accent);
+    }
+
+    // name (english/main) + korean name on the same baseline
+    c.font = `900 36px ${FONT}`;
+    const nameEnW = c.measureText(state.nameEn || '').width;
+    if(doDraw){
+      c.textAlign='left'; c.textBaseline='alphabetic';
+      c.fillStyle = accent;
+      c.fillText(state.nameEn, rightX, y+33);
+      c.font = `700 19px ${FONT}`; c.fillStyle = '#666';
+      c.fillText(state.nameKr, rightX + nameEnW + 10, y+33);
+    }
+
+    // contact block — solid accent fill, white text: twitter id + other contact
+    const contactY = y + contactOffsetY;
+    if(doDraw){
+      roundRectPath(c, rightX, contactY, rightW, contactH, 13);
+      c.fillStyle = accent; c.fill();
+      const iconX = rightX + cPad;
+      const textX = iconX + 28;
+      const r1 = contactY + cPad + cRowH/2;
+      const r2 = r1 + cRowH;
+      drawAtIcon(c, iconX+8, r1, 8, '#ffffff');
+      drawEnvelope(c, iconX, r2-6, 17, 12, '#ffffff');
+      c.font = `500 16px ${FONT}`; c.fillStyle = '#ffffff';
+      c.textAlign='left'; c.textBaseline='middle';
+      c.save(); c.beginPath();
+      c.rect(textX, contactY, rightW - (textX-rightX) - cPad, contactH); c.clip();
+      const handleText = state.handle ? '@'+state.handle.replace(/^@/,'') : '';
+      c.fillText(handleText, textX, r1);
+      c.fillText(state.contact, textX, r2);
+      c.restore();
+      c.textBaseline='alphabetic';
+    }
+
+    y += Math.max(AV, (contactY + contactH) - yStart) + 20;
+
+    // ---- tags: 4 across, or 2 across when the text is too long ----
+    c.font = `500 13px ${FONT}`;
+    const tagsFilled = state.tags.map(t=>t.trim()).filter(Boolean);
+    const tagGap = 8, tagPadX = 8, tagRowH = 32, tagGapY = 8;
+    if(tagsFilled.length){
+      const widest = Math.max(...tagsFilled.map(t=>c.measureText(t).width));
+      const cellFour = (W - tagGap*3)/4;
+      const perRow = (widest + tagPadX*2 > cellFour) ? 2 : 4;
+      const cellW = perRow===4 ? cellFour : (W - tagGap)/2;
+      const tagRowCount = Math.ceil(tagsFilled.length/perRow);
+      if(doDraw){
+        c.textAlign='center'; c.textBaseline='middle';
+        tagsFilled.forEach((t,i)=>{
+          const col = i % perRow, r = Math.floor(i/perRow);
+          const tx = x + col*(cellW+tagGap);
+          const ty = y + r*(tagRowH+tagGapY);
+          roundRectPath(c, tx, ty, cellW, tagRowH, tagRowH/2);
+          c.strokeStyle = accent; c.lineWidth = 1.6; c.stroke();
+          c.save(); roundRectPath(c, tx, ty, cellW, tagRowH, tagRowH/2); c.clip();
+          c.fillStyle = accent;
+          c.fillText(t, tx+cellW/2, ty+tagRowH/2+1);
+          c.restore();
+        });
+        c.textAlign='left'; c.textBaseline='alphabetic';
+      }
+      y += tagRowCount*(tagRowH+tagGapY) - tagGapY + 18;
+    }
+
+    // ---- info box; the comment bubble sits inside its reserved bottom area ----
+    c.font = `600 19px ${FONT}`;
+    const commentText = state.comment.trim();
+    const commentH = commentText ? 50 : 0;
+    const commentW = commentText
+      ? Math.min(c.measureText(commentText).width + 44, W + PROFILE_INSET)
+      : 0;
+
+    const noticeLines = state.notices.split('\n').map(s=>s.trim()).filter(Boolean);
+    const descLines = state.descriptions.split('\n').map(s=>s.trim()).filter(Boolean);
+    const padX = 28, padTop = 30, padBottom = 18, lineH = 26 + state.lineSpacing, bulletIndent = 18;
+    const textMaxW = W - padX*2 - bulletIndent;
+    const wrappedNotice = noticeLines.map(l=>buildRichLines(c,l,textMaxW));
+    const wrappedDesc = descLines.map(l=>buildRichLines(c,l,textMaxW));
+    const noticeLineCount = wrappedNotice.reduce((s,a)=>s+a.length,0);
+    const descLineCount = wrappedDesc.reduce((s,a)=>s+a.length,0);
+    const hasBoth = noticeLines.length && descLines.length;
+    const dividerH = hasBoth ? 26 : 0;
+    const textH = noticeLineCount*lineH + dividerH + descLineCount*lineH;
+    const reserve = commentText ? (commentH + 26) : 0;
+    const contentH = padTop + textH + reserve + padBottom;
+    // stretched to whatever the category column leaves, so the card ends flush
+    const fillH = targetH ? (targetH - (y - yStart)) : 0;
+    const infoBoxH = Math.max(contentH, fillH);
+
+    if(infoBoxH > padTop){
+      if(doDraw){
+        roundRectPath(c, x, y, W, infoBoxH, 16); c.fillStyle = '#f2f2f5'; c.fill();
+        c.save(); roundRectPath(c, x, y, W, infoBoxH, 16); c.clip();
+        let iy = y + padTop + lineH*0.72;
+        wrappedNotice.forEach(lines=>{
+          lines.forEach((lineWords,li)=>{
+            if(li===0){ c.font = `700 17px ${FONT}`; c.fillStyle = accent; c.textAlign='left'; c.textBaseline='alphabetic'; c.fillText('•', x+padX, iy); }
+            drawRichLine(c, lineWords, x+padX+bulletIndent, iy, '#333', accent);
+            iy += lineH;
+          });
+        });
+        if(hasBoth){
+          const dy = y + padTop + noticeLineCount*lineH + dividerH/2;
+          c.save();
+          c.strokeStyle = accent; c.globalAlpha = 0.45; c.lineWidth = 2; c.setLineDash([2,5]);
+          c.beginPath(); c.moveTo(x+padX, dy); c.lineTo(x+W-padX, dy); c.stroke();
+          c.restore();
+          iy = y + padTop + noticeLineCount*lineH + dividerH + lineH*0.72;
+        }
+        wrappedDesc.forEach(lines=>{
+          lines.forEach((lineWords,li)=>{
+            if(li===0){ c.font = `700 17px ${FONT}`; c.fillStyle = accent; c.textAlign='left'; c.textBaseline='alphabetic'; c.fillText('•', x+padX, iy); }
+            drawRichLine(c, lineWords, x+padX+bulletIndent, iy, '#333', accent);
+            iy += lineH;
+          });
+        });
+        c.restore();
+
+        // bubble: overlaps the reserved bottom strip, overhanging to the left
+        if(commentText){
+          const bx = x - PROFILE_INSET;
+          const by = y + infoBoxH - padBottom - commentH;
+          roundRectPath(c, bx, by, commentW, commentH, commentH/2);
+          c.fillStyle = accent; c.fill();
+          c.beginPath();
+          c.moveTo(bx+26, by+commentH-2);
+          c.lineTo(bx+42, by+commentH-2);
+          c.lineTo(bx+26, by+commentH+11);
+          c.closePath(); c.fill();
+          c.save(); roundRectPath(c, bx, by, commentW, commentH, commentH/2); c.clip();
+          c.font = `600 19px ${FONT}`; c.fillStyle = '#fff';
+          c.textAlign='left'; c.textBaseline='middle';
+          c.fillText(commentText, bx+22, by+commentH/2+1);
+          c.restore();
+          c.textBaseline='alphabetic';
+        }
+      }
+      y += infoBoxH;
+    }
+
+    return y - yStart;
+  }
+
+  // Row 0 uses tall portrait thumbnails; the two rows below use short wide ones.
+  function rowMetrics(){
+    return state.rows.map((row, ri)=>{
+      const hasLabel = row.label.trim().length > 0;
+      const offset = hasLabel ? LABEL_COL_W : 0;
+      const itemW = (CAT_W - offset - GAP_ITEMS*2)/3;
+      const imgH = (ri === 0) ? itemW*4/3 + ROW0_EXTRA_H : itemW*0.72;
+      return { hasLabel, offset, itemW, imgH, rowH: imgH + 8 + CAPTION_H };
+    });
+  }
+
+  function catColHeight(){
+    const m = rowMetrics();
+    const rowsH = m.reduce((s,r)=>s+r.rowH, 0) + (m.length-1)*ROW_GAP;
+    return TITLE_H + rowsH + BARCODE_MARGIN_TOP + BARCODE_H;
+  }
+
+  function renderCategoryColumn(c, x, yStart){
+    const accent = currentAccent();
+    const metrics = rowMetrics();
+    let y = yStart;
+
+    c.font = `900 30px ${FONT}`; c.fillStyle = accent;
+    c.textAlign='center'; c.textBaseline='alphabetic';
+    c.fillText(state.categoryTitle, x+CAT_W/2, y+26);
+    y += TITLE_H;
+
+    state.rows.forEach((row, ri)=>{
+      const m = metrics[ri];
+      const itemsX = x + m.offset;
+
+      if(m.hasLabel){
+        // sparkle sits at the same baseline as the first item's topic caption;
+        // the label is anchored just above it and grows upward, condensing
+        // (자간/장평) if it would otherwise outgrow the thumbnail row.
+        const topicBaselineY = y + m.imgH + 22;
+        const sparkleR = 9, minGap = 8;
+        const sparkleY = topicBaselineY - 5;
+        const labelBottomY = sparkleY - sparkleR - minGap;
+        const maxLen = Math.max(labelBottomY - y, 20);
+        drawFittedVerticalLabel(c, row.label, x+13, labelBottomY, maxLen, accent);
+        drawSparkle(c, x+13, sparkleY, sparkleR, accent);
+      }
+
+      row.items.forEach((item, ii)=>{
+        const ix = itemsX + ii*(m.itemW+GAP_ITEMS);
+        c.save();
+        roundRectPath(c, ix, y, m.itemW, m.imgH, 10); c.clip();
+        if(item.imgEl) drawTransformed(c, item.imgEl, ix, y, m.itemW, m.imgH, item.tf);
+        else { c.fillStyle = '#e8e8ee'; c.fillRect(ix, y, m.itemW, m.imgH); }
+        c.restore();
+
+        c.save(); c.beginPath(); c.rect(ix, y+m.imgH+6, m.itemW, CAPTION_H); c.clip();
+        c.font = `700 14px ${FONT}`; c.fillStyle = '#333';
+        c.textAlign='left'; c.textBaseline='alphabetic';
+        c.fillText(item.topic || '', ix, y+m.imgH+22);
+        if(item.credit){
+          c.font = `400 12px ${FONT}`; c.fillStyle = '#aaa'; c.textAlign='right';
+          c.fillText('ⓒ '+item.credit, ix+m.itemW, y+m.imgH+22);
+        }
+        c.restore();
+      });
+
+      y += m.rowH;
+      if(ri < state.rows.length-1){
+        c.strokeStyle = '#ececef'; c.lineWidth = 1;
+        const dividerY = y + ROW_GAP_TOP;
+        c.beginPath(); c.moveTo(x, dividerY); c.lineTo(x+CAT_W, dividerY); c.stroke();
+        y += ROW_GAP;
+      }
+    });
+
+    // barcode, tinted with the theme colour
+    y += BARCODE_MARGIN_TOP;
+    let bx = x+CAT_W;
+    c.fillStyle = accent;
+    for(let i=BAR_WIDTHS.length-1;i>=0;i--){
+      bx -= BAR_WIDTHS[i];
+      c.fillRect(bx, y, BAR_WIDTHS[i], BARCODE_H);
+      bx -= 2;
+    }
+  }
+
+  function draw(){
+    const accent = currentAccent();
+
+    // the info box stretches to match the category column, so the two
+    // columns finish level and the card ends flush
+    const catH = catColHeight();
+    const profileH = renderProfileColumn(ctx, PROFILE_X, 0, false, catH);
+    const bodyH = Math.max(profileH, catH);
+    const cardInnerH = CHROME_H + bodyH;
+    const cardTotalH = PAD_TOP + cardInnerH + PAD_BOTTOM;
+    const totalH = Math.round(BANNER_H + cardTotalH - OVERLAP + FOOTER_H);
+    logicalH = totalH;
+
+    // physical pixel buffer is EXPORT_SCALE times bigger than the logical
+    // layout; setting width/height resets the transform, so re-apply the
+    // scale once per draw before issuing any drawing commands
+    canvas.width = Math.round(CARD_W * EXPORT_SCALE);
+    canvas.height = Math.round(totalH * EXPORT_SCALE);
+    ctx.setTransform(EXPORT_SCALE, 0, 0, EXPORT_SCALE, 0, 0);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0,0,CARD_W,totalH);
+
+    // banner
+    ctx.save();
+    topRoundRectPath(ctx, 0, 0, CARD_W, BANNER_H, 22);
+    ctx.clip();
+    if(state.bannerImgEl){
+      drawTransformed(ctx, state.bannerImgEl, 0, 0, CARD_W, BANNER_H, state.bannerTf);
+    } else {
+      const t = THEMES[state.themeIndex];
+      const grad = ctx.createLinearGradient(0,0,CARD_W,BANNER_H);
+      if(state.customColor){ grad.addColorStop(0, state.customColor+'aa'); grad.addColorStop(1, state.customColor); }
+      else { grad.addColorStop(0, t.from); grad.addColorStop(1, t.to); }
+      ctx.fillStyle = grad;
+      ctx.fillRect(0,0,CARD_W,BANNER_H);
+    }
+    ctx.restore();
+
+    // white card
+    const cardTop = BANNER_H - OVERLAP;
+    roundRectPath(ctx, 0, cardTop, CARD_W, cardTotalH, 26);
+    ctx.fillStyle = '#ffffff';
+    ctx.fill();
+
+    // window chrome — all tinted with the theme colour
+    const chromeY = cardTop + PAD_TOP + 16;
+    drawDots(ctx, PAD_SIDE+6, chromeY, accent);
+    drawGlobe(ctx, CARD_W/2, chromeY, 11, accent);
+    drawClose(ctx, CARD_W-PAD_SIDE-8, chromeY, 8, accent);
+
+    const bodyY = cardTop + PAD_TOP + CHROME_H;
+    renderProfileColumn(ctx, PROFILE_X, bodyY, true, catH);
+    renderCategoryColumn(ctx, CAT_X, bodyY);
+
+    // stickers sit on top of the card artwork, like a photo stuck onto it —
+    // but never on top of the credit line, which is drawn after them so it
+    // always stays readable
+    state.stickers.forEach(s=>{
+      const b = stickerBox(s);
+      ctx.drawImage(s.imgEl, b.x1, b.y1, b.w, b.h);
+    });
+
+    // credit — centred below the card, as in the reference
+    ctx.font = `400 14px ${FONT}`; ctx.fillStyle = '#bcbcc4';
+    ctx.textAlign='center'; ctx.textBaseline='alphabetic';
+    ctx.fillText(CREDIT, CARD_W/2, cardTop + cardTotalH + 30);
+    ctx.textAlign='left';
+  }
+
+  // ---------- sticker geometry + drag/resize on the live canvas ----------
+  // position/size are stored as fractions of the card width and CURRENT
+  // card height, so a sticker stays roughly put even as the card's height
+  // changes (e.g. typing more notices makes the card taller).
+  function stickerBox(s){
+    const w = s.wFrac * CARD_W, h = w * s.aspect;
+    const cx = s.xFrac * CARD_W, cy = s.yFrac * logicalH;
+    return { x1:cx-w/2, y1:cy-h/2, x2:cx+w/2, y2:cy+h/2, w, h };
+  }
+  // maps a pointer event straight to logical (1080-space) coordinates,
+  // independent of both the CSS display size and the physical pixel buffer
+  function canvasPoint(e){
+    const r = canvas.getBoundingClientRect();
+    return { x:(e.clientX-r.left)*(CARD_W/r.width), y:(e.clientY-r.top)*(logicalH/r.height) };
+  }
+  function hitTestSticker(pt){
+    for(let i=state.stickers.length-1;i>=0;i--){
+      const b = stickerBox(state.stickers[i]);
+      if(pt.x>=b.x1 && pt.x<=b.x2 && pt.y>=b.y1 && pt.y<=b.y2) return i;
+    }
+    return -1;
+  }
+  let dragSticker = null, dragOffX = 0, dragOffY = 0;
+  canvas.addEventListener('pointerdown', (e)=>{
+    const pt = canvasPoint(e);
+    const idx = hitTestSticker(pt);
+    if(idx < 0) return;
+    const s = state.stickers[idx];
+    state.stickers.splice(idx,1); state.stickers.push(s); // bring to front
+    dragSticker = s;
+    const b = stickerBox(s);
+    dragOffX = pt.x - (b.x1+b.x2)/2; dragOffY = pt.y - (b.y1+b.y2)/2;
+    canvas.style.cursor = 'grabbing';
+    try{ canvas.setPointerCapture(e.pointerId); } catch(err){ /* capture is best-effort */ }
+    draw();
+  });
+  canvas.addEventListener('pointermove', (e)=>{
+    const pt = canvasPoint(e);
+    if(dragSticker){
+      dragSticker.xFrac = (pt.x - dragOffX) / CARD_W;
+      dragSticker.yFrac = (pt.y - dragOffY) / logicalH;
+      draw();
+    } else {
+      canvas.style.cursor = hitTestSticker(pt) >= 0 ? 'grab' : 'default';
+    }
+  });
+  function endStickerDrag(){ dragSticker = null; canvas.style.cursor = 'default'; }
+  canvas.addEventListener('pointerup', endStickerDrag);
+  canvas.addEventListener('pointercancel', endStickerDrag);
+
+  draw();
+
+  // canvas text doesn't repaint itself when a web font finishes loading —
+  // paint once immediately (system-font fallback), then again once Paperozi
+  // is actually available so the card doesn't stay stuck on the fallback
+  const PAPEROZI_WEIGHTS = [400,500,600,700,800,900];
+  Promise.all(PAPEROZI_WEIGHTS.map(w => document.fonts.load(`${w} 20px "Paperozi"`)))
+    .then(draw)
+    .catch(()=>{ /* CDN unreachable — keep the system-font fallback render */ });
+
+  const downloadBtn = document.getElementById('downloadBtn');
+  downloadBtn.addEventListener('click', ()=>{
+    draw();
+    const jpegUrl = canvas.toDataURL('image/jpeg', 0.95);
+    const a = document.createElement('a');
+    const safeName = (state.nameEn.trim() || 'card').replace(/[^\w가-힣-]/g,'_');
+    a.href = jpegUrl;
+    a.download = `프로필카드_${safeName}.jpg`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  });
+})();
+</script>
+
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"f5d3b54061e0459080bdc7fbfcc9294d","r":1}' crossorigin="anonymous"></script>
+</body>
+</html>
