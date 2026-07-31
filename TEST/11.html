@@ -1,0 +1,847 @@
+alpiem.tistory.com/m/47
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRPG Map Sheet Maker Pro (Layer Supported)</title>
+    <style>
+        :root {
+            --bg-main: #f8fafc;
+            --bg-card: #ffffff;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --accent: #d97706;
+            --accent-hover: #b45309;
+            --danger: #dc2626;
+            --danger-hover: #b91c1c;
+            --success: #16a34a;
+            --success-hover: #15803d;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            width: 100%;
+            background-color: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 0;
+            text-align: center;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.05em;
+            color: var(--text-main);
+        }
+
+        .container {
+            max-width: 1250px;
+            width: 100%;
+            padding: 24px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+        }
+
+        /* 컨트롤 패널 */
+        #controls {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            border-right: 1px solid var(--border);
+            padding-right: 20px;
+        }
+
+        .control-group:last-child {
+            border-right: none;
+            padding-right: 0;
+        }
+
+        .control-group.actions {
+            margin-left: auto;
+            flex-direction: row;
+            align-items: flex-end;
+        }
+
+        label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        button, select, input[type="text"], input[type="number"] {
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background-color: #ffffff;
+            color: var(--text-main);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        input[type="text"] { cursor: text; width: 130px; }
+        input[type="color"] {
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 8px;
+            cursor: pointer;
+            padding: 0;
+            background: none;
+        }
+
+        button:hover { background-color: #f1f5f9; border-color: #cbd5e1; }
+        button.active { background-color: var(--primary); color: #ffffff; border-color: var(--primary); }
+
+        #add-hole-btn, #add-text-btn { background-color: var(--accent); color: white; border-color: var(--accent); }
+        #add-hole-btn:hover, #add-text-btn:hover { background-color: var(--accent-hover); }
+        #delete-btn { background-color: #fee2e2; color: var(--danger); border-color: #fca5a5; }
+        #delete-btn:hover { background-color: var(--danger); color: white; }
+        #download-btn { background-color: var(--success); color: white; border-color: var(--success); font-weight: 600; }
+        #download-btn:hover { background-color: var(--success-hover); }
+
+        /* 동적 스타일 편집 패널 */
+        #dynamic-props {
+            display: none;
+            background: #f1f5f9;
+            border-radius: 12px;
+            padding: 12px 16px;
+            width: 100%;
+            box-sizing: border-box;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 메인 작업 영역 레이아웃 (좌: 캔버스, 우: 레이어) */
+        .workspace {
+            display: flex;
+            gap: 24px;
+            width: 100%;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        /* 캔버스 뷰 (원래 크기 707x500 유지) */
+        #canvas-container {
+            background-image: linear-gradient(45deg, #e2e8f0 25%, transparent 25%), 
+                              linear-gradient(-45deg, #e2e8f0 25%, transparent 25%), 
+                              linear-gradient(45deg, transparent 75%, #e2e8f0 75%), 
+                              linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
+            background-size: 16px 16px;
+            background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            background-color: #f1f5f9;
+            width: 707px;
+            height: 500px;
+        }
+
+        canvas { display: block; background-color: transparent; }
+
+        /* 레이어 사이드바 패널 */
+        #layer-panel {
+            width: 320px;
+            height: 500px; /* 캔버스 높이와 일치 */
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            padding: 16px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        #layer-panel h3 {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-main);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+        }
+
+        .layer-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            overflow-y: auto;
+            flex: 1;
+            padding-right: 4px;
+        }
+
+        /* 레이어 아이템 스타일 */
+        .layer-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .layer-item:hover { background: #f1f5f9; }
+        .layer-item.selected {
+            background: #eff6ff;
+            border-color: #bfdbfe;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .layer-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .layer-type-badge {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .badge-hole { background: #fee2e2; color: #ef4444; }
+        .badge-sticker { background: #fef3c7; color: #d97706; }
+        .badge-text { background: #e0f2fe; color: #0284c7; }
+
+        .layer-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .layer-btn {
+            background: none;
+            border: none;
+            padding: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            color: var(--text-muted);
+        }
+        .layer-btn:hover { background: #e2e8f0; color: var(--text-main); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>TRPG Map Sheet Maker Pro</h1>
+    </header>
+
+    <div class="container">
+        <div id="controls">
+            <div class="control-group">
+                <label>1. 배경 종이</label>
+                <div class="btn-row">
+                    <input type="file" id="bg-upload" accept="image/*" style="display:none;">
+                    <button id="bg-upload-btn">이미지 삽입</button>
+                    <button id="bg-reset-btn">리셋</button>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>2. 작업 모드</label>
+                <div class="btn-row">
+                    <button id="mode-select" class="active">선택 / 이동</button>
+                    <button id="mode-sticker">스티커 추가</button>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>3. 구멍 생성</label>
+                <div class="btn-row">
+                    <select id="hole-shape">
+                        <option value="rect">사각형</option>
+                        <option value="circle">정원</option>
+                        <option value="ellipse">타원</option>
+                    </select>
+                    <button id="add-hole-btn">생성</button>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>4. 타이포 텍스트</label>
+                <div class="btn-row">
+                    <input type="text" id="text-input" value="텍스트 입력" placeholder="문구 작성">
+                    <button id="add-text-btn">추가</button>
+                    
+                    <input type="file" id="font-upload" accept=".ttf, .otf" style="display:none;">
+                    <button id="font-upload-btn" style="border-color: var(--primary); color: var(--primary);">폰트 업로드</button>
+                </div>
+            </div>
+
+            <div class="control-group actions">
+                <button id="delete-btn">삭제</button>
+                <button id="download-btn">PNG 다운로드</button>
+            </div>
+
+            <input type="file" id="sticker-upload" accept="image/*" style="display:none;">
+        </div>
+
+        <div id="dynamic-props"></div>
+
+        <div class="workspace">
+            <div id="canvas-container">
+                <canvas id="mapCanvas" width="1414" height="1000" style="width: 707px; height: 500px;"></canvas>
+            </div>
+
+            <div id="layer-panel">
+                <h3>레이어 관리</h3>
+                <div class="layer-list" id="layerListContainer">
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('mapCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let currentMode = 'select'; 
+        let backgroundImage = null;
+        let isBgLoaded = false; 
+        
+        let elements = []; 
+        let selectedElement = null;
+        let isDragging = null; 
+        let startX, startY;
+        let elementIdCounter = 0; // 각 레이어를 구별하기 위한 고유 ID 카운터
+
+        let fontFamilies = [
+            { name: '고딕 (Sans-serif)', value: 'sans-serif' },
+            { name: '명조 (Serif)', value: 'serif' },
+            { name: '판타지 (Fantasy)', value: 'fantasy' },
+            { name: '손글씨 (Cursive)', value: 'cursive' },
+            { name: '디지털 (Monospace)', value: 'monospace' }
+        ];
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 1. 배경 드로우
+            ctx.globalCompositeOperation = 'source-over';
+            if (backgroundImage && isBgLoaded) {
+                ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+            } else {
+                ctx.fillStyle = '#ffffff'; 
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+
+            // 2. 투명 구멍 파내기
+            ctx.globalCompositeOperation = 'destination-out';
+            elements.forEach(el => {
+                if (el.visible === false) return; // 숨겨진 레이어는 그리지 않음
+                if (el.type === 'hole') {
+                    ctx.fillStyle = 'rgba(0,0,0,1)';
+                    ctx.beginPath();
+                    if (el.shape === 'rect') {
+                        ctx.fillRect(el.x, el.y, el.w, el.h);
+                    } else if (el.shape === 'circle') {
+                        let r = Math.abs(el.w) / 2;
+                        ctx.arc(el.x + r, el.y + r, r, 0, Math.PI * 2);
+                        ctx.fill();
+                    } else if (el.shape === 'ellipse') {
+                        let rx = Math.abs(el.w) / 2;
+                        let ry = Math.abs(el.h) / 2;
+                        ctx.ellipse(el.x + rx, el.y + ry, rx, ry, 0, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            });
+
+            // 3. 구멍 윤곽선 프레임 그리기
+            ctx.globalCompositeOperation = 'source-over';
+            elements.forEach(el => {
+                if (el.visible === false) return;
+                if (el.type === 'hole' && el.frameWidth > 0) {
+                    ctx.strokeStyle = el.frameColor;
+                    ctx.lineWidth = el.frameWidth;
+                    ctx.beginPath();
+                    if (el.shape === 'rect') {
+                        ctx.strokeRect(el.x, el.y, el.w, el.h);
+                    } else if (el.shape === 'circle') {
+                        let r = el.w / 2;
+                        ctx.arc(el.x + r, el.y + r, r, 0, Math.PI * 2);
+                        ctx.stroke();
+                    } else if (el.shape === 'ellipse') {
+                        let rx = el.w / 2; let ry = el.h / 2;
+                        ctx.ellipse(el.x + rx, el.y + ry, rx, ry, 0, 0, Math.PI * 2);
+                        ctx.stroke();
+                    }
+                }
+            });
+
+            // 4. 스티커 및 텍스트 얹기
+            elements.forEach(el => {
+                if (el.visible === false) return;
+                if (el.type === 'sticker') {
+                    ctx.drawImage(el.img, el.x, el.y, el.w, el.h);
+                } else if (el.type === 'text') {
+                    ctx.fillStyle = el.color;
+                    ctx.font = `${el.isBold ? 'bold' : 'normal'} ${el.size}px "${el.fontFamily}"`;
+                    ctx.textBaseline = 'top';
+                    ctx.fillText(el.text, el.x, el.y);
+                    
+                    const metrics = ctx.measureText(el.text);
+                    el.w = metrics.width;
+                    el.h = el.size;
+                }
+                
+                if (selectedElement === el) {
+                    ctx.strokeStyle = '#2563eb';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([4, 4]);
+                    
+                    if(el.type === 'hole' && el.shape === 'circle') {
+                        ctx.beginPath(); let r = el.w / 2;
+                        ctx.arc(el.x + r, el.y + r, r, 0, Math.PI * 2); ctx.stroke();
+                    } else if(el.type === 'hole' && el.shape === 'ellipse') {
+                        ctx.beginPath(); let rx = el.w / 2; let ry = el.h / 2;
+                        ctx.ellipse(el.x + rx, el.y + ry, rx, ry, 0, 0, Math.PI * 2); ctx.stroke();
+                    } else {
+                        ctx.strokeRect(el.x, el.y, el.w, el.h);
+                    }
+                    ctx.setLineDash([]);
+                    
+                    if (el.type !== 'text') {
+                        ctx.fillStyle = '#ffffff';
+                        ctx.strokeStyle = '#2563eb';
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.arc(el.x + el.w, el.y + el.h, 7, 0, Math.PI * 2);
+                        ctx.fill(); ctx.stroke();
+                    }
+                }
+            });
+        }
+
+        // 레이어 패널 UI 새로고침 함수
+        function updateLayerPanel() {
+            const container = document.getElementById('layerListContainer');
+            container.innerHTML = '';
+
+            if (elements.length === 0) {
+                container.innerHTML = `<span style="font-size:12px; color:var(--text-muted); text-align:center; padding-top:20px;">생성된 레이어가 없습니다.</span>`;
+                return;
+            }
+
+            // 화면상 위에 위치하는 요소(배열 뒷부분)가 레이어 목록 가장 위에 나오도록 역순 렌더링
+            for (let i = elements.length - 1; i >= 0; i--) {
+                const el = elements[i];
+                const isSelected = selectedElement === el;
+                const isVisible = el.visible !== false;
+
+                let layerName = '';
+                if (el.type === 'hole') layerName = `구멍 (${el.shape === 'rect' ? '사각형' : el.shape === 'circle' ? '정원' : '타원'})`;
+                else if (el.type === 'sticker') layerName = `스티커 이미지`;
+                else if (el.type === 'text') layerName = el.text.length > 10 ? el.text.substring(0, 10) + '...' : el.text;
+
+                const item = document.createElement('div');
+                item.className = `layer-item ${isSelected ? 'selected' : ''}`;
+                item.innerHTML = `
+                    <div class="layer-info">
+                        <span class="layer-type-badge badge-${el.type}">${el.type}</span>
+                        <span title="${el.type === 'text' ? el.text : layerName}">${layerName}</span>
+                    </div>
+                    <div class="layer-actions">
+                        <button class="layer-btn toggle-visible" title="숨기기/보이기">${isVisible ? '👁' : '🙈'}</button>
+                        <button class="layer-btn move-up" title="위로 올리기">▲</button>
+                        <button class="layer-btn move-down" title="아래로 내리기">▼</button>
+                    </div>
+                `;
+
+                // 레이어 항목 클릭 시 요소 선택 연동
+                item.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('layer-btn')) return;
+                    selectedElement = el;
+                    draw();
+                    updatePropsPanel();
+                    updateLayerPanel();
+                });
+
+                // 숨기기 토글 버튼 기능
+                item.querySelector('.toggle-visible').addEventListener('click', () => {
+                    el.visible = (el.visible === false) ? true : false;
+                    draw();
+                    updateLayerPanel();
+                });
+
+                // 레이어 앞으로 가져오기 (배열 뒤쪽으로 이동)
+                item.querySelector('.move-up').addEventListener('click', () => {
+                    const idx = elements.indexOf(el);
+                    if (idx < elements.length - 1) {
+                        elements[idx] = elements[idx + 1];
+                        elements[idx + 1] = el;
+                        draw();
+                        updateLayerPanel();
+                    }
+                });
+
+                // 레이어 뒤로 보내기 (배열 앞쪽으로 이동)
+                item.querySelector('.move-down').addEventListener('click', () => {
+                    const idx = elements.indexOf(el);
+                    if (idx > 0) {
+                        elements[idx] = elements[idx - 1];
+                        elements[idx - 1] = el;
+                        draw();
+                        updateLayerPanel();
+                    }
+                });
+
+                container.appendChild(item);
+            }
+        }
+
+        // 컴포넌트별 속성 변경 패널 제어
+        function updatePropsPanel() {
+            const panel = document.getElementById('dynamic-props');
+            if (!selectedElement) {
+                panel.style.display = 'none';
+                return;
+            }
+            panel.style.display = 'flex';
+            panel.innerHTML = '';
+
+            if (selectedElement.type === 'hole') {
+                panel.innerHTML = `
+                    <div class="btn-row">
+                        <label>프레임 두께</label>
+                        <input type="range" id="prop-frame-width" min="0" max="20" value="${selectedElement.frameWidth}">
+                        <span style="font-size:12px; min-width:30px;">${selectedElement.frameWidth}px</span>
+                    </div>
+                    <div class="btn-row">
+                        <label>프레임 색상</label>
+                        <input type="color" id="prop-frame-color" value="${selectedElement.frameColor}">
+                    </div>
+                `;
+                document.getElementById('prop-frame-width').addEventListener('input', (e) => {
+                    selectedElement.frameWidth = parseInt(e.target.value);
+                    e.target.nextElementSibling.innerText = e.target.value + 'px';
+                    draw();
+                });
+                document.getElementById('prop-frame-color').addEventListener('input', (e) => {
+                    selectedElement.frameColor = e.target.value;
+                    draw();
+                });
+            } 
+            else if (selectedElement.type === 'text') {
+                let fontOptions = fontFamilies.map(f => `<option value="${f.value}" ${selectedElement.fontFamily === f.value ? 'selected' : ''}>${f.name}</option>`).join('');
+                panel.innerHTML = `
+                    <div class="btn-row">
+                        <label>내용</label>
+                        <input type="text" id="prop-text-string" value="${selectedElement.text}">
+                    </div>
+                    <div class="btn-row">
+                        <label>글꼴</label>
+                        <select id="prop-text-font">${fontOptions}</select>
+                    </div>
+                    <div class="btn-row">
+                        <label>크기</label>
+                        <input type="number" id="prop-text-size" min="10" max="200" value="${selectedElement.size}" style="width:60px;">
+                    </div>
+                    <div class="btn-row">
+                        <label>색상</label>
+                        <input type="color" id="prop-text-color" value="${selectedElement.color}">
+                    </div>
+                    <div class="btn-row">
+                        <button id="prop-text-bold" class="${selectedElement.isBold ? 'active' : ''}">B (굵게)</button>
+                    </div>
+                `;
+                document.getElementById('prop-text-string').addEventListener('input', (e) => { 
+                    selectedElement.text = e.target.value; 
+                    draw(); 
+                    updateLayerPanel();
+                });
+                document.getElementById('prop-text-font').addEventListener('change', (e) => { selectedElement.fontFamily = e.target.value; draw(); });
+                document.getElementById('prop-text-size').addEventListener('input', (e) => { selectedElement.size = parseInt(e.target.value) || 12; draw(); });
+                document.getElementById('prop-text-color').addEventListener('input', (e) => { selectedElement.color = e.target.value; draw(); });
+                document.getElementById('prop-text-bold').addEventListener('click', (e) => {
+                    selectedElement.isBold = !selectedElement.isBold;
+                    e.target.classList.toggle('active');
+                    draw();
+                });
+            } else {
+                panel.innerHTML = `<span style="font-size:13px; color:var(--text-muted);">선택된 스티커 이미지의 위치와 크기를 조절할 수 있습니다.</span>`;
+            }
+        }
+
+        // --- TTF/OTF 파일 업로드 연동 로직 ---
+        const fontUploadInput = document.getElementById('font-upload');
+        document.getElementById('font-upload-btn').addEventListener('click', () => fontUploadInput.click());
+
+        fontUploadInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const fontName = file.name.split('.')[0].replace(/[^a-zA-Z0-9가-힣]/g, ''); 
+            const reader = new FileReader();
+
+            reader.onload = async function(event) {
+                try {
+                    const fontFace = new FontFace(fontName, event.target.result);
+                    const loadedFace = await fontFace.load();
+                    document.fonts.add(loadedFace);
+
+                    fontFamilies.push({ name: `✨ ${file.name.split('.')[0]}`, value: fontName });
+                    alert(`'${file.name.split('.')[0]}' 폰트가 정상적으로 등록되었습니다!\n글꼴 선택 창에서 선택하실 수 있습니다.`);
+                    
+                    updatePropsPanel();
+                    draw();
+                } catch (err) {
+                    console.error(err);
+                    alert("폰트 파일을 처리하는 중 오류가 발생했습니다. 올바른 TTF/OTF 파일인지 확인해 주세요.");
+                }
+            };
+            reader.readAsArrayBuffer(file);
+            e.target.value = ''; 
+        });
+
+        // 텍스트 추가 누름
+        document.getElementById('add-text-btn').addEventListener('click', () => {
+            const txtValue = document.getElementById('text-input').value;
+            const newText = {
+                id: elementIdCounter++,
+                type: 'text',
+                text: txtValue,
+                x: 150, y: 150,
+                w: 100, h: 30,
+                size: 40,
+                color: '#1e293b',
+                fontFamily: 'sans-serif',
+                isBold: false,
+                visible: true
+            };
+            elements.push(newText);
+            selectedElement = newText;
+            currentMode = 'select';
+            document.getElementById('mode-select').classList.add('active');
+            document.getElementById('mode-sticker').classList.remove('active');
+            draw();
+            updatePropsPanel();
+            updateLayerPanel();
+        });
+
+        // 구멍 생성 누름
+        document.getElementById('add-hole-btn').addEventListener('click', () => {
+            const shape = document.getElementById('hole-shape').value;
+            const newHole = {
+                id: elementIdCounter++,
+                type: 'hole',
+                shape: shape,
+                x: 200, y: 200,
+                w: 150, h: shape === 'circle' ? 150 : 100,
+                frameWidth: 0,       
+                frameColor: '#000000',
+                visible: true
+            };
+            elements.push(newHole);
+            selectedElement = newHole;
+            currentMode = 'select';
+            document.getElementById('mode-select').classList.add('active');
+            document.getElementById('mode-sticker').classList.remove('active');
+            draw();
+            updatePropsPanel();
+            updateLayerPanel();
+        });
+
+        // 마우스 상호작용
+        canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            startX = (e.clientX - rect.left) * scaleX;
+            startY = (e.clientY - rect.top) * scaleY;
+
+            if (currentMode === 'select') {
+                for (let i = elements.length - 1; i >= 0; i--) {
+                    const el = elements[i];
+                    if (el.visible === false) continue; // 숨겨진 요소는 선택 불가처리
+                    
+                    if (selectedElement === el && el.type !== 'text' &&
+                        startX >= el.x + el.w - 15 && startX <= el.x + el.w + 15 &&
+                        startY >= el.y + el.h - 15 && startY <= el.y + el.h + 15) {
+                        isDragging = 'resize';
+                        return;
+                    }
+                    
+                    if (startX >= el.x && startX <= el.x + el.w &&
+                        startY >= el.y && startY <= el.y + el.h) {
+                        selectedElement = el;
+                        isDragging = 'move';
+                        
+                        // 기존의 최상단 강제이동 로직을 빼고 레이어 관리 패널 연동을 강화
+                        draw();
+                        updatePropsPanel();
+                        updateLayerPanel();
+                        return;
+                    }
+                }
+                selectedElement = null;
+                draw();
+                updatePropsPanel();
+                updateLayerPanel();
+            }
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!selectedElement || !isDragging) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const currentX = (e.clientX - rect.left) * scaleX;
+            const currentY = (e.clientY - rect.top) * scaleY;
+
+            const dx = currentX - startX;
+            const dy = currentY - startY;
+
+            if (isDragging === 'move') {
+                selectedElement.x += dx;
+                selectedElement.y += dy;
+            } else if (isDragging === 'resize') {
+                selectedElement.w += dx;
+                if(selectedElement.type === 'hole' && selectedElement.shape === 'circle') {
+                    selectedElement.h = selectedElement.w;
+                } else {
+                    selectedElement.h += dy;
+                }
+                if(selectedElement.w < 30) selectedElement.w = 30;
+                if(selectedElement.h < 30) selectedElement.h = 30;
+            }
+
+            startX = currentX;
+            startY = currentY;
+            draw();
+        });
+
+        window.addEventListener('mouseup', () => { isDragging = null; });
+
+        function deleteSelected() {
+            if (selectedElement) {
+                const index = elements.indexOf(selectedElement);
+                if (index > -1) {
+                    elements.splice(index, 1);
+                    selectedElement = null;
+                    draw();
+                    updatePropsPanel();
+                    updateLayerPanel();
+                }
+            }
+        }
+        document.getElementById('delete-btn').addEventListener('click', deleteSelected);
+        window.addEventListener('keydown', (e) => { if (e.key === 'Delete' || e.key === 'Backspace') deleteSelected(); });
+
+        const bgUploadInput = document.getElementById('bg-upload');
+        document.getElementById('bg-upload-btn').addEventListener('click', () => bgUploadInput.click());
+        bgUploadInput.addEventListener('change', (e) => {
+            const file = e.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                const img = new Image(); img.crossOrigin = 'anonymous';
+                img.onload = function() { backgroundImage = img; isBgLoaded = true; draw(); }
+                img.src = ev.target.result;
+            }
+            reader.readAsDataURL(file); e.target.value = '';
+        });
+        document.getElementById('bg-reset-btn').addEventListener('click', () => { backgroundImage = null; isBgLoaded = false; bgUploadInput.value = ''; draw(); });
+
+        const modeSelBtn = document.getElementById('mode-select');
+        const modeStkBtn = document.getElementById('mode-sticker');
+        modeSelBtn.addEventListener('click', () => { currentMode = 'select'; modeSelBtn.classList.add('active'); modeStkBtn.classList.remove('active'); });
+        modeStkBtn.addEventListener('click', () => document.getElementById('sticker-upload').click());
+        document.getElementById('sticker-upload').addEventListener('change', (e) => {
+            const file = e.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                const img = new Image(); img.crossOrigin = 'anonymous';
+                img.onload = function() {
+                    const newSticker = { 
+                        id: elementIdCounter++,
+                        type: 'sticker', 
+                        img: img, 
+                        x: 150, y: 150, 
+                        w: 200, h: (img.height / img.width) * 200,
+                        visible: true
+                    };
+                    elements.push(newSticker); selectedElement = newSticker;
+                    currentMode = 'select'; modeSelBtn.classList.add('active'); modeStkBtn.classList.remove('active');
+                    draw(); updatePropsPanel(); updateLayerPanel();
+                }
+                img.src = ev.target.result;
+            }
+            reader.readAsDataURL(file); e.target.value = '';
+        });
+
+        document.getElementById('download-btn').addEventListener('click', () => {
+            const temp = selectedElement; selectedElement = null; draw();
+            const link = document.createElement('a');
+            link.download = 'trpg_custom_mapsheet.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            selectedElement = temp; draw();
+        });
+
+        // 초기 화면 세팅
+        updateLayerPanel();
+    </script>
+</body>
+</html>
