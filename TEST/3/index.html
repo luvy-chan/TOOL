@@ -1,0 +1,183 @@
+my-room-dxi.pages.dev/
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+
+    <title>My Room</title>
+    <script type="module" crossorigin src="/assets/index-Can9azxg.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-BjjGbT8n.css">
+  </head>
+
+  <body>
+    <div id="app"></div>
+
+    <!-- 메뉴 열기 -->
+    <button
+      id="menu-toggle"
+      type="button"
+      aria-label="메뉴 열기"
+    >
+      ☰
+    </button>
+
+    <!-- 왼쪽 설정 메뉴 -->
+    <aside id="controls">
+      <div class="menu-header">
+        <strong>설정</strong>
+
+        <button
+          id="menu-close"
+          type="button"
+          aria-label="메뉴 닫기"
+        >
+          ←
+        </button>
+      </div>
+
+      <!-- 캐릭터 관리 -->
+      <section class="control-section">
+        <div class="section-title-row">
+          <strong>캐릭터 관리</strong>
+
+          <span id="character-count">
+            0 / 5
+          </span>
+        </div>
+
+        <div id="character-list"></div>
+
+        <label
+          for="character-add-upload"
+          class="menu-action-button"
+        >
+          ＋ 캐릭터 추가
+        </label>
+
+        <input
+          id="character-add-upload"
+          type="file"
+          accept="image/png, image/jpeg, image/webp"
+        />
+
+        <label
+          for="character-replace-upload"
+          class="menu-action-button secondary"
+        >
+          선택 캐릭터 이미지 변경
+        </label>
+
+        <input
+          id="character-replace-upload"
+          type="file"
+          accept="image/png, image/jpeg, image/webp"
+        />
+
+        <button
+          id="character-delete-button"
+          class="menu-action-button danger"
+          type="button"
+        >
+          선택 캐릭터 삭제
+        </button>
+      </section>
+
+      <!-- 털 색상 -->
+      <section
+        id="fur-color-control"
+        class="control-section"
+      >
+        <div class="section-title-row">
+          <strong>선택 캐릭터 털 색상</strong>
+        </div>
+
+        <div class="fur-color-inputs">
+          <input
+            id="fur-color-picker"
+            type="color"
+            value="#e6dcc0"
+            aria-label="털 색상 선택"
+          />
+
+          <input
+            id="fur-color-code"
+            type="text"
+            value="#E6DCC0"
+            maxlength="7"
+            spellcheck="false"
+            aria-label="털 색상 코드"
+          />
+        </div>
+      </section>
+
+      <!-- 배경 -->
+      <section class="control-section">
+        <strong class="standalone-title">
+          배경
+        </strong>
+
+        <label
+          for="background-upload"
+          class="menu-action-button"
+        >
+          배경 변경
+        </label>
+
+        <input
+          id="background-upload"
+          type="file"
+          accept="image/png, image/jpeg, image/webp"
+        />
+      </section>
+
+      <button
+        id="reset-all-button"
+        type="button"
+      >
+        전체 초기화
+      </button>
+    </aside>
+
+    <!-- 통합 아이템 바 -->
+    <div id="item-bar">
+      <div class="item-bar-header">
+        <strong>아이템</strong>
+
+        <span id="active-item-name">
+          아이템을 선택하세요
+        </span>
+      </div>
+
+      <div id="item-list"></div>
+
+      <div class="item-add-buttons">
+        <label for="snack-upload">
+          ＋ 간식
+        </label>
+
+        <input
+          id="snack-upload"
+          type="file"
+          accept="image/png, image/jpeg, image/webp"
+        />
+
+        <label for="drink-upload">
+          ＋ 음료
+        </label>
+
+        <input
+          id="drink-upload"
+          type="file"
+          accept="image/png, image/jpeg, image/webp"
+        />
+      </div>
+    </div>
+
+  </body>
+</html>
