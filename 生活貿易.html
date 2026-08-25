@@ -326,14 +326,14 @@ input {
 
   <div class="tab-panel active" id="tab-tracker">
     <div class="header-bar">
-      <h1 class="page-title">生活貿易材料表</h1>
+      <h1 class="page-title">！9/17當周停用！(換回1趟的原表)</h1>
       <div class="header-controls">
         <button id="btnClear" class="btn-clear">清空</button>
         <button id="btnMinus" class="btn-clear">-1組</button>
         <div class="sets-global">
           組數
           <div class="sets-btns" id="globalSetsBtns">
-            <button data-n="1">1</button><button data-n="2">2</button><button data-n="3">3</button><button data-n="4">4</button>
+            <button data-n="1">1</button><button data-n="2">2</button><button data-n="3">3</button>
           </div>
         </div>
       </div>
@@ -359,8 +359,8 @@ input {
     <p class="page-title" style="margin-bottom:10px;">每周一趟</p>
     <div class="static-note">
       <p>搭配貿易夥伴、商人才能</p>
-      <p>佩拉火山、卡魯森林：L5、L4、L3各買1組</p>
-      <p>凱麗達營地、綠洲：L5、L4各買1組</p>
+      <p>佩拉火山、凱麗達營地：L5、L4、L3各買1組，L2買2組</p>
+      <p>綠洲、卡魯森林：L5、L4、L3各買1組，卡魯L2買2組、L✰一組</p>
     </div>
 
     <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 20px;">
@@ -559,37 +559,50 @@ const AREAS = [
     {name:'拉斯帕黑豹的皮革', lv:5, note:'基因突變體×3、特級木材×9、波斯菊香水×6'},
     {name:'火山蜥蜴的卵', lv:4, note:'閃光紙×35、優布×35、500紅×14'},
     {name:'伊克西翁的角', lv:3, note:'人偶500水×21、金板×35'},
+    {name:'火山石', lv:2, note:'秘銀板×28、大麥粉×42'},    
   ]},
   { name:'凱麗達營地', items:[
     {name:'玫瑰鹽', lv:5, note:'秘銀鐵釘×9、毒液弩箭×9、優木×9'},
     {name:'大型露營帳篷', lv:4, note:'人工草皮×7、綠寶石保險絲×7、高皮繩×35'},
+    {name:'溫泉入浴劑', lv:3, note:'黏黏膠水×21、優質香草蠟燭×14'},
+    {name:'凱麗達鮭魚', lv:2, note:'能量轉換器×14、淨化的兔子腳×14'},    
   ]},
   { name:'綠洲', items:[
     {name:'巨大尖牙化石', lv:5, note:'寵物遊戲組合×3、乾草堆×9、魔力木材×15'},
     {name:'仙人掌花', lv:4, note:'白葡萄酒×7、銀板×14、高布×28'},
+    {name:'綠洲風景畫', lv:3, note:'優質皮繩×7、粗線×21'},
   ]},
   { name:'卡魯', items:[
+    {name:'搖椅', lv:✰, note:'黑莓汁×3、花花洋裝×3、強力黏著劑×3'},
     {name:'貝殼化石', lv:5, note:'能量增幅×6、堅固之鏈×3、魔法羽毛筆×15'},
     {name:'卡魯香菇', lv:4, note:'旋轉齒輪×7、中木×35、高絲×28'},
-    {name:'石頭戰馬雕刻像', lv:3, note:'稀原合金×14、麵粉/小麥粉×35'},
+    {name:'石頭戰馬雕刻像', lv:3, note:'稀原合金×14、小麥粉×35'},
+    {name:'木製桌子', lv:2, note:'魔法的羊皮紙×14、粗繩×28'},    
   ]},
 ];
 
 const CATEGORIES = [
-  { key:'metal', name:'金屬', note:'', recipes:[
-    { target:{name:'銀板', suffix:'綠洲｜仙人掌花', per:14}, source:{area:'綠洲', item:'仙人掌花'}, materials:[{name:'銀塊', per:1, hoverText:'合成\n金屬塊+祝福藥水+阿蘭特結晶(貿易所有賣)'}]},
-    { target:{name:'秘銀鐵釘', suffix:'凱麗達｜玫瑰鹽', per:9}, source:{area:'凱麗達營地', item:'玫瑰鹽'}, materials:[{name:'秘銀塊', per:20, hoverText:'合成\n金屬塊+祝福藥水+阿蘭特結晶(貿易所有賣)'}]},
-    { target:{name:'金板', suffix:'佩拉｜伊克西翁角', per:35}, source:{area:'佩拉火山', item:'伊克西翁的角'}, materials:[{name:'金塊', per:1, hoverText:'合成\n金屬塊+祝福藥水+阿蘭特結晶(貿易所有賣)'}]},
+  { key:'metal', name:'金屬(戴手套)', note:'', recipes:[
+    { target:{name:'銀板', suffix:'綠洲｜仙人掌花', per:14}, source:{area:'綠洲', item:'仙人掌花'}, materials:[{name:'銀塊', per:1'}]},
+    { target:{name:'秘銀鐵釘', suffix:'凱麗達｜玫瑰鹽', per:9}, source:{area:'凱麗達營地', item:'玫瑰鹽'}, materials:[{name:'秘銀塊', per:20'}]},
+    { target:{name:'金板', suffix:'佩拉｜伊克西翁角', per:35}, source:{area:'佩拉火山', item:'伊克西翁的角'}, materials:[{name:'金塊', per:1'}]},
+    { target:{name:'秘銀板', suffix:'佩拉｜火山石', per:28}, source:{area:'佩拉火山', item:'火山石'}, materials:[{name:'秘銀塊', per:1'}]},
   ]},
-  { key:'magic', name:'魔法製造', note:'寵物宗師', recipes:[
+  { key:'magic', name:'魔法製造(寵物)', note:'寵物宗師', recipes:[
     { target:{name:'基因突變體', suffix:'佩拉｜黑豹皮革', per:3}, source:{area:'佩拉火山', item:'拉斯帕黑豹的皮革'}, materials:[
       {name:'基因突變兔的腳', per:10},{name:'基因突變植物的黏液', per:5},{name:'大腳怪的心臟', per:9},
     ]},
     { target:{name:'聚集魔力的木柴', suffix:'綠洲｜尖牙化石', per:15}, source:{area:'綠洲', item:'巨大尖牙化石'}, materials:[
       {name:'中級木柴', per:1, hoverText:'木柴×3'},{name:'稀原', per:1, hoverText:'稀原礦石碎片×5'},{name:'希里原', per:1, hoverText:'希里原結晶×5'},
     ]},
+    { target:{name:'黏黏膠水', suffix:'凱麗達｜入浴劑', per:21}, source:{area:'凱麗達營地', item:'溫泉入浴劑'}, materials:[
+      {name:'基因突變植物的黏液', per:1'},{name:'希里原', per:1, hoverText:'希里原結晶×5'},
+    ]},
+    { target:{name:'淨化的兔子腳', suffix:'凱麗達｜鮭魚', per:14}, source:{area:'凱麗達營地', item:'凱麗達鮭魚'}, materials:[
+      {name:'基因突變兔的腳', per:1'},{name:'希里原', per:1, hoverText:'希里原結晶×5'},
+    ]},
   ]},
-  { key:'rare', name:'稀原工學', note:'寵物宗師', recipes:[
+  { key:'rare', name:'稀原工學(寵物)', note:'寵物宗師', recipes:[
     { target:{name:'能量增幅裝置', suffix:'卡魯｜貝殼化石', per:6}, source:{area:'卡魯', item:'貝殼化石'}, materials:[
       {name:'綠寶石核心', per:3},{name:'能量轉換器', per:3, hoverText:'希里原×1+稀原×1\n=希里原結晶×5+稀原礦石碎片×5'},
     ]},
@@ -602,6 +615,9 @@ const CATEGORIES = [
     { target:{name:'稀原合金', suffix:'卡魯｜戰馬雕像', per:14}, source:{area:'卡魯', item:'石頭戰馬雕刻像'}, materials:[
       {name:'柔軟的稀原礦石碎片', per:15},
     ]},
+    { target:{name:'能量轉換器', suffix:'凱麗達｜鮭魚', per:14}, source:{area:'凱麗達營地', item:'凱麗達鮭魚'}, materials:[
+      {name:'稀原', per:1, hoverText:'稀原礦石碎片×5'},{name:'希里原', per:1, hoverText:'希里原結晶×5'},
+    ]},
   ]},
   { key:'wood', name:'木柴', recipes:[
     { target:{name:'中級木柴', suffix:'卡魯｜卡魯香菇', per:35}, source:{area:'卡魯', item:'卡魯香菇'}, materials:[{name:'木柴', per:3}]},
@@ -610,7 +626,7 @@ const CATEGORIES = [
       {name:'優質木柴', per:1},{name:'高純度強化劑', per:1, hoverText:'推薦分解\n擁有覺醒能量的結晶、蘊藏黑暗的刀刃碎片'},
     ]},
   ]},
-  { key:'potion', name:'藥水', note:'藥師宗師', recipes:[
+  { key:'potion', name:'藥水(宗師)', note:'藥師宗師', recipes:[
     { target:{name:'強化生命藥水(效果500)<br>', suffix:'佩拉｜黑豹皮革', per:14, hoverText:'醫療所兼職'}, source:{area:'佩拉火山', item:'火山蜥蜴的卵'}, materials:[
       {name:'幸運草', per:1, hoverText:'艾明花店兼職'},{name:'強化生命藥水(效果300)', per:1},{name:'水', per:1},
     ]},
@@ -631,13 +647,19 @@ const CATEGORIES = [
     { target:{name:'人工草皮', suffix:'凱麗達｜露營帳篷', per:7}, source:{area:'凱麗達營地', item:'大型露營帳篷'}, materials:[
       {name:'新鮮的草', per:20 , hoverText:'鋤田技能挖取花田'},{name:'花捆', per:5, hoverText:'鋤田技能挖取花田'},
     ]},
+    { target:{name:'優質香草蠟燭', suffix:'凱麗達｜入浴劑', per:14}, source:{area:'凱麗達營地', item:'溫泉入浴劑'}, materials:[
+      {name:'精製的催化劑', per:1'},{name:'蜂蠟(↓希布林)', per:1'},{name:'迷你香草蠟燭', per:1'},
+    ]},
   ]},
-  { key:'textile', name:'紡織', note:'裁縫宗師', recipes:[
+  { key:'textile', name:'紡織(宗師)', note:'裁縫宗師', recipes:[
     { target:{name:'高級絲綢', suffix:'卡魯｜卡魯香菇', per:28}, source:{area:'卡魯', item:'卡魯香菇'}, materials:[{name:'細線團', per:5}]},
     { target:{name:'高級布料', suffix:'綠洲｜仙人掌花', per:28}, source:{area:'綠洲', item:'仙人掌花'}, materials:[{name:'粗線團', per:4}]},
     { target:{name:'優質布料', suffix:'佩拉｜火蜥蜴卵', per:35}, source:{area:'佩拉火山', item:'火山蜥蜴的卵'}, materials:[{name:'粗線團', per:6}]},
     { target:{name:'堅固之鏈', suffix:'卡魯｜貝殼化石', per:3, hoverText:'！推薦兼職獲取！\n繩結線=細線團×1+粗線團×1'}, source:{area:'卡魯', item:'貝殼化石'}, materials:[{name:'繩結線', per:1},{name:'蘊藏黑暗的刀刃碎片', per:1}]},
     { target:{name:'高級皮繩', suffix:'凱麗達｜露營帳篷', per:35}, source:{area:'凱麗達營地', item:'大型露營帳篷'}, materials:[{name:'高級皮革', per:1}]},
+    { target:{name:'優質皮繩', suffix:'綠洲｜風景畫', per:7}, source:{area:'綠洲', item:'綠洲風景畫'}, materials:[{name:'優質皮革｜碧玉送克拉銀行員', per:1}]},
+    { target:{name:'粗線', suffix:'綠洲｜風景畫', per:21}, source:{area:'綠洲', item:'綠洲風景畫'}, materials:[{name:'細線團', per:5}]},
+    { target:{name:'粗繩', suffix:'卡魯｜木製桌子', per:28}, source:{area:'卡魯', item:'木製桌子'}, materials:[{name:'粗線團', per:5}]},
   ]},
   { key:'other', name:'其他材料', recipes:[
     { target:{name:'和諧的波斯菊香水', suffix:'佩拉｜黑豹皮革', per:6, hoverText:'芬恩的手工藝\n！周一有加成！'}, source:{area:'佩拉火山', item:'拉斯帕黑豹的皮革'}, materials:[
@@ -649,14 +671,21 @@ const CATEGORIES = [
     { target:{name:'閃光紙', suffix:'佩拉｜火蜥蜴卵', per:35, yield:10, hoverText:'合成\n一份10張'}, source:{area:'佩拉火山', item:'火山蜥蜴的卵'}, materials:[
       {name:'紙', per:10},{name:'紅色小珠子', per:1},{name:'藍色小珠子', per:1},{name:'綠色小珠子', per:1},{name:'銀色小珠子', per:1},
     ]},
-    { target:{name:'麵粉/小麥粉', suffix:'卡魯｜戰馬雕像', per:35}, source:{area:'卡魯', item:'石頭戰馬雕刻像'}, materials:[
-      {name:'小麥', per:10},
-    ]},
+    { target:{name:'小麥粉', suffix:'卡魯｜戰馬雕像', per:35}, source:{area:'卡魯', item:'石頭戰馬雕刻像'}, materials:[{name:'小麥', per:10},]},
+    { target:{name:'大麥粉', suffix:'佩拉｜火山石', per:42}, source:{area:'佩拉火山', item:'火山石'}, materials:[{name:'大麥', per:10},]},
   ]},
   { key:'circle', name:'魔法陣材料', recipes:[
     { target:{name:'魔法的羽毛筆', suffix:'卡魯｜貝殼化石', per:15, hoverText:'書店兼職'}, source:{area:'卡魯', item:'貝殼化石'}, materials:[
       {name:'有朝氣的羽毛', per:1, hoverText:'雜貨店販賣'},{name:'魔力藥草', per:10},{name:'黃金藥草', per:10},
     ]},
+    { target:{name:'魔法的羊皮紙', suffix:'卡魯｜木製桌子', per:14}, source:{area:'卡魯', item:'木製桌子'}, materials:[
+      {name:'柔軟的羊皮紙', per:1},{name:'魔力藥草', per:10},{name:'日光藥草', per:10},
+    ]},
+  ]},
+  { key:'textile', name:'塔汀農場', note:' ', recipes:[
+    { target:{name:'黑莓汁', suffix:'卡魯｜搖椅', per:3}, source:{area:'卡魯', item:'搖椅'}, materials:[{name:'茉莉', per:1},{name:'黑莓', per:1}]},
+    { target:{name:'花花洋裝', suffix:'卡魯｜搖椅', per:3}, source:{area:'卡魯', item:'搖椅'}, materials:[{name:'茉莉', per:1},{name:'蜘蛛絲', per:1}]},
+    { target:{name:'強力黏著劑', suffix:'卡魯｜搖椅', per:3}, source:{area:'卡魯', item:'搖椅'}, materials:[{name:'橡膠', per:1},{name:'蜘蛛絲', per:1}]},
   ]},
 ];
 
