@@ -475,6 +475,7 @@ const AREAS = [
     {name:'凱麗達鮭魚', lv:2, note:'能量轉換器×14、淨化的兔子腳×14'},    
   ]},
   { name:'綠洲', items:[
+    {name:'農場', lv:'✰', note:'強化纖維×2、黃昏魯特琴×2'},
     {name:'巨大尖牙化石', lv:5, note:'寵物遊戲組合×3、乾草堆×9、魔力木材×15'},
     {name:'仙人掌花', lv:4, note:'白葡萄酒×7、銀板×14、高布×28'},
     {name:'綠洲風景畫', lv:3, note:'優質皮繩×7、粗線×21'},
@@ -497,7 +498,7 @@ const CATEGORIES = [
   ]},
   { key:'magic', name:'魔法製造', note:'寵物宗師', recipes:[
     { target:{name:'基因突變體', suffix:'佩拉｜黑豹皮革', per:3}, source:{area:'佩拉火山', item:'拉斯帕黑豹的皮革'}, materials:[
-      {name:'基因突變兔的腳', per:10},{name:'基因突變植物的黏液', per:5},{name:'大腳怪的心臟', per:9},
+      {name:'基因突變兔的腳', per:10},{name:'基因突變植物的黏液', per:5},{name:'大腳怪的心臟', per:3},
     ]},
     { target:{name:'聚集魔力的木柴', suffix:'綠洲｜尖牙化石', per:15}, source:{area:'綠洲', item:'巨大尖牙化石'}, materials:[
       {name:'中級木柴', per:1, hoverText:'木柴×3'},{name:'稀原', per:1, hoverText:'稀原礦石碎片×5'},{name:'希里原', per:1, hoverText:'希里原結晶×5'},
@@ -548,7 +549,7 @@ const CATEGORIES = [
     { target:{name:'乾草堆', suffix:'綠洲｜尖牙化石', per:9}, source:{area:'綠洲', item:'巨大尖牙化石'}, materials:[
       {name:'壞掉的小麥葉', per:20, hoverText:'割小麥隨機獲得'},{name:'優質皮繩', per:1},
     ]},
-    { target:{name:'弩炮專用浸毒瓦伊凡弩箭<br>', suffix:'凱麗達｜玫瑰鹽', per:9}, source:{area:'凱麗達營地', item:'玫瑰鹽'}, materials:[
+    { target:{name:'弩炮專用浸毒瓦伊凡弩箭<br>', suffix:'凱麗達｜玫瑰鹽', per:9, yield:3}, source:{area:'凱麗達營地', item:'玫瑰鹽'}, materials:[
       {name:'木柴', per:1},{name:'瓦伊凡的爪子', per:1},{name:'劇毒藥水', per:1, hoverText:'基礎藥草×1+劇毒藥草×1+水瓶×1'},
     ]},
     { target:{name:'人工草皮', suffix:'凱麗達｜露營帳篷', per:7}, source:{area:'凱麗達營地', item:'大型露營帳篷'}, materials:[
@@ -589,10 +590,13 @@ const CATEGORIES = [
       {name:'柔軟的羊皮紙', per:1},{name:'魔力藥草', per:10},{name:'日光藥草', per:10},
     ]},
   ]},
-  { key:'textile', name:'塔汀農場', note:' ', recipes:[
-    { target:{name:'黑莓汁', suffix:'卡魯｜搖椅', per:3}, source:{area:'卡魯', item:'搖椅'}, materials:[{name:'茉莉', per:1},{name:'黑莓', per:1}]},
-    { target:{name:'花花洋裝', suffix:'卡魯｜搖椅', per:3}, source:{area:'卡魯', item:'搖椅'}, materials:[{name:'茉莉', per:1},{name:'蜘蛛絲', per:1}]},
-    { target:{name:'強力黏著劑', suffix:'卡魯｜搖椅', per:3}, source:{area:'卡魯', item:'搖椅'}, materials:[{name:'橡膠', per:1},{name:'蜘蛛絲', per:1}]},
+  { key:'farm', name:'塔汀農場', note:' ', recipes:[
+    { target:{name:'黑莓汁', suffix:'茉莉｜黑莓', per:3}, source:{area:'卡魯', item:'搖椅'}},
+    { target:{name:'花花洋裝', suffix:'茉莉｜蜘蛛絲', per:3}, source:{area:'卡魯', item:'搖椅'}},
+    { target:{name:'強力黏著劑', suffix:'橡膠｜蜘蛛絲', per:3}, source:{area:'卡魯', item:'搖椅'}},
+    { target:{name:'強化纖維', suffix:'秋葵｜橡膠｜蜘蛛2', per:3}, source:{area:'綠洲', item:'農場'}},
+    { target:{name:'黃昏魯特琴', suffix:'黑莓｜茉莉｜紅梨2', per:3}, source:{area:'綠洲', item:'農場'}, 
+     materials:[{name:'黑莓', per:5},{name:'茉莉', per:8},{name:'秋葵', per:2},{name:'紅梨', per:4},{name:'橡膠', per:5},{name:'蜘蛛絲', per:8}]},
   ]},
 ];
 
