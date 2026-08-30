@@ -79,6 +79,14 @@
                 initConverter();
             }, []);
 
+            const handleConvert = (text) => {
+                let processed = text;
+
+                if (converterReady && openccRef.current) {
+                    processed = openccRef.current(processed);
+                }
+                setOutputText(processed);
+            };
            
 
             const handleInputChange = (e) => {
